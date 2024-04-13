@@ -53,10 +53,17 @@
             font-size: 20px;
             color: $black;
             opacity: 70%;
+            transition: 0.3s all ease-in;
             
             &.active{
                 color: $primary;
                 opacity: 100%;
+            }
+
+            &:hover{
+                cursor: pointer;
+                color: $primary;
+                opacity: 1;
             }
         }
     }
