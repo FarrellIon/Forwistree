@@ -1,0 +1,14 @@
+@import 'colors';
+@import 'fonts';
+
+.text-primary{
+    color: $primary
+}
+
+.header-font{
+    font-family: $header;
+}
+
+.paragraph-font{
+    font-family: $paragraph;
+}
