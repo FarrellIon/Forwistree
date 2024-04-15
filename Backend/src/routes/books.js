@@ -21,10 +21,6 @@ const bookList = [
 ]
 
 router.get('/', (request, response) => {
-    response.cookie('visited', 'true', {
-        maxAge: 10000,
-    });
-
     const { isbn } = request.query;
     const parsedIsbn = parseInt(isbn);
 
@@ -61,12 +57,12 @@ router.post('/shopping/cart', (request, response) => {
         }
     }
 
-    response.send(201);
+    response.sendStatus(201);
 });
 
 router.post('/', (request, response) => {
     bookList.push(request.body);
-    response.send(201);
+    response.sendStatus(201);
 });
 
 module.exports = router;
