@@ -16,6 +16,7 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
-    // currencyKey: process.env.BCA_API
+    // apiToken: process.env.SHOPEE_API_TOKEN,
+    // shopID: process.env.SHOP_ID
   }
 })

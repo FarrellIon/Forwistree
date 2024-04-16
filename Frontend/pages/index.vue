@@ -2,6 +2,7 @@
   <div>
     <Navbar></Navbar>
     <HeroBanner></HeroBanner>
+    <BukuBaruTerbit></BukuBaruTerbit>
     <Footer></Footer>
   </div>
 </template>
