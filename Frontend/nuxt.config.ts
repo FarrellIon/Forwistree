@@ -2,6 +2,10 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss', 'nuxt-aos'],
+  typescript: {
+    typeCheck: true,
+    strict: true
+  },
   app: {
     head: {
       title: 'Forwistree',
@@ -16,7 +20,8 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
-    // apiToken: process.env.SHOPEE_API_TOKEN,
-    // shopID: process.env.SHOP_ID
+    public:{
+      API_HOST: process.env.API_HOST,
+    }
   }
 })

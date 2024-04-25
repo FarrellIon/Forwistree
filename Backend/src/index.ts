@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import databaseRoutes from "./routes/database";
 import connectDB from "./database";
+import cors from 'cors';
 
 //Database Connection
 dotenv.config();
@@ -21,10 +22,11 @@ const startDB = async () => {
 
 startDB();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/database', databaseRoutes);
+app.use('/api/database', databaseRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");

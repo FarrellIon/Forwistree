@@ -2,13 +2,15 @@ import { Request, Response } from 'express';
 import { MasterKategori } from "../../database/schemas/master_kategori";
 import { encryptString, decryptString } from '../../utils/encryption';
 import { Types } from 'mongoose';
+import validator from 'validator';
 
 class KategoriController{
     get = async(req: Request, res: Response) => {
         const kategori = await MasterKategori.find({}).sort('-createdAt');
 
         if (kategori?.length === 0) {
-            throw new Error("Belum ada data kategori");
+            res.status(500).send('Belum ada data kategori');
+            return;
         }
 
         res.status(200).json({
@@ -23,7 +25,8 @@ class KategoriController{
         const kategori = await MasterKategori.findById({ _id: decryptedId });
 
         if (!kategori){
-            throw new Error("Tidak ditemukan kategori dengan id tersebut");
+            res.status(500).send('Tidak ditemukan kategori dengan id tersebut');
+            return;
         }
 
         res.status(200).json({
@@ -35,8 +38,23 @@ class KategoriController{
     create = async(req: Request, res: Response) => {
         const { nama } = req.body;
 
-        if (!nama){
-            throw new Error('Tidak ada nama kategori');
+        const requiredFields = ['nama'];
+        let errorMsg: string = '';
+        
+        for (const field of requiredFields) {
+            if (!req.body[field]) {
+                errorMsg += `Tidak ada ${field.replace('_', ' ')}\n`;
+            }
+        }
+
+        if(errorMsg != ''){
+            res.status(500).send(errorMsg);
+            return;
+        }
+
+        if (!validator.isAlphanumeric(nama)){
+            res.status(500).send('Nama kategori tidak valid');
+            return;
         }
 
         const objectId = new Types.ObjectId();
@@ -61,7 +79,8 @@ class KategoriController{
         const kategori = await MasterKategori.findByIdAndUpdate({ _id: decryptedId }, req.body, { new: true })
 
         if (!kategori){
-            throw new Error('Tidak ditemukan kategori dengan id tersebut!');
+            res.status(500).send('Tidak ditemukan kategori dengan id tersebut!');
+            return;
         }
 
         res.status(200).json({
@@ -76,7 +95,8 @@ class KategoriController{
         const kategori = await MasterKategori.findByIdAndDelete({ _id: decryptedId });
 
         if (!kategori){
-            throw new Error("Tidak ditemukan kategori dengan id tersebut!");
+            res.status(500).send('Tidak ditemukan kategori dengan id tersebut!');
+            return;
         }
 
         res.status(200).json({
