@@ -3,6 +3,7 @@ import { Buku } from '../database/schemas/buku';
 import { encryptString, decryptString } from '../utils/encryption';
 import { Types } from 'mongoose';
 import validator from 'validator';
+import cloudinary from '../utils/cloudinary';
 
 class BukuController{
     get = async(req: Request, res: Response) => {
@@ -42,7 +43,17 @@ class BukuController{
             ...rest
         } = req.body;
 
-        console.log(req.file);
+        interface UploadResult {
+            url: string
+        }
+
+        const fileBuffer = req.file!.buffer;
+        const uploadResult: UploadResult = await new Promise((resolve) => {
+            cloudinary.v2.uploader.upload_stream((error: Error, uploadResult: UploadResult) => {
+                return resolve(uploadResult);
+            }).end(fileBuffer);
+        });
+        const file_sinopsis = uploadResult.url;
 
         const requiredFields = ['nama', 'kategori', 'jumlah_halaman', 'harga', 'diskon', 'status_bestseller'];
         let errorMsg: string = '';
@@ -75,7 +86,9 @@ class BukuController{
         const newBukuObj = {
             _id: objectId,
             id: encryptedId,
+            nama: nama,
             kategori: new Types.ObjectId(kategoriId),
+            file_sinopsis: file_sinopsis,
             ...rest
         }
 
