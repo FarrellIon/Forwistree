@@ -1,5 +1,5 @@
 import express from "express";
-import { bukuController } from "../../../controllers/buku";
+import { bukuController } from "../../../controllers/buku/buku";
 import multer from "multer";
 
 const upload = multer();

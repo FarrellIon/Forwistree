@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { MasterKategori } from "../../database/schemas/master_kategori";
+import { MasterKategori } from "../../database/schemas/master_data/master_kategori";
 import { encryptString, decryptString } from '../../utils/encryption';
 import { Types } from 'mongoose';
 import validator from 'validator';
@@ -36,8 +36,6 @@ class KategoriController{
     }
 
     create = async(req: Request, res: Response) => {
-        const { nama } = req.body;
-
         const requiredFields = ['nama'];
         let errorMsg: string = '';
         
@@ -52,8 +50,9 @@ class KategoriController{
             return;
         }
 
-        if (!validator.isAlphanumeric(nama)){
-            res.status(500).send('Nama kategori tidak valid');
+        const validatorMsg: string = this.validateInputs(req);
+        if(validatorMsg != ''){
+            res.status(500).send(validatorMsg);
             return;
         }
 
@@ -63,6 +62,7 @@ class KategoriController{
         const newKategoriObj = {
             _id: objectId,
             id: encryptedId,
+            added_by: new Types.ObjectId(), //Temporary Added By
             ...req.body
         }
 
@@ -76,8 +76,19 @@ class KategoriController{
     update = async(req: Request, res: Response) => {
         const { id } = req.params;
         const decryptedId = decryptString(id);
-        const kategori = await MasterKategori.findByIdAndUpdate({ _id: decryptedId }, req.body, { new: true })
 
+        if (Object.keys(req.body).length === 0){
+            res.status(500).send('Belum ada data yang diinput');
+            return;
+        }
+
+        const validatorMsg: string = this.validateInputs(req);
+        if(validatorMsg != ''){
+            res.status(500).send(validatorMsg);
+            return;
+        }
+
+        const kategori = await MasterKategori.findByIdAndUpdate({ _id: decryptedId }, req.body, { new: true })
         if (!kategori){
             res.status(500).send('Tidak ditemukan kategori dengan id tersebut!');
             return;
@@ -103,6 +114,20 @@ class KategoriController{
             kategori,
             msg: "Berhasil"
         });
+    }
+
+    validateInputs = (req: Request) => {
+        if(req.body.nama){
+            if (!validator.isAlphanumeric(req.body.nama)){
+                return 'Nama kategori tidak valid';
+            }
+            
+            if(!validator.isLength(req.body.nama, { min: 3, max: 30 })){    
+                return 'Nama kategori harus sepanjang 3-30 huruf';
+            }
+        }
+
+        return '';
     }
 }
 

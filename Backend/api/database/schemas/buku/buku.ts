@@ -9,6 +9,7 @@ interface Buku {
     harga: Number,
     diskon: Number,
     status_bestseller: Boolean,
+    added_by: Schema.Types.ObjectId,
     createdAt: Date,
     updatedAt: Date
 }
@@ -25,7 +26,8 @@ const BukuSchema = new Schema<Buku>(
         },
         kategori: {
             type: Schema.Types.ObjectId,
-            ref: 'master_kategori'
+            ref: 'master_kategori',
+            required: true
         },
         file_sinopsis: {
             type: String,
@@ -49,6 +51,11 @@ const BukuSchema = new Schema<Buku>(
             required: true,
             default: false
         },
+        added_by: {
+            type: Schema.Types.ObjectId,
+            ref: 'admins',
+            required: true
+        }
     },
     { timestamps: true }
 );

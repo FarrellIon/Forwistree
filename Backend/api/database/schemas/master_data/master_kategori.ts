@@ -3,6 +3,7 @@ import { Schema, model } from 'mongoose';
 interface MasterKategori {
     id: String,
     nama: String,
+    added_by: Schema.Types.ObjectId,
     createdAt: Date,
     updatedAt: Date
 }
@@ -15,6 +16,11 @@ const MasterKategoriSchema = new Schema<MasterKategori>(
         },
         nama: {
             type: String,
+            required: true
+        },
+        added_by: {
+            type: Schema.Types.ObjectId,
+            ref: 'admins',
             required: true
         }
     },
