@@ -26,8 +26,8 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "start": "node ./api/index.ts",
-    "start:dev": "nodemon ./api/index.ts",
+    "start": "node ./src/api/index.ts",
+    "start:dev": "nodemon ./src/api/index.ts",
     "prod": "node dist/final.ts",
     "test": "jest"
   },
