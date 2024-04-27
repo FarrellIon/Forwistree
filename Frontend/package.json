@@ -16,7 +16,8 @@
     "sass": "^1.75.0",
     "typescript": "^5.4.5",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "vue-tsc": "^1.8.22"
   },
   "devDependencies": {
     "nuxt-aos": "^1.2.4"
