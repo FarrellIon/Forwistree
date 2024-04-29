@@ -1,21 +1,21 @@
 import { Request, Response } from 'express';
-import { MasterKategori } from "../../database/schemas/master_data/master_kategori";
+import { MasterPenulis } from '../../database/schemas/master_data/master_penulis';
 import { encryptString, decryptString } from '../../utils/encryption';
 import { Types } from 'mongoose';
 import validator from 'validator';
 
-class KategoriController{
+class PenulisController{
     get = async(req: Request, res: Response) => {
         try{
-            const kategori = await MasterKategori.find({}).sort('-createdAt');
+            const penulis = await MasterPenulis.find({}).sort('-createdAt');
 
-            if (kategori?.length === 0) {
-                res.status(500).send('Belum ada data kategori');
+            if (penulis?.length === 0) {
+                res.status(500).send('Belum ada data penulis');
                 return;
             }
 
             res.status(200).json({
-                kategori,
+                penulis,
                 msg: "Berhasil"
             });
         } catch (error) {
@@ -28,15 +28,15 @@ class KategoriController{
         try {
             const { id } = req.params;
             const decryptedId = decryptString(id);
-            const kategori = await MasterKategori.findById({ _id: decryptedId });
+            const penulis = await MasterPenulis.findById({ _id: decryptedId });
 
-            if (!kategori){
-                res.status(500).send('Tidak ditemukan kategori dengan id tersebut');
+            if (!penulis){
+                res.status(500).send('Tidak ditemukan penulis dengan id tersebut');
                 return;
             }
 
             res.status(200).json({
-                kategori,
+                penulis,
                 msg: "Berhasil"
             });
         } catch (error) {
@@ -47,7 +47,7 @@ class KategoriController{
 
     create = async(req: Request, res: Response) => {
         try {
-            const requiredFields = ['nama'];
+            const requiredFields = ['nama_pena'];
             let errorMsg: string = '';
             
             for (const field of requiredFields) {
@@ -70,16 +70,16 @@ class KategoriController{
             const objectId = new Types.ObjectId();
             const encryptedId = encryptString(objectId.toString());
 
-            const newKategoriObj = {
+            const newPenulisObj = {
                 _id: objectId,
                 id: encryptedId,
                 added_by: new Types.ObjectId(), //Temporary Added By
                 ...req.body
             }
 
-            const newKategori = await MasterKategori.create(newKategoriObj);
+            const newPenulis = await MasterPenulis.create(newPenulisObj);
             res.status(201).json({
-                kategori: newKategori,
+                penulis: newPenulis,
                 msg: "Berhasil"
             });
         } catch (error) {
@@ -104,14 +104,14 @@ class KategoriController{
                 return;
             }
 
-            const kategori = await MasterKategori.findByIdAndUpdate({ _id: decryptedId }, req.body, { new: true })
-            if (!kategori){
-                res.status(500).send('Tidak ditemukan kategori dengan id tersebut!');
+            const penulis = await MasterPenulis.findByIdAndUpdate({ _id: decryptedId }, req.body, { new: true })
+            if (!penulis){
+                res.status(500).send('Tidak ditemukan penulis dengan id tersebut!');
                 return;
             }
 
             res.status(200).json({
-                kategori: kategori,
+                penulis: penulis,
                 msg: "Berhasil"
             });
         } catch (error) {
@@ -124,15 +124,15 @@ class KategoriController{
         try{
             const { id } = req.params;
             const decryptedId = decryptString(id);
-            const kategori = await MasterKategori.findByIdAndDelete({ _id: decryptedId });
+            const penulis = await MasterPenulis.findByIdAndDelete({ _id: decryptedId });
 
-            if (!kategori){
-                res.status(500).send('Tidak ditemukan kategori dengan id tersebut!');
+            if (!penulis){
+                res.status(500).send('Tidak ditemukan penulis dengan id tersebut!');
                 return;
             }
 
             res.status(200).json({
-                kategori,
+                penulis,
                 msg: "Berhasil"
             });
         } catch (error) {
@@ -146,11 +146,21 @@ class KategoriController{
         
         if(req.body.nama){
             if (!validator.isAlphanumeric(req.body.nama, undefined, {ignore: ' -,&!.?'})){
-                errorMsg += 'Nama kategori tidak valid';
+                errorMsg += 'Nama penulis tidak valid';
             }
             
-            if(!validator.isLength(req.body.nama, { min: 3, max: 30 })){    
-                errorMsg += 'Nama kategori harus sepanjang 3-30 huruf';
+            if(!validator.isLength(req.body.nama, { max: 30 })){    
+                errorMsg += 'Nama penulis maksimal 30 huruf';
+            }
+        }
+
+        if(req.body.nama_pena){
+            if (!validator.isAlphanumeric(req.body.nama_pena, undefined, {ignore: ' -,&!.?'})){
+                errorMsg += 'Nama pena penulis tidak valid';
+            }
+            
+            if(!validator.isLength(req.body.nama_pena, { max: 30 })){    
+                errorMsg += 'Nama pena penulis maksimal 30 huruf';
             }
         }
 
@@ -158,4 +168,4 @@ class KategoriController{
     }
 }
 
-export const kategoriController = new KategoriController();
+export const penulisController = new PenulisController();

@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.route('/').get(kategoriController.get)
 router.post('/', upload.none(), kategoriController.create);
-router.route('/:id').get(kategoriController.getOne).patch(kategoriController.update).delete(kategoriController.delete);
+router.patch('/:id', upload.none(), kategoriController.update);
+router.route('/:id').get(kategoriController.getOne).delete(kategoriController.delete);
 
 export default router;

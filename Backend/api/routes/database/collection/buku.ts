@@ -6,7 +6,14 @@ const upload = multer();
 const router = express.Router();
 
 router.route('/').get(bukuController.get);
-router.post('/', upload.single('file_sinopsis'), bukuController.create);
-router.route('/:id').get(bukuController.getOne).patch(bukuController.update).delete(bukuController.delete);
+router.post('/', upload.fields([
+    { name: 'file_sinopsis', maxCount: 1 },
+    { name: 'gambar_buku', maxCount: 5 }
+]), bukuController.create);
+router.patch('/:id', upload.fields([
+    { name: 'file_sinopsis', maxCount: 1 },
+    { name: 'gambar_buku', maxCount: 5 }
+]), bukuController.update);
+router.route('/:id').get(bukuController.getOne).delete(bukuController.delete);
 
 export default router;
