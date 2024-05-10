@@ -5,6 +5,7 @@ interface MasterPenulis {
     nama: String,
     nama_pena: String,
     added_by: Schema.Types.ObjectId,
+    pivot_penulis_buku: Schema.Types.ObjectId[],
     createdAt: Date,
     updatedAt: Date
 }
@@ -21,7 +22,13 @@ const MasterPenulisSchema = new Schema<MasterPenulis>(
         nama_pena: {
             type: String,
             required: true
-        }
+        },
+        pivot_penulis_buku: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'pivot_penulis_buku'
+            }
+        ]
     },
     { timestamps: true }
 );

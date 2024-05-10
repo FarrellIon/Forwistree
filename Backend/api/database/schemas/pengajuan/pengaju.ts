@@ -5,6 +5,7 @@ interface Pengaju {
     nama_pena: String,
     email: String,
     no_wa: String,
+    pengajuan_penerbitan: Schema.Types.ObjectId[],
 }
 
 const PengajuSchema = new Schema<Pengaju>(
@@ -24,7 +25,13 @@ const PengajuSchema = new Schema<Pengaju>(
         no_wa: {
             type: String,
             required: true
-        }
+        },
+        pengajuan_penerbitan: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'pengajuan_penerbitan'
+            }
+        ]
     },
     { timestamps: true }
 );

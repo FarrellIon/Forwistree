@@ -1,9 +1,10 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 
 interface MasterKategori {
     id: String,
     nama: String,
-    added_by: Schema.Types.ObjectId,
+    buku: Types.ObjectId[],
+    added_by: Types.ObjectId,
     createdAt: Date,
     updatedAt: Date
 }
@@ -22,7 +23,13 @@ const MasterKategoriSchema = new Schema<MasterKategori>(
             type: Schema.Types.ObjectId,
             ref: 'admins',
             required: true
-        }
+        },
+        buku: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'buku'
+            }
+        ]
     },
     { timestamps: true }
 );

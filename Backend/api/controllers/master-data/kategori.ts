@@ -7,7 +7,9 @@ import validator from 'validator';
 class KategoriController{
     get = async(req: Request, res: Response) => {
         try{
-            const kategori = await MasterKategori.find({}).sort('-createdAt');
+            const kategori = await MasterKategori.find({})
+            .populate('buku', 'id')
+            .sort('-createdAt');
 
             if (kategori?.length === 0) {
                 res.status(500).send('Belum ada data kategori');

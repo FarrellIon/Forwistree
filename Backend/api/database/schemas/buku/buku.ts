@@ -1,15 +1,17 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 
 interface Buku {
     id: String,
     nama: String,
-    kategori: Schema.Types.ObjectId,
+    kategori: Types.ObjectId,
     file_sinopsis: String,
     jumlah_halaman: Number,
     harga: Number,
     diskon: Number,
     status_bestseller: Boolean,
-    added_by: Schema.Types.ObjectId,
+    added_by: Types.ObjectId,
+    gambar_buku: Types.ObjectId[],
+    pivot_penulis_buku: Types.ObjectId[],
     createdAt: Date,
     updatedAt: Date
 }
@@ -55,7 +57,19 @@ const BukuSchema = new Schema<Buku>(
             type: Schema.Types.ObjectId,
             ref: 'admins',
             required: true
-        }
+        },
+        gambar_buku: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'gambar_buku'
+            }
+        ],
+        pivot_penulis_buku: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'pivot_penulis_buku'
+            }
+        ]
     },
     { timestamps: true }
 );

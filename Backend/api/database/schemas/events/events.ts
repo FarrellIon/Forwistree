@@ -6,6 +6,7 @@ interface Events {
     deskripsi: String
     status_aktif: Boolean
     added_by: Schema.Types.ObjectId,
+    gambar_event: Schema.Types.ObjectId[],
     createdAt: Date,
     updatedAt: Date
 }
@@ -33,7 +34,13 @@ const EventsSchema = new Schema<Events>(
             type: Schema.Types.ObjectId,
             ref: 'admins',
             required: true
-        }
+        },
+        gambar_event: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'gambar_event'
+            }
+        ]
     },
     { timestamps: true }
 );

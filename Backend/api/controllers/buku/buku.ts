@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Buku } from '../../database/schemas/buku/buku';
 import { MasterKategori } from '../../database/schemas/master_data/master_kategori';
 import { GambarBuku } from '../../database/schemas/buku/gambar_buku';
+import { PivotPenulisBuku } from '../../database/schemas/pivot/pivot_penulis_buku';
 import { encryptString, decryptString } from '../../utils/encryption';
 import { Types } from 'mongoose';
 import validator from 'validator';
@@ -56,14 +57,43 @@ class BukuController{
 
     create = async(req: Request, res: Response) => {
         try{
+            //Declarations
             const { 
                 nama,
                 kategori,
+                penulis_buku,
                 ...rest
             } = req.body;
             const { file_sinopsis, gambar_buku } = (req as any).files;
 
-            //Upload Sinopsis
+            const requiredFields = ['nama', 'kategori', 'jumlah_halaman', 'harga', 'diskon', 'status_bestseller'];
+            
+
+            //Validators
+            let errorMsg: string = '';
+            for (const field of requiredFields) {
+                if (!req.body[field]) {
+                    errorMsg += `Tidak ada ${field.replace('_', ' ')}\n`;
+                }
+            }
+            
+            if(!file_sinopsis || !gambar_buku){
+                if(!file_sinopsis){
+                    errorMsg += `Tidak ada file sinopsis yang terlampir\n`;
+                }
+                
+                if(!gambar_buku){
+                    errorMsg += `Tidak ada gambar buku yang terlampir\n`;
+                }
+            }
+
+            if(errorMsg != ''){
+                res.status(500).send(errorMsg);
+                return;
+            }
+            
+
+            //Interface
             interface UploadResult {
                 secure_url: string
             }
@@ -72,16 +102,19 @@ class BukuController{
                 buffer: Buffer
             }
 
+
+            //Upload Sinopsis
             const validatorMsg: string = this.validateInputs(req);
             if(validatorMsg != ''){
                 res.status(500).send(validatorMsg);
                 return;
             }
 
-            const unique_id = crypto.randomBytes(16).toString("hex");
+            const unique_id = crypto.randomBytes(8).toString("hex");
+            const nama_folder = 'forwistree/buku/'+nama.replace(/ /g,"_")+'_'+unique_id;
             const fileSinopsisBuffer = file_sinopsis[0].buffer;
             const uploadResult: UploadResult = await new Promise((resolve, reject) => {
-                cloudinary.v2.uploader.upload_stream({folder: 'forwistree/'+nama+'_'+unique_id+'/file_sinopsis'}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
+                cloudinary.v2.uploader.upload_stream({folder: nama_folder+'/file_sinopsis'}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
                     if (error) {
                         return reject(error);
                     } else {
@@ -91,37 +124,18 @@ class BukuController{
             });
             const file_sinopsis_url = uploadResult.secure_url;
 
-            const requiredFields = ['nama', 'kategori', 'jumlah_halaman', 'harga', 'diskon', 'status_bestseller'];
-            let errorMsg: string = '';
-            
-            for (const field of requiredFields) {
-                if (!req.body[field]) {
-                    errorMsg += `Tidak ada ${field.replace('_', ' ')}\n`;
-                }
-            }
-            
-            const requiredFiles = ['file_sinopsis', 'gambar_buku'];
-            
-            for (const field of requiredFiles) {
-                if (!req.files[field]) {
-                    errorMsg += `Tidak ada ${field.replace('_', ' ')}\n`;
-                }
-            }
 
-            if(errorMsg != ''){
-                res.status(500).send(errorMsg);
-                return;
-            }
-
+            //Insert Buku
             const objectId = new Types.ObjectId();
             const encryptedId = encryptString(objectId.toString());
             const kategoriId = decryptString(kategori);
+            const kategoriObjectId = new Types.ObjectId(kategoriId);
 
             const newBukuObj = {
                 _id: objectId,
                 id: encryptedId,
                 nama: nama,
-                kategori: new Types.ObjectId(kategoriId),
+                kategori: kategoriObjectId,
                 file_sinopsis: file_sinopsis_url,
                 added_by: new Types.ObjectId(), //Temporary Added By
                 ...rest
@@ -129,10 +143,17 @@ class BukuController{
 
             const newBuku = await Buku.create(newBukuObj);
 
+
+            //Insert buku to kategori array
+            const kategoriRelationObj = await MasterKategori.findById({ _id: kategoriObjectId });
+            kategoriRelationObj?.buku.push(newBukuObj);
+            kategoriRelationObj?.save();
+
+
             //Upload Gambar Buku
             gambar_buku.forEach(async (gambar: GambarBuku) => {
                 const uploadGambarResult: UploadResult = await new Promise((resolve, reject) => {
-                    cloudinary.v2.uploader.upload_stream({folder: 'forwistree/'+nama+'_'+unique_id+'/file_sinopsis'}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
+                    cloudinary.v2.uploader.upload_stream({folder: nama_folder+'/gambar_buku'}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
                         if (error) {
                             return reject(error);
                         } else {
@@ -146,13 +167,30 @@ class BukuController{
                 const gambar_buku_url = uploadGambarResult.secure_url;
                 
                 const newGambarBukuObj = {
-                    _id: objectId,
+                    _id: gambarObjectId,
                     id: encryptedGambarId,
-                    buku: encryptedId,
+                    buku: objectId,
                     image: gambar_buku_url
                 }
     
                 await GambarBuku.create(newGambarBukuObj);
+            });
+
+            
+            //Insert Penulis
+            penulis_buku.forEach(async (penulis: string) => {
+                const pivotPenulisBukuObjectId = new Types.ObjectId();
+                const encryptedPenulisBukuId = encryptString(pivotPenulisBukuObjectId.toString());
+                const decryptedPenulisId = decryptString(penulis);
+                
+                const newPivotPenulisBukuObj = {
+                    _id: pivotPenulisBukuObjectId,
+                    id: encryptedPenulisBukuId,
+                    buku: objectId,
+                    penulis: new Types.ObjectId(decryptedPenulisId)
+                }
+    
+                await PivotPenulisBuku.create(newPivotPenulisBukuObj);
             });
             
             res.status(201).json({
@@ -167,16 +205,28 @@ class BukuController{
 
     update = async(req: Request, res: Response) => {
         try {
+            //Declarations
             const { id } = req.params;
             const decryptedId = decryptString(id);
 
-            const { kategori, ...rest } = req.body
-            const kategoriId = decryptString(kategori);
-            const newBukuObj = {
-                kategori: new Types.ObjectId(kategoriId),
+            const { 
+                nama,
+                kategori,
+                penulis_buku,
                 ...rest
-            }
+            } = req.body;
+            const { file_sinopsis, gambar_buku } = (req as any).files;
 
+            const buku = await Buku.findById({ _id: decryptedId });
+            const bukuId = buku?._id;
+
+            if (!buku){
+                res.status(500).send('Tidak ditemukan buku dengan id tersebut!');
+                return;
+            }
+            
+
+            //Validators
             if (Object.keys(req.body).length === 0){
                 res.status(500).send('Belum ada data yang diinput');
                 return;
@@ -188,20 +238,150 @@ class BukuController{
                 return;
             }
 
-            const buku = await Buku.findByIdAndUpdate({ _id: decryptedId }, newBukuObj, { new: true })
-            .populate('kategori', 'nama');
+            
+            //Interface
+            interface UploadResult {
+                secure_url: string
+            }
 
-            if (!buku){
+            interface GambarBuku {
+                buffer: Buffer
+            }
+
+
+            //Delete Sinopsis
+            const file_sinopsis_url_db = buku.file_sinopsis;
+            const parts = file_sinopsis_url_db.split('/');
+            const index = parts.indexOf('forwistree');
+            const extractedPart = parts.slice(index).join('/');
+            const firstSlashIndex = extractedPart.indexOf('/');
+            const secondSlashIndex = extractedPart.indexOf('/', firstSlashIndex + 1);
+            const thirdSlashIndex = extractedPart.indexOf('/', secondSlashIndex + 1);
+            const extractedPartFinal = extractedPart.substring(0, thirdSlashIndex);
+
+            await new Promise((resolve, reject) => {
+                cloudinary.v2.api.delete_resources_by_prefix(extractedPartFinal, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
+                    if (error) {
+                        return reject(error);
+                    } else {
+                        return resolve(uploadResult as UploadResult);
+                    }
+                });
+            });
+            await new Promise((resolve, reject) => {
+                cloudinary.v2.api.delete_folder(extractedPartFinal, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
+                    if (error) {
+                        return reject(error);
+                    } else {
+                        return resolve(uploadResult as UploadResult);
+                    }
+                });
+            });
+
+
+            //Upload Sinopsis
+            const unique_id = crypto.randomBytes(8).toString("hex");
+            const nama_folder = 'forwistree/buku/'+nama.replace(/ /g,"_")+'_'+unique_id;
+            const fileSinopsisBuffer = file_sinopsis[0].buffer;
+            const uploadResult: UploadResult = await new Promise((resolve, reject) => {
+                cloudinary.v2.uploader.upload_stream({folder: nama_folder+'/file_sinopsis'}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
+                    if (error) {
+                        return reject(error);
+                    } else {
+                        return resolve(uploadResult as UploadResult);
+                    }
+                }).end(fileSinopsisBuffer);
+            });
+            const file_sinopsis_url = uploadResult.secure_url;
+
+
+            //Update Buku
+            const kategoriId = decryptString(kategori);
+            const kategoriObjectId = new Types.ObjectId(kategoriId);
+
+            const newBukuObj = {
+                nama: nama,
+                kategori: kategoriObjectId,
+                file_sinopsis: file_sinopsis_url,
+                added_by: new Types.ObjectId(), //Temporary Added By
+                ...rest
+            }
+            
+            const updatedBuku = await Buku.findByIdAndUpdate({ _id: decryptedId }, newBukuObj, { new: true });
+
+            if(!updatedBuku){
                 res.status(500).send('Tidak ditemukan buku dengan id tersebut!');
                 return;
             }
+
+
+            //Remove Old Relations
+            const oldKategoriRelationObj = await MasterKategori.findById({ _id: buku.kategori._id });
+
+            if(oldKategoriRelationObj){
+                oldKategoriRelationObj.buku = oldKategoriRelationObj?.buku.filter(item => item.toString() !== bukuId?.toString())
+                oldKategoriRelationObj?.save();
+            }
+
+            
+            //Add relations
+            const newKategoriRelationObj = await MasterKategori.findById({ _id: updatedBuku.kategori._id });
+            
+            if(newKategoriRelationObj){
+                newKategoriRelationObj?.buku.push(updatedBuku._id);
+                newKategoriRelationObj?.save();
+            }
+
+
+            //Upload Gambar Buku
+            gambar_buku.forEach(async (gambar: GambarBuku) => {
+                const uploadGambarResult: UploadResult = await new Promise((resolve, reject) => {
+                    cloudinary.v2.uploader.upload_stream({folder: nama_folder+'/gambar_buku'}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
+                        if (error) {
+                            return reject(error);
+                        } else {
+                            return resolve(uploadResult as UploadResult);
+                        }
+                    }).end(gambar.buffer);
+                });
+
+                const gambarObjectId = new Types.ObjectId();
+                const encryptedGambarId = encryptString(gambarObjectId.toString());
+                const gambar_buku_url = uploadGambarResult.secure_url;
+                
+                const newGambarBukuObj = {
+                    _id: gambarObjectId,
+                    id: encryptedGambarId,
+                    buku: buku._id,
+                    image: gambar_buku_url
+                }
+    
+                await GambarBuku.create(newGambarBukuObj);
+            });
+            
+
+            //Insert Penulis
+            penulis_buku.forEach(async (penulis: string) => {
+                const pivotPenulisBukuObjectId = new Types.ObjectId();
+                const encryptedPenulisBukuId = encryptString(pivotPenulisBukuObjectId.toString());
+                const decryptedPenulisId = decryptString(penulis);
+                
+                const newPivotPenulisBukuObj = {
+                    _id: pivotPenulisBukuObjectId,
+                    id: encryptedPenulisBukuId,
+                    buku: buku._id,
+                    penulis: new Types.ObjectId(decryptedPenulisId)
+                }
+    
+                await PivotPenulisBuku.create(newPivotPenulisBukuObj);
+            });
 
             res.status(200).json({
                 buku: buku,
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(500).send("Terjadi kesalahan, error : " + JSON.stringify(error));
             return;
         }
     }
@@ -229,6 +409,13 @@ class BukuController{
 
     validateInputs = (req: Request) => {
         let errorMsg: string = '';
+
+        interface GambarBuku {
+            buffer: Buffer,
+            mimetype: any
+        }
+
+        const { file_sinopsis, gambar_buku } = (req as any).files;
 
         if(req.body.nama){
             if (!validator.isAlphanumeric(req.body.nama, undefined, {ignore: ' -,&!.?'})){
@@ -283,14 +470,34 @@ class BukuController{
             }
         }
 
-        if(req.file){
-            const fileType = mime.contentType(req.file.mimetype);
+        if(file_sinopsis){
+            const fileType = mime.contentType(file_sinopsis[0].mimetype);
             if(fileType != 'application/pdf'){
-                errorMsg += 'File terlampir harus file pdf';
+                errorMsg += 'File sinopsis harus file pdf';
                 errorMsg += '\n';
             }
-            if(req.file.fieldname != 'file_sinopsis'){
-                errorMsg += 'File terlampir bukan file sinopsis';
+
+            if(file_sinopsis.length > 1){
+                errorMsg += 'File sinopsis tidak boleh lebih dari 1';
+                errorMsg += '\n';
+            }
+        }
+
+        if(gambar_buku){
+            let counter: number = 0;
+            gambar_buku.forEach((gambar: GambarBuku) => {
+                const fileType = mime.contentType(gambar.mimetype);
+
+                if(fileType != 'image/jpeg' && fileType != 'image/webp' && fileType != 'image/png') counter++;
+            });
+
+            if(counter !== 0){
+                errorMsg += 'Semua gambar buku yang terlampir harus berformat jpeg/png/webp';
+                errorMsg += '\n';
+            }
+
+            if(gambar_buku.length > 5){
+                errorMsg += 'Gambar buku tidak boleh lebih dari 5';
                 errorMsg += '\n';
             }
         }
