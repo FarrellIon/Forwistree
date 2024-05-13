@@ -1,11 +1,11 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 
 interface MasterPenulis {
     id: String,
     nama: String,
     nama_pena: String,
-    added_by: Schema.Types.ObjectId,
-    pivot_penulis_buku: Schema.Types.ObjectId[],
+    added_by: Types.ObjectId,
+    pivot_penulis_buku: Types.ObjectId[],
     createdAt: Date,
     updatedAt: Date
 }

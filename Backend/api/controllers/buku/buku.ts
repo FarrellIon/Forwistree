@@ -3,6 +3,7 @@ import { Buku } from '../../database/schemas/buku/buku';
 import { MasterKategori } from '../../database/schemas/master_data/master_kategori';
 import { GambarBuku } from '../../database/schemas/buku/gambar_buku';
 import { PivotPenulisBuku } from '../../database/schemas/pivot/pivot_penulis_buku';
+import { Admins } from '../../database/schemas/admin/admins';
 import { encryptString, decryptString } from '../../utils/encryption';
 import { Types } from 'mongoose';
 import validator from 'validator';
@@ -10,12 +11,23 @@ import crypto from 'crypto';
 import cloudinary from '../../utils/cloudinary';
 import mime from 'mime-types';
 import { UploadApiErrorResponse, UploadApiResponse } from 'cloudinary';
+import { MasterPenulis } from '../../database/schemas/master_data/master_penulis';
 
 class BukuController{
     get = async(req: Request, res: Response) => {
         try {
             const buku = await Buku.find({})
             .populate('kategori', 'nama')
+            .populate('added_by', 'username')
+            .populate('gambar_buku', 'image')
+            .populate({
+                path: 'pivot_penulis_buku',
+                select: 'penulis',
+                populate: {
+                    path: 'penulis',
+                    select: 'nama_pena'
+                }
+            })
             .sort('-createdAt');
 
             if (buku?.length === 0) {
@@ -38,7 +50,8 @@ class BukuController{
             const { id } = req.params;
             const decryptedId = decryptString(id);
             const buku = await Buku.findById({ _id: decryptedId })
-            .populate('kategori', 'nama');
+            .populate('kategori', 'nama')
+            .populate('added_by', 'username');
 
             if (!buku){
                 res.status(500).send('Tidak ditemukan buku dengan id tersebut');
@@ -130,6 +143,7 @@ class BukuController{
             const encryptedId = encryptString(objectId.toString());
             const kategoriId = decryptString(kategori);
             const kategoriObjectId = new Types.ObjectId(kategoriId);
+            const adminObjectId = (req.user! as any)._id;
 
             const newBukuObj = {
                 _id: objectId,
@@ -137,17 +151,11 @@ class BukuController{
                 nama: nama,
                 kategori: kategoriObjectId,
                 file_sinopsis: file_sinopsis_url,
-                added_by: new Types.ObjectId(), //Temporary Added By
+                added_by: adminObjectId,
                 ...rest
             }
 
             const newBuku = await Buku.create(newBukuObj);
-
-
-            //Insert buku to kategori array
-            const kategoriRelationObj = await MasterKategori.findById({ _id: kategoriObjectId });
-            kategoriRelationObj?.buku.push(newBukuObj);
-            kategoriRelationObj?.save();
 
 
             //Upload Gambar Buku
@@ -174,6 +182,12 @@ class BukuController{
                 }
     
                 await GambarBuku.create(newGambarBukuObj);
+
+
+                //Add gambar buku relation to buku
+                const bukuRelationObj = await Buku.findById({ _id: objectId });
+                bukuRelationObj?.gambar_buku.push(newGambarBukuObj as any);
+                bukuRelationObj?.save();
             });
 
             
@@ -182,16 +196,38 @@ class BukuController{
                 const pivotPenulisBukuObjectId = new Types.ObjectId();
                 const encryptedPenulisBukuId = encryptString(pivotPenulisBukuObjectId.toString());
                 const decryptedPenulisId = decryptString(penulis);
+                const penulisId = new Types.ObjectId(decryptedPenulisId);
                 
                 const newPivotPenulisBukuObj = {
                     _id: pivotPenulisBukuObjectId,
                     id: encryptedPenulisBukuId,
                     buku: objectId,
-                    penulis: new Types.ObjectId(decryptedPenulisId)
+                    penulis: penulisId
                 }
     
                 await PivotPenulisBuku.create(newPivotPenulisBukuObj);
+
+
+                //Add pivot buku relations
+                const bukuRelationObj = await Buku.findById({ _id: objectId });
+                bukuRelationObj?.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
+                bukuRelationObj?.save();
+                
+                const penulisRelationObj = await MasterPenulis.findById({ _id: penulisId });
+                penulisRelationObj?.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
+                penulisRelationObj?.save();
             });
+
+
+            //Insert buku relations
+            const kategoriRelationObj = await MasterKategori.findById({ _id: kategoriObjectId });
+            kategoriRelationObj?.buku.push(newBukuObj);
+            kategoriRelationObj?.save();
+
+            const adminRelationObj = await Admins.findById({ _id: adminObjectId });
+            adminRelationObj?.buku.push(newBukuObj);
+            adminRelationObj?.save();
+
             
             res.status(201).json({
                 buku: newBuku,
@@ -320,7 +356,14 @@ class BukuController{
 
             if(oldKategoriRelationObj){
                 oldKategoriRelationObj.buku = oldKategoriRelationObj?.buku.filter(item => item.toString() !== bukuId?.toString())
-                oldKategoriRelationObj?.save();
+                oldKategoriRelationObj.save();
+            }
+
+            const oldAdminRelationObj = await Admins.findById({ _id: buku.added_by._id });
+
+            if(oldAdminRelationObj){
+                oldAdminRelationObj.buku = oldAdminRelationObj?.buku.filter(item => item.toString() !== bukuId?.toString())
+                oldAdminRelationObj.save();
             }
 
             
@@ -328,8 +371,15 @@ class BukuController{
             const newKategoriRelationObj = await MasterKategori.findById({ _id: updatedBuku.kategori._id });
             
             if(newKategoriRelationObj){
-                newKategoriRelationObj?.buku.push(updatedBuku._id);
-                newKategoriRelationObj?.save();
+                newKategoriRelationObj.buku.push(updatedBuku._id);
+                newKategoriRelationObj.save();
+            }
+
+            const newAdminRelationObj = await Admins.findById({ _id: updatedBuku.added_by._id });
+            
+            if(newAdminRelationObj){
+                newAdminRelationObj.buku.push(updatedBuku._id);
+                newAdminRelationObj.save();
             }
 
 
@@ -357,6 +407,15 @@ class BukuController{
                 }
     
                 await GambarBuku.create(newGambarBukuObj);
+
+                
+                //Add gambar buku relation to buku
+                const bukuRelationObj = await Buku.findById({ _id: decryptedId });
+                if(bukuRelationObj){
+                    bukuRelationObj.gambar_buku = [];
+                    bukuRelationObj.gambar_buku.push(newGambarBukuObj as any);
+                    bukuRelationObj.save();
+                }
             });
             
 
@@ -365,15 +424,30 @@ class BukuController{
                 const pivotPenulisBukuObjectId = new Types.ObjectId();
                 const encryptedPenulisBukuId = encryptString(pivotPenulisBukuObjectId.toString());
                 const decryptedPenulisId = decryptString(penulis);
+                const penulisId = new Types.ObjectId(decryptedPenulisId);
                 
                 const newPivotPenulisBukuObj = {
                     _id: pivotPenulisBukuObjectId,
                     id: encryptedPenulisBukuId,
                     buku: buku._id,
-                    penulis: new Types.ObjectId(decryptedPenulisId)
+                    penulis: penulisId
                 }
     
                 await PivotPenulisBuku.create(newPivotPenulisBukuObj);
+                //Add pivot buku relations
+                const bukuRelationObj = await Buku.findById({ _id: buku._id });
+                if(bukuRelationObj){
+                    bukuRelationObj.pivot_penulis_buku = [];
+                    bukuRelationObj.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
+                    bukuRelationObj.save();
+                }
+                
+                const penulisRelationObj = await MasterPenulis.findById({ _id: penulisId });
+                if(penulisRelationObj){
+                    penulisRelationObj.pivot_penulis_buku = [];
+                    penulisRelationObj.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
+                    penulisRelationObj.save();
+                }
             });
 
             res.status(200).json({

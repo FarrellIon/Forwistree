@@ -1,14 +1,14 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 
 interface Admins {
     id: String,
     username: String,
     password: String,
-    buku: Schema.Types.ObjectId,
-    events: Schema.Types.ObjectId,
-    master_kategori: Schema.Types.ObjectId,
-    master_penulis: Schema.Types.ObjectId,
-    pengajuan_penerbitan: Schema.Types.ObjectId,
+    buku: Types.ObjectId[],
+    events: Types.ObjectId[],
+    master_kategori: Types.ObjectId[],
+    master_penulis: Types.ObjectId[],
+    pengajuan_penerbitan: Types.ObjectId[],
     createdAt: Date,
     updatedAt: Date
 }
