@@ -159,7 +159,8 @@ class BukuController{
 
 
             //Upload Gambar Buku
-            gambar_buku.forEach(async (gambar: GambarBuku) => {
+            const gambar_buku_array = Array.isArray(gambar_buku) ? gambar_buku : [gambar_buku];
+            gambar_buku_array.forEach(async (gambar: GambarBuku) => {
                 const uploadGambarResult: UploadResult = await new Promise((resolve, reject) => {
                     cloudinary.v2.uploader.upload_stream({folder: nama_folder+'/gambar_buku'}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
                         if (error) {
@@ -186,13 +187,19 @@ class BukuController{
 
                 //Add gambar buku relation to buku
                 const bukuRelationObj = await Buku.findById({ _id: objectId });
-                bukuRelationObj?.gambar_buku.push(newGambarBukuObj as any);
-                bukuRelationObj?.save();
+                if(bukuRelationObj){
+                    bukuRelationObj.gambar_buku.push(newGambarBukuObj as any);
+                    bukuRelationObj.save();
+                }else{
+                    res.status(500).send('Relasi buku tidak ditemukan!');
+                    return;
+                }
             });
 
             
             //Insert Penulis
-            penulis_buku.forEach(async (penulis: string) => {
+            const penulis_buku_array = Array.isArray(penulis_buku) ? penulis_buku : [penulis_buku];
+            penulis_buku_array.forEach(async (penulis: string) => {
                 const pivotPenulisBukuObjectId = new Types.ObjectId();
                 const encryptedPenulisBukuId = encryptString(pivotPenulisBukuObjectId.toString());
                 const decryptedPenulisId = decryptString(penulis);
@@ -210,23 +217,43 @@ class BukuController{
 
                 //Add pivot buku relations
                 const bukuRelationObj = await Buku.findById({ _id: objectId });
-                bukuRelationObj?.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
-                bukuRelationObj?.save();
+                if(bukuRelationObj){
+                    bukuRelationObj.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
+                    bukuRelationObj.save();
+                }else{
+                    res.status(500).send('Relasi buku tidak ditemukan!');
+                    return;
+                }
                 
                 const penulisRelationObj = await MasterPenulis.findById({ _id: penulisId });
-                penulisRelationObj?.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
-                penulisRelationObj?.save();
+                if(penulisRelationObj){
+                    penulisRelationObj.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
+                    penulisRelationObj.save();
+                }else{
+                    res.status(500).send('Relasi penulis tidak ditemukan!');
+                    return;
+                }
             });
 
 
             //Insert buku relations
             const kategoriRelationObj = await MasterKategori.findById({ _id: kategoriObjectId });
-            kategoriRelationObj?.buku.push(newBukuObj);
-            kategoriRelationObj?.save();
+            if(kategoriRelationObj){
+                kategoriRelationObj.buku.push(newBukuObj);
+                kategoriRelationObj.save();
+            }else{
+                res.status(500).send('Relasi kategori tidak ditemukan!');
+                return;
+            }
 
             const adminRelationObj = await Admins.findById({ _id: adminObjectId });
-            adminRelationObj?.buku.push(newBukuObj);
-            adminRelationObj?.save();
+            if(adminRelationObj){
+                adminRelationObj.buku.push(newBukuObj);
+                adminRelationObj.save();
+            }else{
+                res.status(500).send('Relasi admin tidak ditemukan!');
+                return;
+            }
 
             
             res.status(201).json({
@@ -339,7 +366,6 @@ class BukuController{
                 nama: nama,
                 kategori: kategoriObjectId,
                 file_sinopsis: file_sinopsis_url,
-                added_by: new Types.ObjectId(), //Temporary Added By
                 ...rest
             }
             
@@ -357,14 +383,20 @@ class BukuController{
             if(oldKategoriRelationObj){
                 oldKategoriRelationObj.buku = oldKategoriRelationObj?.buku.filter(item => item.toString() !== bukuId?.toString())
                 oldKategoriRelationObj.save();
+            }else{
+                res.status(500).send('Relasi kategori tidak ditemukan!');
+                return;
             }
 
-            const oldAdminRelationObj = await Admins.findById({ _id: buku.added_by._id });
+            // const oldAdminRelationObj = await Admins.findById({ _id: buku.added_by._id });
 
-            if(oldAdminRelationObj){
-                oldAdminRelationObj.buku = oldAdminRelationObj?.buku.filter(item => item.toString() !== bukuId?.toString())
-                oldAdminRelationObj.save();
-            }
+            // if(oldAdminRelationObj){
+            //     oldAdminRelationObj.buku = oldAdminRelationObj?.buku.filter(item => item.toString() !== bukuId?.toString())
+            //     oldAdminRelationObj.save();
+            // }else{
+            //     res.status(500).send('Relasi admin tidak ditemukan!');
+            //     return;
+            // }
 
             
             //Add relations
@@ -373,18 +405,25 @@ class BukuController{
             if(newKategoriRelationObj){
                 newKategoriRelationObj.buku.push(updatedBuku._id);
                 newKategoriRelationObj.save();
+            }else{
+                res.status(500).send('Relasi kategori tidak ditemukan!');
+                return;
             }
 
-            const newAdminRelationObj = await Admins.findById({ _id: updatedBuku.added_by._id });
+            // const newAdminRelationObj = await Admins.findById({ _id: updatedBuku.added_by._id });
             
-            if(newAdminRelationObj){
-                newAdminRelationObj.buku.push(updatedBuku._id);
-                newAdminRelationObj.save();
-            }
+            // if(newAdminRelationObj){
+            //     newAdminRelationObj.buku.push(updatedBuku._id);
+            //     newAdminRelationObj.save();
+            // }else{
+            //     res.status(500).send('Relasi admin tidak ditemukan!');
+            //     return;
+            // }
 
 
             //Upload Gambar Buku
-            gambar_buku.forEach(async (gambar: GambarBuku) => {
+            const gambar_buku_array = Array.isArray(gambar_buku) ? gambar_buku : [gambar_buku];
+            gambar_buku_array.forEach(async (gambar: GambarBuku, index: number) => {
                 const uploadGambarResult: UploadResult = await new Promise((resolve, reject) => {
                     cloudinary.v2.uploader.upload_stream({folder: nama_folder+'/gambar_buku'}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
                         if (error) {
@@ -406,25 +445,38 @@ class BukuController{
                     image: gambar_buku_url
                 }
     
-                await GambarBuku.create(newGambarBukuObj);
+                const updatedGambarBuku = await GambarBuku.create(newGambarBukuObj);
+                if(!updatedGambarBuku){
+                    res.status(500).send('Gagal upload gambar buku!');
+                    return;
+                }
 
                 
                 //Add gambar buku relation to buku
                 const bukuRelationObj = await Buku.findById({ _id: decryptedId });
                 if(bukuRelationObj){
-                    bukuRelationObj.gambar_buku = [];
+                    if(index === 0){
+                        bukuRelationObj.gambar_buku = [];
+                    }
                     bukuRelationObj.gambar_buku.push(newGambarBukuObj as any);
                     bukuRelationObj.save();
+                }else{
+                    res.status(500).send('Relasi buku tidak ditemukan!');
+                    return;
                 }
             });
             
 
             //Insert Penulis
-            penulis_buku.forEach(async (penulis: string) => {
+            const penulis_buku_array = Array.isArray(penulis_buku) ? penulis_buku : [penulis_buku];
+            penulis_buku_array.forEach(async (penulis: string, index: number) => {
                 const pivotPenulisBukuObjectId = new Types.ObjectId();
                 const encryptedPenulisBukuId = encryptString(pivotPenulisBukuObjectId.toString());
                 const decryptedPenulisId = decryptString(penulis);
                 const penulisId = new Types.ObjectId(decryptedPenulisId);
+
+                const bukuRelationObj = await Buku.findById({ _id: buku._id });
+                const penulisRelationObj = await MasterPenulis.findById({ _id: penulisId });
                 
                 const newPivotPenulisBukuObj = {
                     _id: pivotPenulisBukuObjectId,
@@ -433,20 +485,34 @@ class BukuController{
                     penulis: penulisId
                 }
     
-                await PivotPenulisBuku.create(newPivotPenulisBukuObj);
+                const updatedPivotPenulisBuku = await PivotPenulisBuku.create(newPivotPenulisBukuObj);
+                if(!updatedPivotPenulisBuku){
+                    res.status(500).send('Gagal upload gambar buku!');
+                    return;
+                }
+
+
                 //Add pivot buku relations
-                const bukuRelationObj = await Buku.findById({ _id: buku._id });
                 if(bukuRelationObj){
-                    bukuRelationObj.pivot_penulis_buku = [];
+                    if(index === 0){
+                        bukuRelationObj.pivot_penulis_buku = [];
+                    }
                     bukuRelationObj.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
                     bukuRelationObj.save();
+                }else{
+                    res.status(500).send('Relasi buku tidak ditemukan!');
+                    return;
                 }
                 
-                const penulisRelationObj = await MasterPenulis.findById({ _id: penulisId });
                 if(penulisRelationObj){
-                    penulisRelationObj.pivot_penulis_buku = [];
+                    if(index === 0){
+                        penulisRelationObj.pivot_penulis_buku = [];
+                    }
                     penulisRelationObj.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
                     penulisRelationObj.save();
+                }else{
+                    res.status(500).send('Relasi penulis tidak ditemukan!');
+                    return;
                 }
             });
 
@@ -559,7 +625,8 @@ class BukuController{
 
         if(gambar_buku){
             let counter: number = 0;
-            gambar_buku.forEach((gambar: GambarBuku) => {
+            const gambar_buku_array = Array.isArray(gambar_buku) ? gambar_buku : [gambar_buku];
+            gambar_buku_array.forEach((gambar: GambarBuku) => {
                 const fileType = mime.contentType(gambar.mimetype);
 
                 if(fileType != 'image/jpeg' && fileType != 'image/webp' && fileType != 'image/png') counter++;
