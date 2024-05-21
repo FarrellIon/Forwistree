@@ -6,6 +6,7 @@ interface Admins {
     password: String,
     buku: Types.ObjectId[],
     events: Types.ObjectId[],
+    mitra_events: Types.ObjectId[],
     master_kategori: Types.ObjectId[],
     master_penulis: Types.ObjectId[],
     pengajuan_penerbitan: Types.ObjectId[],
@@ -37,6 +38,12 @@ const AdminsSchema = new Schema<Admins>(
             {
                 type: Schema.Types.ObjectId,
                 ref: 'events'
+            }
+        ],
+        mitra_events: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'mitra_event'
             }
         ],
         master_kategori: [

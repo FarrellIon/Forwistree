@@ -1,6 +1,7 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import connectDB from "./database";
+import ConnectMongo from "connect-mongo";
 import cors from 'cors';
 import passport from 'passport';
 import session from 'express-session';
@@ -36,7 +37,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(session({
     secret: process.env.SESSION_KEY!,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store: ConnectMongo.create({
+        mongoUrl: process.env.DB_URL
+    }),
 }));
 app.use(passport.initialize());
 app.use(passport.session());

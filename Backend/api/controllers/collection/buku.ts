@@ -79,14 +79,14 @@ class BukuController{
             } = req.body;
             const { file_sinopsis, gambar_buku } = (req as any).files;
 
-            const requiredFields = ['nama', 'kategori', 'jumlah_halaman', 'harga', 'diskon', 'status_bestseller'];
+            const requiredFields = ['nama', 'kategori', 'jumlah_halaman', 'harga', 'diskon', 'status_bestseller', 'penulis_buku'];
             
 
             //Validators
             let errorMsg: string = '';
             for (const field of requiredFields) {
                 if (!req.body[field]) {
-                    errorMsg += `Tidak ada ${field.replace('_', ' ')}\n`;
+                    errorMsg += `Tidak ada ${field.replace(/_/g, ' ')}\n`;
                 }
             }
             
@@ -641,6 +641,30 @@ class BukuController{
                 errorMsg += 'Gambar buku tidak boleh lebih dari 5';
                 errorMsg += '\n';
             }
+        }
+
+        if(req.body.penulis_buku){
+            let penulis_buku = req.body.penulis_buku;
+            let flag = 0;
+            const penulis_buku_array = Array.isArray(penulis_buku) ? penulis_buku : [penulis_buku];
+            
+            penulis_buku_array.forEach(async (penulis: string) => {
+                if(flag == 0){
+                    if (!validator.isAlphanumeric(penulis, undefined, {ignore: ' -,&!.?:'})){
+                        errorMsg += 'Nama penulis tidak valid';
+                        errorMsg += '\n';
+                        flag = 1;
+                    }
+                    
+                    if(!validator.isLength(penulis, { min: 1, max: 50 })){    
+                        errorMsg += 'Nama penulis harus sepanjang 1-50 huruf';
+                        errorMsg += '\n';
+                        flag = 1;
+                    }
+                }else{
+                    return errorMsg;
+                }
+            });
         }
 
         return errorMsg;

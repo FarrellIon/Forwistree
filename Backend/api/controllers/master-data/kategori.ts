@@ -54,7 +54,7 @@ class KategoriController{
             
             for (const field of requiredFields) {
                 if (!req.body[field]) {
-                    errorMsg += `Tidak ada ${field.replace('_', ' ')}\n`;
+                    errorMsg += `Tidak ada ${field.replace(/_/g, ' ')}\n`;
                 }
             }
 
@@ -71,11 +71,12 @@ class KategoriController{
 
             const objectId = new Types.ObjectId();
             const encryptedId = encryptString(objectId.toString());
+            const adminObjectId = (req.user! as any)._id;
 
             const newKategoriObj = {
                 _id: objectId,
                 id: encryptedId,
-                added_by: new Types.ObjectId(), //Temporary Added By
+                added_by: adminObjectId,
                 ...req.body
             }
 
