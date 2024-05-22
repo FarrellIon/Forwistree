@@ -378,16 +378,18 @@ class EventController{
                 const old_mitra_array = Array.isArray(old_mitra) ? old_mitra : [old_mitra];
 
                 old_mitra_array.forEach(async (mitra: Types.ObjectId, index: number) => {
-                    const mitraRelationObj = await MitraEvent.findById({ _id: mitra });
+                    const pivotMitraRelationObj = await PivotMitraEvent.findById({ _id: mitra });
                     
-                    if(mitraRelationObj){
-                        if(index === 0){
+                    if(pivotMitraRelationObj){
+                        const mitraRelationObj = await MitraEvent.findById({ _id: pivotMitraRelationObj.mitra });
+                        
+                        if(mitraRelationObj){
                             mitraRelationObj.pivot_mitra_event = [];
+                            mitraRelationObj.save();
+                        }else{
+                            res.status(500).send('Relasi mitra tidak ditemukan!');
+                            return;
                         }
-                        mitraRelationObj.save();
-                    }else{
-                        res.status(500).send('Relasi mitra tidak ditemukan!');
-                        return;
                     }
                 });
             }else{
@@ -403,9 +405,9 @@ class EventController{
                 const encryptedMitraEventId = encryptString(pivotMitraEventObjectId.toString());
                 const decryptedMitraId = decryptString(mitra);
                 const mitraId = new Types.ObjectId(decryptedMitraId);
+                const mitraRelationObj = await MitraEvent.findById({ _id: mitraId });
 
                 const eventRelationObj = await Events.findById({ _id: event._id });
-                const mitraRelationObj = await MitraEvent.findById({ _id: mitraId });
                 
                 const newPivotMitraEventObj = {
                     _id: pivotMitraEventObjectId,
@@ -434,9 +436,6 @@ class EventController{
                 }
                 
                 if(mitraRelationObj){
-                    if(index === 0){
-                        mitraRelationObj.pivot_mitra_event = [];
-                    }
                     mitraRelationObj.pivot_mitra_event.push(pivotMitraEventObjectId);
                     mitraRelationObj.save();
                 }else{
