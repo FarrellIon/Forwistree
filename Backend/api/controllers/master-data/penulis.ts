@@ -165,6 +165,18 @@ class PenulisController{
             }
         }
 
+        if(req.body.email){
+            if (!validator.isEmail(req.body.email)){
+                errorMsg += 'Email tidak valid';
+            }
+        }
+
+        if(req.body.no_wa){
+            if (!validator.isNumeric(req.body.no_wa)){
+                errorMsg += 'Nomor HP tidak valid';
+            }
+        }
+
         return errorMsg;
     }
 }

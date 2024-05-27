@@ -27,7 +27,6 @@ const PengajuanPenerbitanSchema = new Schema<PengajuanPenerbitan>(
         accepted_by: {
             type: Schema.Types.ObjectId,
             ref: 'admins',
-            required: true
         }
     },
     { timestamps: true }
