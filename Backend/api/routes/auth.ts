@@ -8,7 +8,10 @@ const router = express.Router();
 
 router.post('/login', upload.none(), passport.authenticate('local'), (req, res) => {
     if(req.user){
-        res.send('Berhasil Login');
+        res.send({
+            message: "Berhasil Login",
+            id: (req.user as any).id
+        });
     }else{
         res.send('Error ketika login');
     }

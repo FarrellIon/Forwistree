@@ -3,12 +3,15 @@ import { Schema, model, Types } from 'mongoose';
 interface Buku {
     id: String,
     nama: String,
+    deskripsi: String,
     kategori: Types.ObjectId,
     file_sinopsis: String,
     jumlah_halaman: Number,
     harga: Number,
     diskon: Number,
     status_bestseller: Boolean,
+    status_editors_pick: Boolean,
+    link_shopee: String,
     added_by: Types.ObjectId,
     gambar_buku: Types.ObjectId[],
     pivot_penulis_buku: Types.ObjectId[],
@@ -23,6 +26,10 @@ const BukuSchema = new Schema<Buku>(
             required: true
         },
         nama: {
+            type: String,
+            required: true
+        },
+        deskripsi: {
             type: String,
             required: true
         },
@@ -52,6 +59,15 @@ const BukuSchema = new Schema<Buku>(
             type: Boolean,
             required: true,
             default: false
+        },
+        status_editors_pick: {
+            type: Boolean,
+            required: true,
+            default: false
+        },
+        link_shopee: {
+            type: String,
+            required: true,
         },
         added_by: {
             type: Schema.Types.ObjectId,

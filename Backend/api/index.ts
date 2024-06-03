@@ -9,6 +9,8 @@ import session from 'express-session';
 //Routes
 import databaseRoutes from "./routes/database";
 import authRoute from "./routes/auth";
+import { Admins } from "./database/schemas/admin/admins";
+import { decryptString } from "./utils/encryption";
 
 //Database Connection
 dotenv.config();
@@ -51,7 +53,14 @@ app.use('/api/auth', authRoute);
 
 //Check if Logged In
 function ensureAuthenticated(req: Request, res: Response, next: () => any) {
-    if (req.isAuthenticated()) {
+    if (req.isAuthenticated() || req.headers.uservalue) {
+        if(req.headers.uservalue){
+            const admin = Admins.findById({ id: decryptString(req.headers.uservalue as string) });
+
+            if(!admin){
+                res.status(400).send('User tidak ditemukan');
+            }
+        }
         return next();
     }else{
         res.status(400).send('Belum login');

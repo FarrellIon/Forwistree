@@ -143,7 +143,7 @@ class BukuController{
             const encryptedId = encryptString(objectId.toString());
             const kategoriId = decryptString(kategori);
             const kategoriObjectId = new Types.ObjectId(kategoriId);
-            const adminObjectId = (req.user! as any)._id;
+            const adminObjectId = (req.user as any)._id;
 
             const newBukuObj = {
                 _id: objectId,
@@ -569,6 +569,18 @@ class BukuController{
             }
         }
 
+        if(req.body.deskripsi){
+            if (!validator.isAlphanumeric(req.body.deskripsi, undefined, {ignore: ' :/-#",&!.?'})){
+                errorMsg += 'Deskripsi tidak valid';
+                errorMsg += '\n';
+            }
+
+            if(!validator.isLength(req.body.deskripsi, { min: 1, max: 1000 })){    
+                errorMsg += 'Deskripsi harus sepanjang 1-1000 huruf';
+                errorMsg += '\n';
+            }
+        }
+
         if(req.body.kategori){
             try {
                 const kategoriId = decryptString(req.body.kategori);
@@ -610,6 +622,20 @@ class BukuController{
             }
         }
 
+        if(req.body.status_editors_pick){
+            if(!validator.isBoolean(req.body.status_editors_pick)){
+                errorMsg += 'Status editors pick harus true / false';
+                errorMsg += '\n';
+            }
+        }
+
+        if(req.body.link_shopee){
+            if (!validator.isURL(req.body.link_shopee)){
+                errorMsg += 'Link shopee tidak valid';
+                errorMsg += '\n';
+            }
+        }
+
         if(file_sinopsis){
             const fileType = mime.contentType(file_sinopsis[0].mimetype);
             if(fileType != 'application/pdf'){
@@ -644,27 +670,25 @@ class BukuController{
         }
 
         if(req.body.penulis_buku){
-            let penulis_buku = req.body.penulis_buku;
-            let flag = 0;
-            const penulis_buku_array = Array.isArray(penulis_buku) ? penulis_buku : [penulis_buku];
-            
-            penulis_buku_array.forEach(async (penulis: string) => {
-                if(flag == 0){
-                    if (!validator.isAlphanumeric(penulis, undefined, {ignore: ' -,&!.?:'})){
-                        errorMsg += 'Nama penulis tidak valid';
-                        errorMsg += '\n';
-                        flag = 1;
+            try {
+                let penulis_buku = req.body.penulis_buku;
+                let flag = 0;
+                const penulis_buku_array = Array.isArray(penulis_buku) ? penulis_buku : [penulis_buku];
+
+                penulis_buku_array.forEach(async (penulis: string) => {
+                    if(flag == 0){
+                        const penulisId = decryptString(penulis);
+                        if(!MasterPenulis.exists({ _id: new Types.ObjectId(penulisId) })){
+                            errorMsg += 'Penulis tidak ditemukan';
+                            errorMsg += '\n';
+                            flag = 1;
+                        }
                     }
-                    
-                    if(!validator.isLength(penulis, { min: 1, max: 50 })){    
-                        errorMsg += 'Nama penulis harus sepanjang 1-50 huruf';
-                        errorMsg += '\n';
-                        flag = 1;
-                    }
-                }else{
-                    return errorMsg;
-                }
-            });
+                });
+            } catch (error) {
+                errorMsg += 'Penulis tidak valid';
+                errorMsg += '\n';
+            }
         }
 
         return errorMsg;

@@ -10,9 +10,6 @@
             <button id="submitFormAddBuku">Submit</button>
         </form>
 
-        {{ formResult }}
-
-        {{ formData }}
         <!-- <div v-if="!result">
             Loading...
         </div>
@@ -26,29 +23,56 @@
 </template>
 
 <script setup>
-    let formResult;
-    let formData;
-    let result;
-
+    const userValue = useCookie('userValue');
     const state = reactive({
         nama: undefined
     });
     const config = useRuntimeConfig();
-    result = await $fetch(`${config.public.API_HOST}/api/database/master-data/kategori`);
 
-    const handleSubmit = async () => {
-        formData = new FormData();
-
-        for (const key of Object.keys(state)) {
-            const value = state[key];
-            formData.append(key, value);
-        }
-
-        formResult = await $fetch(`${config.public.API_HOST}/api/database/buku`, {
+    const login = async () => {
+        let fetchResult = await $fetch(`${config.public.API_HOST}/api/auth/login`, {
             method: 'POST',
-            body: formData
+            body: {
+                username: 'Farrell2',
+                password: '1234'
+            }
         });
+
+        return fetchResult;
     }
+
+    const loginResult = await login();
+    console.log(loginResult);
+    if(loginResult.message == "Berhasil Login"){
+        userValue.value = loginResult.id;
+    }
+
+
+    const fetchKategori = async () => {
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori`, {
+            headers: {
+                userValue: userValue,
+            }
+        });
+
+        return fetchResult;
+    }
+    const kategori = await fetchKategori();
+    console.log(kategori);
+
+    // const handleSubmit = async () => {
+    //     formData = new FormData();
+
+    //     for (const key of Object.keys(state)) {
+    //         const value = state[key];
+    //         formData.append(key, value);
+    //     }
+
+    //     formResult = await $fetch(`${config.public.API_HOST}/api/database/buku`, {
+    //         method: 'POST',
+    //         body: formData
+    //     });
+    // }
 
     // const url = ``;
     // const { data: books } = await useFetch(url);
