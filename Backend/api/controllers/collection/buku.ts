@@ -636,6 +636,13 @@ class BukuController{
             }
         }
 
+        if(req.body.tanggal_terbit){
+            if(!validator.isDate(req.body.tanggal_terbit)){
+                errorMsg += 'Tanggal terbit belum memiliki format yang benar';
+                errorMsg += '\n';
+            }
+        }
+
         if(file_sinopsis){
             const fileType = mime.contentType(file_sinopsis[0].mimetype);
             if(fileType != 'application/pdf'){

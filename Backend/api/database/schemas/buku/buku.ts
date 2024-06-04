@@ -15,6 +15,7 @@ interface Buku {
     added_by: Types.ObjectId,
     gambar_buku: Types.ObjectId[],
     pivot_penulis_buku: Types.ObjectId[],
+    tanggal_terbit: Date,
     createdAt: Date,
     updatedAt: Date
 }
@@ -73,6 +74,9 @@ const BukuSchema = new Schema<Buku>(
             type: Schema.Types.ObjectId,
             ref: 'admins',
             required: true
+        },
+        tanggal_terbit: {
+            type: Date
         },
         gambar_buku: [
             {

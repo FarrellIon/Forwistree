@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss', 'nuxt-aos'],
+  modules: ['@nuxtjs/tailwindcss', 'nuxt-aos', 'nuxt-swiper', 'dayjs-nuxt'],
   typescript: {
     typeCheck: true,
     strict: true

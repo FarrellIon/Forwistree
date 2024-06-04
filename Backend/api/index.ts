@@ -53,8 +53,11 @@ app.use('/api/auth', authRoute);
 
 //Check if Logged In
 function ensureAuthenticated(req: Request, res: Response, next: () => any) {
-    if (req.isAuthenticated() || req.headers.uservalue) {
-        if(req.headers.uservalue){
+    if (req.isAuthenticated() || req.headers.uservalue != 'undefined') {
+        if(req.isAuthenticated()){
+            return next();
+        }
+        if(req.headers.uservalue != 'undefined'){
             const admin = Admins.findById({ id: decryptString(req.headers.uservalue as string) });
 
             if(!admin){
