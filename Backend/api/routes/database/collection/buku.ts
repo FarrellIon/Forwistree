@@ -6,6 +6,9 @@ const upload = multer();
 const router = express.Router();
 
 router.route('/').get(bukuController.get);
+router.route('/recently-published').get(bukuController.getRecentlyPublished);
+router.route('/editors-pick').get(bukuController.getEditorsPick);
+router.route('/limited-sale').get(bukuController.getLimitedSale);
 router.post('/', upload.fields([
     { name: 'file_sinopsis' },
     { name: 'gambar_buku' }

@@ -12,7 +12,7 @@
         <h1 class="header-font" data-aos="fade-up" data-aos-duration="800" data-aos-easing="ease-out-cubic">Buku Baru <span class="text-primary">Terbit</span></h1>
         <p class="main-paragraph paragraph-font" data-aos="fade-up" data-aos-duration="1100" data-aos-easing="ease-out-cubic">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie. Praesent consectetur ligula eget ex dapibus, sit amet malesuada leo lobortis.</p>
 
-        <div v-if="!books">
+        <div v-if="!bukuBaruTerbit">
             Loading...
         </div>
         <div v-else>
@@ -43,7 +43,7 @@
                         prevEl: '#swiper-prev-btn',
                     }"
                 >
-                    <SwiperSlide v-for="book in books" :key="book._id">
+                    <SwiperSlide v-for="book in bukuBaruTerbit" :key="book._id">
                         <div class="book-container-swiper">
                             <img :src="book.gambar_buku[0].image" alt="">
                             <p class="paragraph-font font-bold text-center mt-4" data-aos="fade-up" data-aos-offset="-10" data-aos-duration="800" data-aos-easing="ease-out-cubic">{{ book.nama }}</p>
@@ -67,7 +67,7 @@
 
     const config = useRuntimeConfig();
     const userValue = useCookie('userValue');
-    let books = [];
+    let bukuBaruTerbit = [];
     
     const login = async () => {
         let fetchResult = await $fetch(`${config.public.API_HOST}/api/auth/login`, {
@@ -86,8 +86,8 @@
         userValue.value = loginResult.id;
     }
 
-    const fetchBuku = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku`, {
+    const fetchBukuBaruTerbit = async () => {
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/recently-published`, {
             headers: {
                 userValue: userValue,
             }
@@ -95,7 +95,7 @@
 
         return fetchResult.data._rawValue.buku;
     }
-    books = await fetchBuku();
+    bukuBaruTerbit = await fetchBukuBaruTerbit();
 
     // const handleSubmit = async () => {
     //     formData = new FormData();

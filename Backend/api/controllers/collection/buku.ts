@@ -44,6 +44,103 @@ class BukuController{
             return;
         }
     }
+    
+    getRecentlyPublished = async(req: Request, res: Response) => {
+        try {
+            const buku = await Buku.find({})
+            .populate('kategori', 'nama')
+            .populate('added_by', 'username')
+            .populate('gambar_buku', 'image')
+            .populate({
+                path: 'pivot_penulis_buku',
+                select: 'penulis',
+                populate: {
+                    path: 'penulis',
+                    select: 'nama_pena'
+                }
+            })
+            .sort('-tanggal_terbit');
+
+            if (buku?.length === 0) {
+                res.status(500).send('Belum ada data buku');
+                return;
+            }
+
+            res.status(200).json({
+                buku,
+                msg: "Berhasil"
+            });
+        } catch (error) {
+            res.status(500).send("Terjadi kesalahan, error : " + error);
+            return;
+        }
+    }
+    
+    getEditorsPick = async(req: Request, res: Response) => {
+        try {
+            const buku = await Buku.findOne({ status_editors_pick: true })
+            .populate('kategori', 'nama')
+            .populate('added_by', 'username')
+            .populate('gambar_buku', 'image')
+            .populate({
+                path: 'pivot_penulis_buku',
+                select: 'penulis',
+                populate: {
+                    path: 'penulis',
+                    select: 'nama_pena'
+                }
+            })
+            .sort({ createdAt: -1 });
+
+            if (!buku) {
+                res.status(500).send('Tidak ada buku editors pick');
+                return;
+            }
+
+            res.status(200).json({
+                buku,
+                msg: "Berhasil"
+            });
+        } catch (error) {
+            res.status(500).send("Terjadi kesalahan, error : " + error);
+            return;
+        }
+    }
+    
+    getLimitedSale = async(req: Request, res: Response) => {
+        try {
+            const buku = await Buku.find({ diskon: { $gt: 0 } })
+            .populate('kategori', 'nama')
+            .populate('added_by', 'username')
+            .populate('gambar_buku', 'image')
+            .populate({
+                path: 'pivot_penulis_buku',
+                select: 'penulis',
+                populate: {
+                    path: 'penulis',
+                    select: 'nama_pena'
+                }
+            })
+            .sort({ createdAt: -1 });
+
+            const bukuCount = await Buku.countDocuments({ diskon: { $gt: 0 } })
+            .sort({ createdAt: -1 });
+
+            if (!buku) {
+                res.status(500).send('Tidak ada buku limited sale');
+                return;
+            }
+
+            res.status(200).json({
+                buku,
+                bukuCount,
+                msg: "Berhasil"
+            });
+        } catch (error) {
+            res.status(500).send("Terjadi kesalahan, error : " + error);
+            return;
+        }
+    }
 
     getOne = async(req: Request, res: Response) => {
         try {

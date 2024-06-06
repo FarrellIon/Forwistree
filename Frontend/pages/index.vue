@@ -3,6 +3,8 @@
     <Navbar></Navbar>
     <HeroBanner></HeroBanner>
     <BukuBaruTerbit></BukuBaruTerbit>
+    <EditorsPick></EditorsPick>
+    <LimitedSale></LimitedSale>
     <Footer></Footer>
   </div>
 </template>
