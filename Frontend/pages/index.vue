@@ -5,6 +5,8 @@
     <BukuBaruTerbit></BukuBaruTerbit>
     <EditorsPick></EditorsPick>
     <LimitedSale></LimitedSale>
+    <LangkahPendaftaran></LangkahPendaftaran>
+    <Testimonials></Testimonials>
     <Footer></Footer>
   </div>
 </template>

@@ -12,6 +12,7 @@
                     <img src="assets/images/chevron.png" alt="">
                 </div>
                 <Swiper
+                    id="swiper-limited-sale"
                     style="margin: 0 !important; width: 100%"
                     :modules="[SwiperAutoplay, SwiperNavigation]"
                     :slides-per-view="1"
@@ -24,11 +25,11 @@
                     :loop="true"
                     :breakpoints="{
                         1140: {
-                            slidesPerView: 3,
+                            slidesPerView: 5,
                             spaceBetween: 60
                         },
-                        680: {
-                            slidesPerView: 2,
+                        870: {
+                            slidesPerView: 3,
                             spaceBetween: 20
                         },
                     }"
@@ -36,7 +37,50 @@
                         nextEl: '#swiper-next-btn2',
                         prevEl: '#swiper-prev-btn2',
                     }"
+                    @slideChange="test"
                 >
+                    <SwiperSlide v-for="book in bukuLimitedSale" :key="book._id">
+                        <div class="book-container-swiper">
+                            <img :src="book.gambar_buku[0].image" alt="">
+                            <p class="paragraph-font font-bold text-center mt-4" data-aos="fade-up" data-aos-offset="-10" data-aos-duration="800" data-aos-easing="ease-out-cubic">{{ book.nama }}</p>
+                            <p class="text-primary paragraph-font text-center mb-4"  data-aos="fade-up" data-aos-offset="-50" data-aos-duration="1100" data-aos-easing="ease-out-cubic">{{ book.pivot_penulis_buku[0].penulis.nama_pena }}</p>
+                            <div class="book-price" style="column-gap: 1rem">
+                                <p class="book-final-price text-center">{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(book.harga * ((100 - book.diskon)/100)) }}</p>
+                                <div class="flex justify-center" style="column-gap: 0.5rem">
+                                    <p v-if="book.diskon > 0" class="book-initial-price text-center"><s>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(book.harga) }}</s></p>
+                                    <div class="book-discount">-{{ book.diskon }}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </SwiperSlide>
+                    <SwiperSlide v-for="book in bukuLimitedSale" :key="book._id">
+                        <div class="book-container-swiper">
+                            <img :src="book.gambar_buku[0].image" alt="">
+                            <p class="paragraph-font font-bold text-center mt-4" data-aos="fade-up" data-aos-offset="-10" data-aos-duration="800" data-aos-easing="ease-out-cubic">{{ book.nama }}</p>
+                            <p class="text-primary paragraph-font text-center mb-4"  data-aos="fade-up" data-aos-offset="-50" data-aos-duration="1100" data-aos-easing="ease-out-cubic">{{ book.pivot_penulis_buku[0].penulis.nama_pena }}</p>
+                            <div class="book-price" style="column-gap: 1rem">
+                                <p class="book-final-price text-center">{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(book.harga * ((100 - book.diskon)/100)) }}</p>
+                                <div class="flex justify-center" style="column-gap: 0.5rem">
+                                    <p v-if="book.diskon > 0" class="book-initial-price text-center"><s>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(book.harga) }}</s></p>
+                                    <div class="book-discount">-{{ book.diskon }}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </SwiperSlide>
+                    <SwiperSlide v-for="book in bukuLimitedSale" :key="book._id">
+                        <div class="book-container-swiper">
+                            <img :src="book.gambar_buku[0].image" alt="">
+                            <p class="paragraph-font font-bold text-center mt-4" data-aos="fade-up" data-aos-offset="-10" data-aos-duration="800" data-aos-easing="ease-out-cubic">{{ book.nama }}</p>
+                            <p class="text-primary paragraph-font text-center mb-4"  data-aos="fade-up" data-aos-offset="-50" data-aos-duration="1100" data-aos-easing="ease-out-cubic">{{ book.pivot_penulis_buku[0].penulis.nama_pena }}</p>
+                            <div class="book-price" style="column-gap: 1rem">
+                                <p class="book-final-price text-center">{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(book.harga * ((100 - book.diskon)/100)) }}</p>
+                                <div class="flex justify-center" style="column-gap: 0.5rem">
+                                    <p v-if="book.diskon > 0" class="book-initial-price text-center"><s>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(book.harga) }}</s></p>
+                                    <div class="book-discount">-{{ book.diskon }}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </SwiperSlide>
                     <SwiperSlide v-for="book in bukuLimitedSale" :key="book._id">
                         <div class="book-container-swiper">
                             <img :src="book.gambar_buku[0].image" alt="">
@@ -75,6 +119,7 @@
 </template>
 
 <script setup>
+    let activeElement;
     const config = useRuntimeConfig();
     const userValue = useCookie('userValue');
     let bukuLimitedSale = [];
@@ -88,7 +133,12 @@
 
         return fetchResult.data._rawValue.buku;
     }
+
     bukuLimitedSale = await fetchBukuLimitedSale();
+
+    const test = () => {
+        activeElement = document.querySelectorAll('#swiper-limited-sale .swiper-slide-active');
+    }
 </script>
 
 <style lang="scss" scoped>
@@ -113,7 +163,7 @@
     .book-container-swiper{
         img{
             aspect-ratio: 28/40;
-            width: 70%;
+            width: 100%;
             margin: 0 auto;
         }
     }
@@ -127,8 +177,8 @@
     }
 
     .swiper-slide-prev, .swiper-slide-next, .swiper-slide{
-        opacity: 50%;
-        transform: scale(0.7);
+        opacity: 70%;
+        transform: scale(0.75);
     }
 
     .swiper-slide-active{
