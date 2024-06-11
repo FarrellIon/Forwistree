@@ -16,10 +16,12 @@
                         <p class="book-final-price">{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(bukuEditorsPick.harga * ((100 - bukuEditorsPick.diskon)/100)) }}</p>
                         <p v-if="bukuEditorsPick.diskon > 0" class="book-initial-price"><s>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(bukuEditorsPick.harga) }}</s></p>
                     </div>
-                    <div class="details" data-aos="fade-right" data-aos-duration="1400" data-aos-easing="ease-out-cubic">
-                        <p>Lihat Detil</p>
-                        <img src="assets/images/right-arrow-primary.png" alt="">
-                    </div>
+                    <NuxtLink :to="`/books/${bukuEditorsPick.id}`">
+                        <div class="book-hover details" data-aos="fade-right" data-aos-duration="1400" data-aos-easing="ease-out-cubic">
+                            <p>Lihat Detil</p>
+                            <img src="assets/images/right-arrow-primary.png" alt="">
+                        </div>
+                    </NuxtLink>
                 </div>
             </div>
         </div>
@@ -60,6 +62,10 @@
         line-height: 1.25;
         margin-bottom: 3rem;
         text-align: left;
+    }
+    
+    .book-hover:hover{
+        cursor: pointer;
     }
     
     .right-side{

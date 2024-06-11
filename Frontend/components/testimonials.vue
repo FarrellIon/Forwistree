@@ -1,7 +1,7 @@
 <template>
     <div class="px-32 py-16">
-        <h1 class="header-font" data-aos="fade-up" data-aos-duration="800" data-aos-easing="ease-out-cubic"><span class="text-primary">Testimonials</span></h1>
-        <p class="main-paragraph paragraph-font" data-aos="fade-up" data-aos-duration="1100" data-aos-easing="ease-out-cubic">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie.</p>
+        <h1 class="header-font" data-aos="fade-up" data-aos-offset="-30" data-aos-duration="800" data-aos-easing="ease-out-cubic"><span class="text-primary">Testimonials</span></h1>
+        <p class="main-paragraph paragraph-font" data-aos="fade-up" data-aos-offset="-50" data-aos-duration="1100" data-aos-easing="ease-out-cubic">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie.</p>
 
         <div v-if="!bukuLimitedSale">
             Loading...

@@ -44,12 +44,14 @@
                     }"
                 >
                     <SwiperSlide v-for="book in bukuBaruTerbit" :key="book._id">
-                        <div class="book-container-swiper">
-                            <img :src="book.gambar_buku[0].image" alt="">
-                            <p class="paragraph-font font-bold text-center mt-4" data-aos="fade-up" data-aos-offset="-10" data-aos-duration="800" data-aos-easing="ease-out-cubic">{{ book.nama }}</p>
-                            <p class="paragraph-font text-center mb-8" data-aos="fade-up" data-aos-offset="-50" data-aos-duration="1100" data-aos-easing="ease-out-cubic">{{ book.pivot_penulis_buku[0].penulis.nama_pena }}</p>
-                            <p class="paragraph-font text-center" data-aos="fade-up" data-aos-offset="-50" data-aos-duration="1100" data-aos-easing="ease-out-cubic">Diterbitkan : <span class="text-primary">{{ $dayjs(book.tanggal_terbit).format('D MMM YYYY') }}</span></p>
-                        </div>
+                        <NuxtLink :to="`/books/${book.id}`">
+                            <div class="book-container-swiper">
+                                <img data-aos="fade-up" data-aos-offset="-10" data-aos-duration="800" :src="book.gambar_buku[0].image" alt="">
+                                <p class="paragraph-font font-bold text-center mt-4" data-aos="fade-up" data-aos-offset="-10" data-aos-duration="800" data-aos-easing="ease-out-cubic">{{ book.nama }}</p>
+                                <p class="paragraph-font text-center mb-8" data-aos="fade-up" data-aos-offset="-50" data-aos-duration="1100" data-aos-easing="ease-out-cubic">{{ book.pivot_penulis_buku[0].penulis.nama_pena }}</p>
+                                <p class="paragraph-font text-center" data-aos="fade-up" data-aos-offset="-50" data-aos-duration="1100" data-aos-easing="ease-out-cubic">Diterbitkan : <span class="text-primary">{{ $dayjs(book.tanggal_terbit).format('D MMM YYYY') }}</span></p>
+                            </div>
+                        </NuxtLink>
                     </SwiperSlide>
                 </Swiper>
                 <div id="swiper-next-btn">
@@ -132,6 +134,10 @@
         line-height: 1.25;
         margin-bottom: 3rem;
         text-align: center;
+    }
+    
+    .book-hover:hover{
+        cursor: pointer;
     }
 
     .book-container-swiper{

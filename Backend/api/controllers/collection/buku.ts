@@ -148,7 +148,16 @@ class BukuController{
             const decryptedId = decryptString(id);
             const buku = await Buku.findById({ _id: decryptedId })
             .populate('kategori', 'nama')
-            .populate('added_by', 'username');
+            .populate('added_by', 'username')
+            .populate('gambar_buku', 'image')
+            .populate({
+                path: 'pivot_penulis_buku',
+                select: 'penulis',
+                populate: {
+                    path: 'penulis',
+                    select: 'nama_pena'
+                }
+            });
 
             if (!buku){
                 res.status(500).send('Tidak ditemukan buku dengan id tersebut');

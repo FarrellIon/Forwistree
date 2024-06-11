@@ -39,7 +39,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "node ./api/index.ts",
-    "start:dev": "nodemon ./api/index.ts",
+    "dev": "nodemon ./api/index.ts",
     "prod": "node dist/final.ts",
     "test": "jest"
   },
