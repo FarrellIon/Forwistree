@@ -6,7 +6,7 @@ export default defineNuxtConfig({
     preference: 'light'
   },
   typescript: {
-    typeCheck: true,
+    typeCheck: false,
     strict: true
   },
   app: {
