@@ -20,8 +20,7 @@
     "typescript": "^5.4.5",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
-    "vue-tsc": "^1.8.22",
-    "vue-zoom-on-hover": "^1.0.6"
+    "vue-tsc": "^1.8.22"
   },
   "devDependencies": {
     "nuxt-aos": "^1.2.4"
