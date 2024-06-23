@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxt/ui": "^2.17.0",
     "@nuxtjs/tailwindcss": "^6.11.4",
     "aos": "^2.3.4",
     "dayjs-nuxt": "^2.1.9",
@@ -18,8 +19,7 @@
     "sass": "^1.75.0",
     "typescript": "^5.4.5",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
-    "vue-tsc": "^1.8.22"
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
     "nuxt-aos": "^1.2.4"
