@@ -35,12 +35,12 @@
                         <div class="testimonial grid" style="grid-template-columns: 2fr 8fr;">
                             <img src="assets/images/quote.png" alt="" class="quote">
                             <div class="right-side">
-                                <p class="string">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie. Praesent consectetur ligula eget ex dapibus, sit amet malesuada leo lobortis.</p>
+                                <p class="string paragraph-font">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie. Praesent consectetur ligula eget ex dapibus, sit amet malesuada leo lobortis.</p>
                                 <div class="user flex items-center gap-4">
                                     <img src="assets/images/testimonial-profile.png" alt="" class="profile-picture">
                                     <div class="bio">
-                                        <p class="text-primary">Test</p>
-                                        <h2>Scott Green</h2>
+                                        <p class="text-primary paragraph-font">Test</p>
+                                        <h2 class="paragraph-font">Scott Green</h2>
                                     </div>
                                 </div>
                             </div>
@@ -50,12 +50,12 @@
                         <div class="testimonial grid" style="grid-template-columns: 2fr 8fr;">
                             <img src="assets/images/quote.png" alt="" class="quote">
                             <div class="right-side">
-                                <p class="string">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie. Praesent consectetur ligula eget ex dapibus, sit amet malesuada leo lobortis.</p>
+                                <p class="string paragraph-font">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie. Praesent consectetur ligula eget ex dapibus, sit amet malesuada leo lobortis.</p>
                                 <div class="user flex items-center gap-4">
                                     <img src="assets/images/testimonial-profile.png" alt="" class="profile-picture">
                                     <div class="bio">
-                                        <p class="text-primary">Test</p>
-                                        <h2>Scott Green</h2>
+                                        <p class="text-primary paragraph-font">Test</p>
+                                        <h2 class="paragraph-font">Scott Green</h2>
                                     </div>
                                 </div>
                             </div>
@@ -65,12 +65,12 @@
                         <div class="testimonial grid" style="grid-template-columns: 2fr 8fr;">
                             <img src="assets/images/quote.png" alt="" class="quote">
                             <div class="right-side">
-                                <p class="string">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie. Praesent consectetur ligula eget ex dapibus, sit amet malesuada leo lobortis.</p>
+                                <p class="string paragraph-font">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie. Praesent consectetur ligula eget ex dapibus, sit amet malesuada leo lobortis.</p>
                                 <div class="user flex items-center gap-4">
                                     <img src="assets/images/testimonial-profile.png" alt="" class="profile-picture">
                                     <div class="bio">
-                                        <p class="text-primary">Test</p>
-                                        <h2>Scott Green</h2>
+                                        <p class="text-primary paragraph-font">Test</p>
+                                        <h2 class="paragraph-font">Scott Green</h2>
                                     </div>
                                 </div>
                             </div>
@@ -80,12 +80,12 @@
                         <div class="testimonial grid" style="grid-template-columns: 2fr 8fr;">
                             <img src="assets/images/quote.png" alt="" class="quote">
                             <div class="right-side">
-                                <p class="string">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie. Praesent consectetur ligula eget ex dapibus, sit amet malesuada leo lobortis.</p>
+                                <p class="string paragraph-font">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie. Praesent consectetur ligula eget ex dapibus, sit amet malesuada leo lobortis.</p>
                                 <div class="user flex items-center gap-4">
                                     <img src="assets/images/testimonial-profile.png" alt="" class="profile-picture">
                                     <div class="bio">
-                                        <p class="text-primary">Test</p>
-                                        <h2>Scott Green</h2>
+                                        <p class="text-primary paragraph-font">Test</p>
+                                        <h2 class="paragraph-font">Scott Green</h2>
                                     </div>
                                 </div>
                             </div>

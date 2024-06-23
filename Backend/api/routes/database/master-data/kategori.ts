@@ -6,6 +6,7 @@ const upload = multer();
 const router = express.Router();
 
 router.route('/').get(kategoriController.get)
+router.route('/random').get(kategoriController.getRandom)
 router.post('/', upload.none(), kategoriController.create);
 router.patch('/:id', upload.none(), kategoriController.update);
 router.route('/:id').get(kategoriController.getOne).delete(kategoriController.delete);

@@ -3,12 +3,20 @@ import { MasterKategori } from "../../database/schemas/master_data/master_katego
 import { encryptString, decryptString } from '../../utils/encryption';
 import { Types } from 'mongoose';
 import validator from 'validator';
+import { Buku } from '../../database/schemas/buku/buku';
 
 class KategoriController{
     get = async(req: Request, res: Response) => {
         try{
             const kategori = await MasterKategori.find({})
-            .populate('buku', 'id')
+            .populate({
+                path: 'buku',
+                select: 'gambar_buku',
+                populate: {
+                    path: 'gambar_buku',
+                    select: 'image'
+                }
+            })
             .sort('-createdAt');
 
             if (kategori?.length === 0) {
@@ -30,12 +38,60 @@ class KategoriController{
         try {
             const { id } = req.params;
             const decryptedId = decryptString(id);
-            const kategori = await MasterKategori.findById({ _id: decryptedId });
+            const kategori = await MasterKategori.findById({ _id: decryptedId })
+            .populate({
+                path: 'buku',
+                populate: {
+                    path: 'gambar_buku',
+                    select: 'image'
+                }
+            });
+
+            const buku = await Buku.findOne()
+                .where({kategori: decryptedId})
+                .sort('-diskon');
+
+            if(!buku){
+                res.status(404).send('Tidak ada buku yang ditemukan dalam kategori ini');
+                return;
+            }
+
+            const maxDiskon = (buku as any).diskon;
 
             if (!kategori){
                 res.status(500).send('Tidak ditemukan kategori dengan id tersebut');
                 return;
             }
+
+            res.status(200).json({
+                kategori,
+                maxDiskon,
+                msg: "Berhasil"
+            });
+        } catch (error) {
+            res.status(500).send("Terjadi kesalahan, error : " + error);
+            return;
+        }
+    }
+
+    getRandom = async(req: Request, res: Response) => {
+        try {
+            const categories = await MasterKategori.find({ buku: { $exists: true, $ne: [] } })
+            .populate({
+                path: 'buku',
+                populate: {
+                    path: 'gambar_buku',
+                    select: 'image'
+                }
+            });
+
+            if (categories.length === 0) {
+                res.status(500).send('Tidak ditemukan kategori yang mengandung buku');
+                return;
+            }
+
+            const randomIndex = Math.floor(Math.random() * categories.length);
+            const kategori = categories[randomIndex];
 
             res.status(200).json({
                 kategori,

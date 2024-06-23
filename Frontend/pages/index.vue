@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Navbar></Navbar>
+    <Navbar :active="'home'"></Navbar>
     <HeroBanner></HeroBanner>
     <BukuBaruTerbit></BukuBaruTerbit>
     <EditorsPick></EditorsPick>

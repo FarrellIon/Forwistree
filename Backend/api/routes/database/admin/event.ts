@@ -6,6 +6,7 @@ const upload = multer();
 const router = express.Router();
 
 router.route('/').get(eventController.get);
+router.route('/ongoing').get(eventController.getOngoingEvent);
 router.post('/', upload.fields([
     { name: 'gambar_event' }
 ]), eventController.create);

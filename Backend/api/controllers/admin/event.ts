@@ -63,6 +63,31 @@ class EventController{
         }
     }
 
+    getOngoingEvent = async(req: Request, res: Response) => {
+        try {
+            const now = new Date();
+
+            const event = await Events.findOne({
+                tanggal_mulai_pendaftaran: { $lt: now },
+                tanggal_penutupan: { $gt: now }
+            })
+            .populate('gambar_event');
+
+            if (!event){
+                res.status(500).send('Tidak ada event yang sedang aktif');
+                return;
+            }
+
+            res.status(200).json({
+                event,
+                msg: "Berhasil"
+            });
+        } catch (error) {
+            res.status(500).send("Terjadi kesalahan, error : " + error);
+            return;
+        }
+    }
+
     create = async(req: Request, res: Response) => {
         try{
             //Declarations

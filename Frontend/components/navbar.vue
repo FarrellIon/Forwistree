@@ -5,10 +5,18 @@
             <span class="header-font text-3xl text-primary font-bold">Forwistree</span>
         </div>
         <div class="basis-full flex gap-8 justify-center">
-            <span class="active navbar-page">Home</span>
-            <span class="navbar-page">Products</span>
-            <span class="navbar-page">Categories</span>
-            <span class="navbar-page">Publish a Book</span>
+            <NuxtLink to="/">
+                <span :class="{'navbar-page': true, 'active': active == 'home'}">Home</span>
+            </NuxtLink>
+            <NuxtLink to="/products">
+                <span :class="{'navbar-page': true, 'active': active == 'products'}">Products</span>
+            </NuxtLink>
+            <NuxtLink to="/categories">
+                <span :class="{'navbar-page': true, 'active': active == 'categories'}">Categories</span>
+            </NuxtLink>
+            <NuxtLink to="/publish">
+                <span :class="{'navbar-page': true, 'active': active == 'publish'}">Publish a Book</span>
+            </NuxtLink>
         </div>
         <div class="navbar-right-side basis-1/2 flex items-center justify-end">
             <img class="size-6 opacity-70" src="assets/images/search.png" alt="">
@@ -18,8 +26,18 @@
     </div>
 </template>
 
-<script setup>
+<script>
+export default {
+    props: {
+        active: {
+            type: String,
+            required: false
+        }
+    }
+}
+</script>
 
+<script setup>
 </script>
 
 <style lang="scss" scoped>
