@@ -41,7 +41,8 @@
     "start": "node ./api/index.ts",
     "dev": "nodemon ./api/index.ts",
     "prod": "node dist/final.ts",
-    "test": "jest"
+    "test": "jest",
+    "build": "webpack"
   },
   "author": "",
   "license": "ISC",
