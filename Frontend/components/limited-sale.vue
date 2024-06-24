@@ -123,7 +123,11 @@
             }
         });
 
-        return fetchResult.data._rawValue.buku;
+        if(fetchResult.data._rawValue){
+            return fetchResult.data._rawValue.buku;
+        }else{
+            return null;
+        }
     }
 
     bukuLimitedSale = await fetchBukuLimitedSale();

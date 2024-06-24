@@ -72,20 +72,25 @@
     let bukuBaruTerbit = [];
     
     const login = async () => {
-        let fetchResult = await $fetch(`${config.public.API_HOST}/api/auth/login`, {
-            method: 'POST',
-            body: {
-                username: 'Farrell2',
-                password: '1234'
-            }
-        });
-
-        return fetchResult;
+        try {
+            let fetchResult = await $fetch(`${config.public.API_HOST}/api/auth/login`, {
+                method: 'POST',
+                body: {
+                    username: 'Farrell2',
+                    password: '1234'
+                }
+            });
+            return fetchResult;
+        } catch (error) {
+            return null;
+        }
     }
 
     const loginResult = await login();
-    if(loginResult.message == "Berhasil Login"){
-        userValue.value = loginResult.id;
+    if(loginResult){
+        if(loginResult.message == "Berhasil Login"){
+            userValue.value = loginResult.id;
+        }
     }
 
     const fetchBukuBaruTerbit = async () => {
@@ -95,7 +100,11 @@
             }
         });
 
-        return fetchResult.data._rawValue.buku;
+        if(fetchResult.data._rawValue){
+            return fetchResult.data._rawValue.buku;
+        }else{
+            return null;
+        }
     }
     bukuBaruTerbit = await fetchBukuBaruTerbit();
 

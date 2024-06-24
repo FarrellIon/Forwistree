@@ -123,10 +123,10 @@
     mainImage.value = bukuDetail.gambar_buku[0].image;
 
     function changeValue(tabName){
-        this.openTab['sinopsis'].value = false;
-        this.openTab['detail_buku'].value = false;
-        this.openTab['tentang_penulis'].value = false;
-        this.openTab[tabName].value = true;
+        openTab['sinopsis'].value = false;
+        openTab['detail_buku'].value = false;
+        openTab['tentang_penulis'].value = false;
+        openTab[tabName].value = true;
     }
 
     function changeImage(image, event){

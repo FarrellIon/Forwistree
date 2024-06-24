@@ -1,5 +1,5 @@
 <template>
-    <div v-if="bukuEditorsPick" class="px-32 py-16" style="background: #FFFBF5">
+    <div class="px-32 py-16" style="background: #FFFBF5">
         <div class="grid" style="grid-template-columns: 6fr 4fr; column-gap: 4rem; align-items: center;">
             <div class="left-side">
                 <h1 class="header-font" data-aos="fade-up" data-aos-duration="800" data-aos-easing="ease-out-cubic">Langkah-Langkah <span class="text-primary">Penerbitan</span></h1>
@@ -36,23 +36,6 @@
         </div>
     </div>
 </template>
-
-<script setup>
-    const config = useRuntimeConfig();
-    const userValue = useCookie('userValue');
-    let bukuEditorsPick;
-
-    const fetchBukuEditorsPick = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/editors-pick`, {
-            headers: {
-                userValue: userValue,
-            }
-        });
-
-        return fetchResult.data._rawValue.buku;
-    }
-    bukuEditorsPick = await fetchBukuEditorsPick();
-</script>
 
 <style lang="scss" scoped>
     @import '../assets/scss/global/global';

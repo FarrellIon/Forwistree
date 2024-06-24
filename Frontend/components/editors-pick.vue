@@ -1,4 +1,6 @@
 <template>
+    {{ bukuEditorsPick }}
+    {{ bukuEditorsPick.value }}
     <div v-if="bukuEditorsPick" class="px-32 py-16" style="background: #FFFBF5">
         <div class="grid" style="grid-template-columns: 4fr 6fr;">
             <div class="relative">
@@ -31,7 +33,7 @@
 <script setup>
     const config = useRuntimeConfig();
     const userValue = useCookie('userValue');
-    let bukuEditorsPick;
+    let bukuEditorsPick = ref();
 
     const fetchBukuEditorsPick = async () => {
         let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/editors-pick`, {
@@ -40,9 +42,14 @@
             }
         });
 
-        return fetchResult.data._rawValue.buku;
+        if(fetchResult.data._rawValue){
+            return fetchResult.data._rawValue.buku;
+        }else{
+            setTimeout(fetchBukuEditorsPick, 2000)
+            return null;
+        }
     }
-    bukuEditorsPick = await fetchBukuEditorsPick();
+    bukuEditorsPick.value = await fetchBukuEditorsPick();
 </script>
 
 <style lang="scss" scoped>

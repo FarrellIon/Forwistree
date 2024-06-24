@@ -3,10 +3,11 @@
         <h1 class="header-font" data-aos="fade-up" data-aos-offset="-30" data-aos-duration="800" data-aos-easing="ease-out-cubic"><span class="text-primary">Testimonials</span></h1>
         <p class="main-paragraph paragraph-font" data-aos="fade-up" data-aos-offset="-50" data-aos-duration="1100" data-aos-easing="ease-out-cubic">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie.</p>
 
-        <div v-if="!bukuLimitedSale">
+        <!-- <div v-if="!bukuLimitedSale">
             Loading...
-        </div>
-        <div v-else>
+        </div> -->
+        <!-- <div v-else> -->
+        <div>
             <div class="relative flex justify-center items-center" style="column-gap: 2rem">
                 <div id="swiper-prev-btn3" style="transform: rotate(180deg)">
                     <img src="assets/images/chevron.png" alt="">
@@ -99,23 +100,6 @@
         </div>
     </div>
 </template>
-
-<script setup>
-    const config = useRuntimeConfig();
-    const userValue = useCookie('userValue');
-    let bukuLimitedSale = [];
-
-    const fetchBukuLimitedSale = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/limited-sale`, {
-            headers: {
-                userValue: userValue,
-            }
-        });
-
-        return fetchResult.data._rawValue.buku;
-    }
-    bukuLimitedSale = await fetchBukuLimitedSale();
-</script>
 
 <style lang="scss" scoped>
     @import '../assets/scss/global/global';
