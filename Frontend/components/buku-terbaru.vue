@@ -54,7 +54,8 @@
 <script setup>
     const config = useRuntimeConfig();
     const userValue = useCookie('userValue');
-    let bukuTerbaru;
+
+    let bukuTerbaru = ref();
 
     const fetchBukuTerbaru = async () => {
         let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku`, {
@@ -63,9 +64,17 @@
             }
         });
 
-        return fetchResult.data._rawValue.buku;
+        if(fetchResult.data._rawValue){
+            bukuTerbaru.value = fetchResult.data._rawValue.buku;
+        }else{
+            setTimeout(fetchBukuTerbaru, 2000)
+            bukuTerbaru.value = null;
+        }
     }
-    bukuTerbaru = await fetchBukuTerbaru();
+
+    onMounted(() => {
+        fetchBukuTerbaru();
+    });
 </script>
 
 <style lang="scss" scoped>

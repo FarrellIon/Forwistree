@@ -1,11 +1,12 @@
 <template>
-    <div v-if="categories" class="categories px-32 mb-8">
+    <div class="categories px-32 mb-8">
         <h2 class="header-font" style="font-size: 24px; font-weight: bold; margin-bottom: 1rem">Kategori</h2>
         <div class="relative flex justify-center items-center" style="column-gap: 2rem">
             <div id="swiper-prev-btn2" style="transform: rotate(180deg)">
                 <img src="assets/images/chevron.png" alt="">
             </div>
             <Swiper
+                v-if="categories"
                 id="swiper-limited-sale"
                 style="margin: 0 !important; width: 100%"
                 :modules="[SwiperAutoplay, SwiperNavigation]"
@@ -43,6 +44,9 @@
                     </NuxtLink>
                 </SwiperSlide>
             </Swiper>
+            <div v-else class="px-32">
+                Loading...
+            </div>
             <div id="swiper-next-btn2">
                 <img src="assets/images/chevron.png" alt="">
             </div>
@@ -53,7 +57,8 @@
 <script setup>
     const config = useRuntimeConfig();
     const userValue = useCookie('userValue');
-    let categories;
+    
+    let categories = ref();
 
     const fetchCategories = async () => {
         let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori`, {
@@ -62,9 +67,17 @@
             }
         });
 
-        return fetchResult.data._rawValue.kategori;
+        if(fetchResult.data._rawValue){
+            categories.value = fetchResult.data._rawValue.kategori;
+        }else{
+            setTimeout(fetchCategories, 2000)
+            categories.value = null;
+        }
     }
-    categories = await fetchCategories();
+
+    onMounted(() => {
+        fetchCategories();
+    });
 </script>
 
 <style lang="scss" scoped>

@@ -45,7 +45,6 @@
 <script setup>
     const config = useRuntimeConfig();
     const userValue = useCookie('userValue');
-    let eventOngoing;
     let timeRemaining = {
         total: ref(0),
         days: ref(0),
@@ -54,6 +53,8 @@
         seconds: ref(0)
     }
 
+    let eventOngoing = ref();
+
     const fetchEventOngoing = async () => {
         let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/admin/event/ongoing`, {
             headers: {
@@ -61,9 +62,17 @@
             }
         });
 
-        return fetchResult.data._rawValue.event;
+        if(fetchResult.data._rawValue){
+            eventOngoing.value = fetchResult.data._rawValue.event;
+        }else{
+            setTimeout(fetchEventOngoing, 2000)
+            eventOngoing.value = null;
+        }
     }
-    eventOngoing = await fetchEventOngoing();
+
+    onMounted(() => {
+        fetchEventOngoing();
+    });
 
     const updateTime = () => {
         timeRemaining['total'].value = Math.round((new Date(eventOngoing.tanggal_penutupan) - new Date()) / 1000);

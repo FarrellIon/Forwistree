@@ -69,7 +69,6 @@
 
     const config = useRuntimeConfig();
     const userValue = useCookie('userValue');
-    let bukuBaruTerbit = [];
     
     const login = async () => {
         try {
@@ -93,6 +92,8 @@
         }
     }
 
+    let bukuBaruTerbit = ref();
+
     const fetchBukuBaruTerbit = async () => {
         let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/recently-published`, {
             headers: {
@@ -101,12 +102,16 @@
         });
 
         if(fetchResult.data._rawValue){
-            return fetchResult.data._rawValue.buku;
+            bukuBaruTerbit.value = fetchResult.data._rawValue.buku;
         }else{
-            return null;
+            setTimeout(fetchBukuBaruTerbit, 2000)
+            bukuBaruTerbit.value = null;
         }
     }
-    bukuBaruTerbit = await fetchBukuBaruTerbit();
+
+    onMounted(() => {
+        fetchBukuBaruTerbit();
+    });
 
     // const handleSubmit = async () => {
     //     formData = new FormData();

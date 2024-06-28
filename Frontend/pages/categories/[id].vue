@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="kategoriDetail">
         <Navbar :active="'categories'"></Navbar>
         <div class="px-32 mb-16">
             <div class="category" v-if="maxDiskon > 0">
@@ -98,6 +98,9 @@
         <KirimkanKarya></KirimkanKarya>
         <Footer></Footer>
     </div>
+    <div class="loading" v-else>
+        <p class="text-center" style="font-size: 44px; margin: 8rem 0">Loading...</p>
+    </div>
 </template>
 
 <script setup>
@@ -106,9 +109,6 @@
     const userValue = useCookie('userValue');
     const page = ref(1);
     const numberPerPage = ref(5);
-    let kategoriDetail;
-    let fetchedKategoriDetail;
-    let maxDiskon;
     const dropdownItems = [
         [
             {
@@ -129,7 +129,11 @@
             }
         ]
     ]
-    
+
+    let kategoriDetail = ref();
+    let fetchedKategoriDetail = ref();
+    let maxDiskon = ref();
+
     const fetchKategoriDetail = async () => {
         let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori/`+id, {
             headers: {
@@ -137,11 +141,19 @@
             }
         });
 
-        return fetchResult.data._rawValue;
+        if(fetchResult.data._rawValue){
+            fetchedKategoriDetail.value = fetchResult.data._rawValue;
+            kategoriDetail.value = fetchedKategoriDetail.value.kategori;
+            maxDiskon.value = fetchedKategoriDetail.value.maxDiskon;
+        }else{
+            setTimeout(fetchKategoriDetail, 2000)
+            fetchedKategoriDetail.value = null;
+        }
     }
-    fetchedKategoriDetail = await fetchKategoriDetail();
-    kategoriDetail = fetchedKategoriDetail.kategori;
-    maxDiskon = fetchedKategoriDetail.maxDiskon;
+
+    onMounted(() => {
+        fetchKategoriDetail();
+    });
 </script>
 
 <style lang="scss" scoped>

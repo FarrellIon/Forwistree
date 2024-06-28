@@ -1,99 +1,104 @@
 <template>
     <Navbar></Navbar>
-    <div class="px-32 mb-4">
-        <p><span class="opacity-50">Home > {{ bukuDetail.kategori.nama }} > </span>{{ bukuDetail.nama }}</p>
+    <div v-if="bukuDetail">
+        <div class="px-32 mb-4">
+            <p><span class="opacity-50">Home > {{ bukuDetail.kategori.nama }} > </span>{{ bukuDetail.nama }}</p>
+        </div>
+        <div class="px-32 grid mb-32" style="grid-template-columns: 1fr 1fr;">
+            <div class="main-container left-side">
+                <div class="main-image rounded">
+                    <img :src="mainImage" alt="">
+                    <div class="favorite-button rounded-full">
+                        <img src="assets/images/heart.png" alt="">
+                    </div>
+                </div>
+                <div class="other-images">
+                    <div v-for="(gambar, index) in bukuDetail.gambar_buku" :class="(index === 0 ? 'active other-image' : 'other-image')" :key="gambar.id" @click="changeImage(gambar.image, $event)">
+                        <img :src="gambar.image" alt="">
+                    </div>
+                </div>
+            </div>
+            <div class="main-container right-side">
+                <span class="paragraph-font book-title">{{ bukuDetail.nama }}</span>
+                <div v-if="bukuDetail.diskon > 0" class="book-discount inline-block">-{{ bukuDetail.diskon }}%</div>
+                <p class="book-writer italic mb-2">{{ bukuDetail.pivot_penulis_buku[0].penulis.nama_pena }}</p>
+                <div class="flex items-end mb-4">
+                    <p class="book-final-price">{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(bukuDetail.harga * ((100 - bukuDetail.diskon)/100)) }}</p>
+                    <p v-if="bukuDetail.diskon > 0" class="book-initial-price"><s>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(bukuDetail.harga) }}</s></p>
+                </div>
+                <p class="mb-8">{{ (bukuDetail.deskripsi.length > 500) ? bukuDetail.deskripsi.substring(0, 500)+'...' : bukuDetail.deskripsi }}</p>
+                <div class="flex justify-end w-100">
+                    <a :href="bukuDetail.link_shopee">
+                        <div class="shopee-button flex justify-center items-center px-4 py-2 rounded gap-3">
+                            <img src="assets/images/logo/shopee.png" alt="">
+                            <p>Cek di Shopee ></p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-16 mr-4">
+                <div class="tabs">
+                    <div :class="(openTab['sinopsis'].value ? 'tab active' : 'tab')" @click="changeValue('sinopsis')">
+                        <p>Synopsis</p>
+                    </div>
+                    <div :class="(openTab['detail_buku'].value ? 'tab active' : 'tab')" @click="changeValue('detail_buku')">
+                        <p>Detail Buku</p>
+                    </div>
+                    <div :class="(openTab['tentang_penulis'].value ? 'tab active' : 'tab')" @click="changeValue('tentang_penulis')">
+                        <p>Tentang Penulis</p>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <div id="sinopsis" class="content" v-if="openTab['sinopsis'].value">
+                        <p>{{ bukuDetail.deskripsi }}</p>
+                    </div>
+                    <div id="detail-buku" class="content" v-else-if="openTab['detail_buku'].value">
+                        <div class="grid-detail-buku grid items-center" style="grid-template-columns: 1fr 1fr; gap: 0.75rem">
+                            <div class="flex detail-row items-center" style="gap: 0.75rem">
+                                <img src="assets/images/category.png" alt="">
+                                <p>Kategori</p>
+                            </div>
+                            <p>{{ bukuDetail.kategori.nama }}</p>
+                            <div class="flex detail-row items-center" style="gap: 0.75rem">
+                                <img src="assets/images/book.png" alt="">
+                                <p>Jumlah Halaman</p>
+                            </div>
+                            <p>{{ bukuDetail.jumlah_halaman }} Halaman</p>
+                            <div class="flex detail-row items-center" style="gap: 0.75rem">
+                                <img src="assets/images/tag.png" alt="">
+                                <p>Harga Setelah Diskon</p>
+                            </div>
+                            <p>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(bukuDetail.harga * ((100 - bukuDetail.diskon)/100)) }}</p>
+                        </div>
+                    </div>
+                    <div id="tentang-penulis" class="content" v-else-if="openTab['tentang_penulis'].value">
+                        <div class="flex">
+                            <img src="assets/images/blank.png" class="rounded-full" alt="">
+                            <div>
+                                <h3 class="nama-penulis">{{ bukuDetail.pivot_penulis_buku[0].penulis.nama_pena }}</h3>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas posuere vitae metus eget consequat. Proin laoreet eget arcu ut dapibus. Suspendisse volutpat elementum felis eu tincidunt.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-16 ml-4 reviews">
+                <div class="tab active mb-4">
+                    <p>Reviews</p>
+                </div>
+                <div>
+                    <a :href="bukuDetail.link_shopee">
+                        <div class="shopee-button w-100 flex justify-center items-center px-4 py-2 rounded gap-3">
+                            <img src="assets/images/logo/shopee.png" alt="">
+                            <p>Cek di Shopee ></p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="px-32 grid mb-32" style="grid-template-columns: 1fr 1fr;">
-        <div class="main-container left-side">
-            <div class="main-image rounded">
-                <img :src="mainImage" alt="">
-                <div class="favorite-button rounded-full">
-                    <img src="assets/images/heart.png" alt="">
-                </div>
-            </div>
-            <div class="other-images">
-                <div v-for="(gambar, index) in bukuDetail.gambar_buku" :class="(index === 0 ? 'active other-image' : 'other-image')" :key="gambar.id" @click="changeImage(gambar.image, $event)">
-                    <img :src="gambar.image" alt="">
-                </div>
-            </div>
-        </div>
-        <div class="main-container right-side">
-            <span class="paragraph-font book-title">{{ bukuDetail.nama }}</span>
-            <div v-if="bukuDetail.diskon > 0" class="book-discount inline-block">-{{ bukuDetail.diskon }}%</div>
-            <p class="book-writer italic mb-2">{{ bukuDetail.pivot_penulis_buku[0].penulis.nama_pena }}</p>
-            <div class="flex items-end mb-4">
-                <p class="book-final-price">{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(bukuDetail.harga * ((100 - bukuDetail.diskon)/100)) }}</p>
-                <p v-if="bukuDetail.diskon > 0" class="book-initial-price"><s>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(bukuDetail.harga) }}</s></p>
-            </div>
-            <p class="mb-8">{{ (bukuDetail.deskripsi.length > 500) ? bukuDetail.deskripsi.substring(0, 500)+'...' : bukuDetail.deskripsi }}</p>
-            <div class="flex justify-end w-100">
-                <a :href="bukuDetail.link_shopee">
-                    <div class="shopee-button flex justify-center items-center px-4 py-2 rounded gap-3">
-                        <img src="assets/images/logo/shopee.png" alt="">
-                        <p>Cek di Shopee ></p>
-                    </div>
-                </a>
-            </div>
-        </div>
-        <div class="mt-16 mr-4">
-            <div class="tabs">
-                <div :class="(openTab['sinopsis'].value ? 'tab active' : 'tab')" @click="changeValue('sinopsis')">
-                    <p>Synopsis</p>
-                </div>
-                <div :class="(openTab['detail_buku'].value ? 'tab active' : 'tab')" @click="changeValue('detail_buku')">
-                    <p>Detail Buku</p>
-                </div>
-                <div :class="(openTab['tentang_penulis'].value ? 'tab active' : 'tab')" @click="changeValue('tentang_penulis')">
-                    <p>Tentang Penulis</p>
-                </div>
-            </div>
-            <div class="tab-content">
-                <div id="sinopsis" class="content" v-if="openTab['sinopsis'].value">
-                    <p>{{ bukuDetail.deskripsi }}</p>
-                </div>
-                <div id="detail-buku" class="content" v-else-if="openTab['detail_buku'].value">
-                    <div class="grid-detail-buku grid items-center" style="grid-template-columns: 1fr 1fr; gap: 0.75rem">
-                        <div class="flex detail-row items-center" style="gap: 0.75rem">
-                            <img src="assets/images/category.png" alt="">
-                            <p>Kategori</p>
-                        </div>
-                        <p>{{ bukuDetail.kategori.nama }}</p>
-                        <div class="flex detail-row items-center" style="gap: 0.75rem">
-                            <img src="assets/images/book.png" alt="">
-                            <p>Jumlah Halaman</p>
-                        </div>
-                        <p>{{ bukuDetail.jumlah_halaman }} Halaman</p>
-                        <div class="flex detail-row items-center" style="gap: 0.75rem">
-                            <img src="assets/images/tag.png" alt="">
-                            <p>Harga Setelah Diskon</p>
-                        </div>
-                        <p>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(bukuDetail.harga * ((100 - bukuDetail.diskon)/100)) }}</p>
-                    </div>
-                </div>
-                <div id="tentang-penulis" class="content" v-else-if="openTab['tentang_penulis'].value">
-                    <div class="flex">
-                        <img src="assets/images/blank.png" class="rounded-full" alt="">
-                        <div>
-                            <h3 class="nama-penulis">{{ bukuDetail.pivot_penulis_buku[0].penulis.nama_pena }}</h3>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas posuere vitae metus eget consequat. Proin laoreet eget arcu ut dapibus. Suspendisse volutpat elementum felis eu tincidunt.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="mt-16 ml-4 reviews">
-            <div class="tab active mb-4">
-                <p>Reviews</p>
-            </div>
-            <div>
-                <a :href="bukuDetail.link_shopee">
-                    <div class="shopee-button w-100 flex justify-center items-center px-4 py-2 rounded gap-3">
-                        <img src="assets/images/logo/shopee.png" alt="">
-                        <p>Cek di Shopee ></p>
-                    </div>
-                </a>
-            </div>
-        </div>
+    <div class="loading" v-else>
+        <p class="text-center" style="font-size: 44px; margin: 8rem 0">Loading...</p>
     </div>
     <Footer></Footer>
 </template>
@@ -102,13 +107,13 @@
     const { id } = useRoute().params;
     const config = useRuntimeConfig();
     const userValue = useCookie('userValue');
-    let bukuDetail;
     let openTab = {
         sinopsis: ref(true),
         detail_buku: ref(false),
         tentang_penulis: ref(false)
     }
     let mainImage = ref();
+    let bukuDetail = ref();
 
     const fetchBukuDetail = async () => {
         let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/`+id, {
@@ -117,10 +122,19 @@
             }
         });
 
-        return fetchResult.data._rawValue.buku;
+        if(fetchResult.data._rawValue){
+            bukuDetail.value = fetchResult.data._rawValue.buku;
+            mainImage.value = bukuDetail.value.gambar_buku[0].image;
+        }else{
+            setTimeout(fetchBukuDetail, 2000)
+            bukuDetail.value = null;
+            mainImage.value = null;
+        }
     }
-    bukuDetail = await fetchBukuDetail();
-    mainImage.value = bukuDetail.gambar_buku[0].image;
+
+    onMounted(() => {
+        fetchBukuDetail();
+    });
 
     function changeValue(tabName){
         openTab['sinopsis'].value = false;

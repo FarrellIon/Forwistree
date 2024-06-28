@@ -1,5 +1,5 @@
 <template>
-    <div class="kirimkan-karya px-32 py-16">
+    <div v-if="bukuTerbaru" class="kirimkan-karya px-32 py-16">
         <div class="left-side">
             <p class="title header-font mb-8">Kirimkan Karya Anda!</p>
             <p class="description paragraph-font mb-16">Kami mengundang Anda untuk menjadi bagian dari perjalanan kreatif kami. Kami percaya bahwa setiap cerita memiliki nilai dan keunikan tersendiri. Jadi, jika Anda memiliki impian untuk melihat karya Anda terbit, kami dengan senang hati menyambutnya!</p>
@@ -21,7 +21,8 @@
 <script setup>
     const config = useRuntimeConfig();
     const userValue = useCookie('userValue');
-    let bukuTerbaru;
+    
+    let bukuTerbaru = ref();
 
     const fetchBukuTerbaru = async () => {
         let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku`, {
@@ -30,9 +31,17 @@
             }
         });
 
-        return fetchResult.data._rawValue.buku;
+        if(fetchResult.data._rawValue){
+            bukuTerbaru.value = fetchResult.data._rawValue.buku;
+        }else{
+            setTimeout(fetchBukuTerbaru, 2000)
+            bukuTerbaru.value = null;
+        }
     }
-    bukuTerbaru = await fetchBukuTerbaru();
+
+    onMounted(() => {
+        fetchBukuTerbaru();
+    });
 </script>
 
 <style lang="scss" scoped>

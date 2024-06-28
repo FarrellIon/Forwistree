@@ -1,6 +1,4 @@
 <template>
-    {{ bukuEditorsPick }}
-    {{ bukuEditorsPick.value }}
     <div v-if="bukuEditorsPick" class="px-32 py-16" style="background: #FFFBF5">
         <div class="grid" style="grid-template-columns: 4fr 6fr;">
             <div class="relative">
@@ -43,13 +41,16 @@
         });
 
         if(fetchResult.data._rawValue){
-            return fetchResult.data._rawValue.buku;
+            bukuEditorsPick.value = fetchResult.data._rawValue.buku;
         }else{
             setTimeout(fetchBukuEditorsPick, 2000)
-            return null;
+            bukuEditorsPick.value = null;
         }
     }
-    bukuEditorsPick.value = await fetchBukuEditorsPick();
+
+    onMounted(() => {
+        fetchBukuEditorsPick();
+    });
 </script>
 
 <style lang="scss" scoped>
