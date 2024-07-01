@@ -79,7 +79,7 @@ class BukuController{
     getEditorsPick = async(req: Request, res: Response) => {
         try {
             const buku = await Buku.findOne({ status_editors_pick: true })
-            .populate('kategori', 'nama')
+            .populate('kategori')
             .populate('added_by', 'username')
             .populate('gambar_buku', 'image')
             .populate({

@@ -1,15 +1,20 @@
 <template>
-    <div v-if="bukuEditorsPick" class="px-32 py-16" style="background: #FFFBF5">
-        <div class="grid" style="grid-template-columns: 4fr 6fr;">
-            <div class="relative">
+    <div v-if="bukuEditorsPick" class="px-8 lg:px-32 py-16" style="background: #FFFBF5">
+        <h1 class="block lg:hidden header-font" style="text-align: center; margin-bottom: 2rem;" data-aos="fade-up" data-aos-duration="800" data-aos-easing="ease-out-cubic">Editor's <span class="text-primary">Pick</span></h1>
+        <div id="grid-template" class="lg:grid" style="grid-template-columns: 4fr 6fr">
+            <div class="book-images relative">
                 <img :src="bukuEditorsPick.gambar_buku[0].image" class="z-10 relative" alt="">
-                <img :src="bukuEditorsPick.gambar_buku[1].image" class="absolute right-16 -bottom-4 z-0" style="width: 40%; height: 65%" alt="">
+                <img id="img-second" :src="bukuEditorsPick.gambar_buku[1].image" class="absolute right-16 -bottom-4 z-0" alt="">
             </div>
             <div class="right-side">
-                <h1 class="header-font" data-aos="fade-up" data-aos-duration="800" data-aos-easing="ease-out-cubic">Editor's <span class="text-primary">Pick</span></h1>
+                <h1 class="hidden lg:block header-font" data-aos="fade-up" data-aos-duration="800" data-aos-easing="ease-out-cubic">Editor's <span class="text-primary">Pick</span></h1>
                 <p class="book-title font-bold paragraph-font" data-aos="fade-up" data-aos-duration="1100" data-aos-easing="ease-out-cubic">{{ bukuEditorsPick.nama }}</p>
                 <p class="book-writer font-normal italic paragraph-font" data-aos="fade-up" data-aos-duration="1100" data-aos-easing="ease-out-cubic">{{ bukuEditorsPick.pivot_penulis_buku[0].penulis.nama_pena }}</p>
-                <div class="book-category">{{ bukuEditorsPick.kategori.nama }}</div>
+                <div class="book-category">
+                    <NuxtLink :to="`/categories/${bukuEditorsPick.kategori.id}`">
+                        {{ bukuEditorsPick.kategori.nama }}
+                    </NuxtLink>
+                </div>
                 <p class="main-paragraph paragraph-font" data-aos="fade-up" data-aos-duration="1100" data-aos-easing="ease-out-cubic">{{ (bukuEditorsPick.deskripsi.length > 300) ? bukuEditorsPick.deskripsi.substring(0, 300)+'...' : bukuEditorsPick.deskripsi }}</p>
                 <div class="bottom-part flex justify-between">
                     <div class="book-price flex items-end" style="column-gap: 1rem">
@@ -124,5 +129,76 @@
                 color: $primary;
             }
         }
+    }
+
+    #img-second{
+        width: 40%;
+        height: 65%;
+    }
+
+    @media (max-width: 1200px) {
+        #grid-template{
+            grid-template-columns: 5fr 5fr !important;
+
+            #img-second{
+                bottom: 1rem;
+                width: 60% !important;
+                right: 2rem;
+            }
+        }
+    }
+
+    @media (max-width: 1024px) {
+        #grid-template{
+            .book-images{
+                img{
+                    width: 100%;
+                    max-width: 240px;
+                    height: auto;
+                }
+            }
+        }
+
+        .book-images{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 1rem;
+            
+            #img-second{
+                position: static;
+            }
+        }
+    
+        .book-hover{
+            p{
+                width: 100%;
+            }
+            img{
+                width: 96px;
+            }
+        }
+
+        .book-title, .book-writer{
+            text-align: center;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .book-hover{
+            margin-top: 1rem;
+        }
+
+        .book-hover p{
+            width: auto;
+        }
+        
+        .bottom-part{
+            display: block;
+        }
+    }
+    
+    @media (max-width: 640px) {
+        
     }
 </style>

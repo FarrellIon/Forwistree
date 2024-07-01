@@ -1,14 +1,14 @@
 <template>
     <div class="footer items-center w-full">
-        <div class="main-footer px-32 py-16 pb-32">
-            <div class="basis-2/5">
+        <div class="main-footer px-8 lg:px-32 py-16 pb-32">
+            <div>
                 <div class="flex items-center mb-6">
                     <img class="size-20 mr-4" src="assets/images/logo_white.png" alt="">
                     <span class="header-font text-3xl text-white font-bold">Forwistree</span>
                 </div>
                 <p id="footer-description" class="w-4/5">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla leo erat, fermentum sit amet odio faucibus, semper malesuada dui. Nunc id ipsum maximus, condimentum velit vel, ornare nunc.</p>
             </div>
-            <div class="basis-1/5">
+            <div>
                 <h2 class="footer-header header-font">Other Pages</h2>
                 <div class="footer-links">
                     <p class="footer-link">About Us</p>
@@ -16,7 +16,7 @@
                     <p class="footer-link">FAQ</p>
                 </div>
             </div>
-            <div class="basis-1/5">
+            <div>
                 <h2 class="footer-header header-font">Contact</h2>
                 <div class="footer-links">
                     <p class="footer-link">Customer Service</p>
@@ -24,7 +24,7 @@
                     <p class="footer-link">How to Publish?</p>
                 </div>
             </div>
-            <div class="basis-1/5">
+            <div>
                 <h2 class="footer-header header-font">Legal</h2>
                 <div class="footer-links">
                     <p class="footer-link">Privacy Policy</p>
@@ -32,7 +32,7 @@
                 </div>
             </div>
         </div>
-        <div class="sub-footer px-32 py-8">
+        <div class="sub-footer px-8 lg:px-32 py-8">
             <span id="copyright" class="font-bold">Copyright © 2024 Forwistree. All rights reserved.</span>
             <div class="flex gap-4">
                 <div class="social-media-circle">
@@ -62,7 +62,9 @@
     .footer{
         .main-footer{
             background: $primary;
-            display: flex;
+            display: grid;
+            grid-template-columns: 6fr 2fr 2fr 2fr;
+            gap: 1rem;
             
             .navbar-right-side{
                 gap: 1rem;
@@ -152,6 +154,31 @@
 
             #copyright{
                 color: $white;
+            }
+        }
+    }
+
+    @media (max-width: 1024px) {
+        .footer{
+            .main-footer{
+                grid-template-columns: 2fr 2fr;
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .footer{
+            .main-footer{
+                grid-template-columns: 2fr;
+                row-gap: 3rem;
+            }
+        }
+
+        .sub-footer{
+            display: block !important;
+
+            div{
+                margin-top: 0.5rem;
             }
         }
     }

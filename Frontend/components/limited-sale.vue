@@ -1,5 +1,5 @@
 <template>
-    <div class="px-32 py-16">
+    <div class="px-8 lg:px-32 py-16">
         <h1 class="header-font" data-aos="fade-up" data-aos-duration="800" data-aos-easing="ease-out-cubic">Limited <span class="text-primary">Sale</span></h1>
         <p class="main-paragraph paragraph-font" data-aos="fade-up" data-aos-duration="1100" data-aos-easing="ease-out-cubic">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie. Praesent consectetur ligula eget ex dapibus, sit amet malesuada leo lobortis.</p>
 

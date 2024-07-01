@@ -1,6 +1,6 @@
 <template>
-    <div class="px-32 py-16" style="background: #FFFBF5">
-        <div class="grid" style="grid-template-columns: 6fr 4fr; column-gap: 4rem; align-items: center;">
+    <div class="px-8 lg:px-32 py-16" style="background: #FFFBF5">
+        <div id="grid-template" class="grid" style="grid-template-columns: 6fr 4fr; column-gap: 4rem; align-items: center;">
             <div class="left-side">
                 <h1 class="header-font" data-aos="fade-up" data-aos-duration="800" data-aos-easing="ease-out-cubic">Langkah-Langkah <span class="text-primary">Penerbitan</span></h1>
                 <p class="main-paragraph paragraph-font" data-aos="fade-up" data-aos-duration="1100" data-aos-easing="ease-out-cubic">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tempus eros a sapien sollicitudin molestie.</p>
@@ -30,7 +30,7 @@
                     <img src="assets/images/right-arrow-primary.png" alt="">
                 </div>
             </div>
-            <div class="relative">
+            <div class="relative hidden lg:block">
                 <img src="assets/images/langkah-penerbitan.png" alt="">
             </div>
         </div>
@@ -80,6 +80,12 @@
         p{
             font-size: 20px;
             color: $primary;
+        }
+    }
+
+    @media (max-width: 1024px) {
+        #grid-template{
+            grid-template-columns: 1fr !important;
         }
     }
 </style>

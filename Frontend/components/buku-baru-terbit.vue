@@ -1,5 +1,5 @@
 <template>
-    <div class="px-32 py-16">
+    <div class="px-8 lg:px-32 py-16">
         <!-- <form id="formAddBuku" @submit.prevent="handleSubmit">
             <label class="block text-gray-700 text-sm font-bold mb-2" for="nama">
                 Nama Buku
