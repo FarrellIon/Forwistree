@@ -34,9 +34,11 @@
                         <p class="measurement paragraph-font">Detik</p>
                     </div>
                 </div>
-                <div class="see-details">
-                    <p>See Details ></p>
-                </div>
+                <NuxtLink :to="`/events/${eventOngoing.id}`">
+                    <div class="see-details">
+                        <p>See Details ></p>
+                    </div>
+                </NuxtLink>
             </div>
         </div>
     </div>
@@ -72,20 +74,20 @@
 
     onMounted(() => {
         fetchEventOngoing();
+        setInterval(updateTime, 1000);
     });
 
     const updateTime = () => {
-        timeRemaining['total'].value = Math.round((new Date(eventOngoing.tanggal_penutupan) - new Date()) / 1000);
-        timeRemaining['days'].value = Math.floor(timeRemaining['total'].value / 86400);
-        timeRemaining['hours'].value = Math.floor((timeRemaining['total'].value % 86400) / 3600);
-        timeRemaining['minutes'].value = Math.floor((timeRemaining['total'].value % 3600) / 60);
-        timeRemaining['seconds'].value = Math.floor(timeRemaining['total'].value % 60);
+        if(eventOngoing.value){
+            timeRemaining['total'].value = Math.round((new Date(eventOngoing.value.tanggal_penutupan) - new Date()) / 1000);
+            timeRemaining['days'].value = Math.floor(timeRemaining['total'].value / 86400);
+            timeRemaining['hours'].value = Math.floor((timeRemaining['total'].value % 86400) / 3600);
+            timeRemaining['minutes'].value = Math.floor((timeRemaining['total'].value % 3600) / 60);
+            timeRemaining['seconds'].value = Math.floor(timeRemaining['total'].value % 60);
+        }
     }
 
     updateTime();
-    onMounted(() => {
-        setInterval(updateTime, 1000);
-    });
 </script>
 
 <style lang="scss" scoped>

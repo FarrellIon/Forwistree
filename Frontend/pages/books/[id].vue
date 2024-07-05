@@ -1,10 +1,10 @@
 <template>
     <Navbar></Navbar>
-    <div v-if="bukuDetail">
-        <div class="px-32 mb-4">
+    <div id="buku-detail" v-if="bukuDetail">
+        <div class="px-8 lg:px-32 mb-4">
             <p><span class="opacity-50">Home > {{ bukuDetail.kategori.nama }} > </span>{{ bukuDetail.nama }}</p>
         </div>
-        <div class="px-32 grid mb-32" style="grid-template-columns: 1fr 1fr;">
+        <div class="book-grid px-8 lg:px-32 grid mb-32" style="grid-template-columns: 1fr 1fr;">
             <div class="main-container left-side">
                 <div class="main-image rounded">
                     <img :src="mainImage" alt="">
@@ -345,6 +345,41 @@
                 border-bottom: 1px solid $primary;
                 opacity: 1;
             }
+        }
+    }
+
+    @media (max-width: 1244px) {
+        #buku-detail{
+            .book-grid{
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        .main-container.left-side{
+            display: block;
+            margin: 0 auto;
+
+            .main-image{
+                margin-bottom: 1rem;
+            }
+
+            .other-images{
+                display: flex;
+                gap: 1rem;
+                height: auto;
+            }
+        }
+    }
+
+    @media (max-width: 500px) {
+        .main-container.left-side{
+            .main-image{
+                width: auto;
+            }
+        }
+
+        .tabs .tab{
+            font-size: 16px;
         }
     }
 </style>

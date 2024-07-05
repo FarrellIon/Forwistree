@@ -1,8 +1,8 @@
 <template>
-    <div class="categories px-32 mb-8">
+    <div class="categories px-8 lg:px-32 mb-8">
         <h2 class="header-font" style="font-size: 24px; font-weight: bold; margin-bottom: 1rem">Kategori</h2>
         <div class="relative flex justify-center items-center" style="column-gap: 2rem">
-            <div id="swiper-prev-btn2" style="transform: rotate(180deg)">
+            <div id="swiper-prev-btn" style="transform: rotate(180deg); cursor: pointer;">
                 <img src="assets/images/chevron.png" alt="">
             </div>
             <Swiper
@@ -47,7 +47,7 @@
             <div v-else class="px-32">
                 Loading...
             </div>
-            <div id="swiper-next-btn2">
+            <div id="swiper-next-btn" style="cursor: pointer;">
                 <img src="assets/images/chevron.png" alt="">
             </div>
         </div>

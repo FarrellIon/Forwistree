@@ -1,8 +1,8 @@
 <template>
-    <div v-if="bukuTerbaru" class="books px-32 mb-8">
+    <div v-if="bukuTerbaru" class="books px-8 lg:px-32 mb-8">
         <h2 class="header-font" style="font-size: 24px; font-weight: bold; margin-bottom: 1rem">Buku Terbaru</h2>
         <div class="relative flex justify-center items-center" style="column-gap: 2rem">
-            <div id="swiper-prev-btn2" style="transform: rotate(180deg)">
+            <div id="swiper-prev-btn2" style="transform: rotate(180deg); cursor: pointer;">
                 <img src="assets/images/chevron.png" alt="">
             </div>
             <Swiper
@@ -26,8 +26,8 @@
                     },
                 }"
                 :navigation="{
-                    nextEl: '#swiper-next-btn',
-                    prevEl: '#swiper-prev-btn',
+                    nextEl: '#swiper-next-btn2',
+                    prevEl: '#swiper-prev-btn2',
                 }"
             >
                 <SwiperSlide v-for="buku in bukuTerbaru.slice(0,10)">
@@ -44,7 +44,7 @@
                     </NuxtLink>
                 </SwiperSlide>
             </Swiper>
-            <div id="swiper-next-btn2">
+            <div id="swiper-next-btn2" style="cursor: pointer;">
                 <img src="assets/images/chevron.png" alt="">
             </div>
         </div>

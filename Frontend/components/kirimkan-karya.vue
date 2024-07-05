@@ -1,5 +1,5 @@
 <template>
-    <div v-if="bukuTerbaru" class="kirimkan-karya px-32 py-16">
+    <div v-if="bukuTerbaru" class="kirimkan-karya px-8 lg:px-32 py-16">
         <div class="left-side">
             <p class="title header-font mb-8">Kirimkan Karya Anda!</p>
             <p class="description paragraph-font mb-16">Kami mengundang Anda untuk menjadi bagian dari perjalanan kreatif kami. Kami percaya bahwa setiap cerita memiliki nilai dan keunikan tersendiri. Jadi, jika Anda memiliki impian untuk melihat karya Anda terbit, kami dengan senang hati menyambutnya!</p>
@@ -86,6 +86,18 @@
                     max-height: 240px;
                 }
             }
+        }
+    }
+
+    @media (max-width: 1244px) {
+        .kirimkan-karya{
+            grid-template-columns: 1fr;
+        }
+
+        .kirimkan-karya .right-side .images{
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            justify-content: space-around;
         }
     }
 </style>

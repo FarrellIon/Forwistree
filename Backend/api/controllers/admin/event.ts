@@ -46,7 +46,14 @@ class EventController{
         try {
             const { id } = req.params;
             const decryptedId = decryptString(id);
-            const event = await Events.findById({ _id: decryptedId });
+            const event = await Events.findById({ _id: decryptedId })
+            .populate({
+                path: 'pivot_mitra_event',
+                select: 'mitra',
+                populate: {
+                    path: 'mitra'
+                }
+            })
 
             if (!event){
                 res.status(500).send('Tidak ditemukan event dengan id tersebut');
