@@ -54,6 +54,7 @@ class EventController{
                     path: 'mitra'
                 }
             })
+            .populate('gambar_event', 'image');
 
             if (!event){
                 res.status(500).send('Tidak ditemukan event dengan id tersebut');

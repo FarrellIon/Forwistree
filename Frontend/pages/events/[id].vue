@@ -4,8 +4,40 @@
         <div class="px-8 lg:px-32 mb-4">
             <p><span class="opacity-50">Home > </span>{{ eventDetail.judul }}</p>
         </div>
-        <div class="event-grid px-8 lg:px-32 grid mb-32" style="grid-template-columns: 1fr 1fr;">
-            <div class="main-container left-side">
+        <div class="event-grid flex px-8 lg:px-32 mb-16">
+            <div v-if="eventDetail.gambar_event" class="main-container left-side">
+                <div class="relative flex justify-center items-center" style="column-gap: 2rem">
+                    <div id="swiper-prev-btn" style="transform: rotate(180deg); cursor: pointer;">
+                        <img src="assets/images/chevron.png" alt="">
+                    </div>
+                    <Swiper
+                        id="swiper-event"
+                        style="margin: 0 !important; width: 100%"
+                        :modules="[SwiperAutoplay, SwiperNavigation, SwiperPagination]"
+                        :slides-per-view="1"
+                        :space-between="20"
+                        :autoplay="{
+                            delay: 2000,
+                            disableOnInteraction: true,
+                        }"
+                        :pagination="true"
+                        :loop="true"
+                        :centered-slides="true"
+                        :navigation="{
+                            nextEl: '#swiper-next-btn',
+                            prevEl: '#swiper-prev-btn',
+                        }"
+                    >
+                        <SwiperSlide v-for="gambar in eventDetail.gambar_event">
+                            <div class="event-image">
+                                <img :src="gambar.image" alt="">
+                            </div>
+                        </SwiperSlide>
+                    </Swiper>
+                    <div id="swiper-next-btn" style="cursor: pointer;">
+                        <img src="assets/images/chevron.png" alt="">
+                    </div>
+                </div>
             </div>
             <div class="main-container right-side">
                 <span class="paragraph-font event-title">{{ eventDetail.judul }}</span>
@@ -51,10 +83,64 @@
             </div>
             <div class="tab-content">
                 <div id="timeline" class="content" v-if="openTab['timeline'].value">
+                    <div class="single-timeline">
+                        <div v-if="isBeforeToday(eventDetail.tanggal_selesai_pendaftaran)" class="timeline-circle finished tailed">
+                            <img src="assets/images/check.png" alt="" style="filter: invert(1)">
+                        </div>
+                        <div v-else class="timeline-circle tailed">
+                        </div>
+                        <div>
+                            <h2>Pendaftaran</h2>
+                            <p v-if="eventDetail.tanggal_mulai_pendaftaran == eventDetail.tanggal_selesai_pendaftaran">{{ $dayjs(eventDetail.tanggal_mulai_pendaftaran).format('D MMMM YYYY') }}</p>
+                            <p v-else>{{ $dayjs(eventDetail.tanggal_mulai_pendaftaran).format('D MMMM YYYY') }} - {{ $dayjs(eventDetail.tanggal_selesai_pendaftaran).format('D MMMM YYYY') }}</p>
+                        </div>
+                    </div>
+                    <div class="single-timeline">
+                        <div v-if="isBeforeToday(eventDetail.tanggal_pembukaan)" class="timeline-circle finished tailed">
+                            <img src="assets/images/check.png" alt="" style="filter: invert(1)">
+                        </div>
+                        <div v-else class="timeline-circle tailed">
+                        </div>
+                        <div>
+                            <h2>Pembukaan</h2>
+                            <p>{{ $dayjs(eventDetail.tanggal_pembukaan).format('D MMMM YYYY') }}</p>
+                        </div>
+                    </div>
+                    <div class="single-timeline">
+                        <div v-if="isBeforeToday(eventDetail.tanggal_selesai_event)" class="timeline-circle finished tailed">
+                            <img src="assets/images/check.png" alt="" style="filter: invert(1)">
+                        </div>
+                        <div v-else class="timeline-circle tailed">
+                        </div>
+                        <div>
+                            <h2>Event</h2>
+                            <p v-if="eventDetail.tanggal_mulai_event == eventDetail.tanggal_selesai_event">{{ $dayjs(eventDetail.tanggal_mulai_event).format('D MMMM YYYY') }}</p>
+                            <p v-else>{{ $dayjs(eventDetail.tanggal_mulai_event).format('D MMMM YYYY') }} - {{ $dayjs(eventDetail.tanggal_selesai_event).format('D MMMM YYYY') }}</p>
+                        </div>
+                    </div>
+                    <div class="single-timeline">
+                        <div v-if="isBeforeToday(eventDetail.tanggal_penutupan)" class="timeline-circle finished">
+                            <img src="assets/images/check.png" alt="" style="filter: invert(1)">
+                        </div>
+                        <div v-else class="timeline-circle">
+                        </div>
+                        <div>
+                            <h2>Penutupan</h2>
+                            <p>{{ $dayjs(eventDetail.tanggal_penutupan).format('D MMMM YYYY') }}</p>
+                        </div>
+                    </div>
                 </div>
                 <div id="cara-bergabung" class="content" v-else-if="openTab['cara_bergabung'].value">
+                    <h2 class="text-2xl mb-2"><b>Cara Bergabung</b></h2>
+                    <p>{{ eventDetail.cara_bergabung }}</p>
                 </div>
                 <div id="syarat-lainnya" class="content" v-else-if="openTab['syarat_lainnya'].value">
+                    <h2 class="text-2xl mb-2"><b>Syarat</b></h2>
+                    <p class="mb-8">{{ eventDetail.syarat }}</p>
+                    <h2 class="text-2xl mb-2"><b>Hadiah</b></h2>
+                    <p class="mb-8">{{ eventDetail.hadiah }}</p>
+                    <h2 class="text-2xl mb-2"><b>Contact Person</b></h2>
+                    <p class="mb-8">{{ eventDetail.contact_person }}</p>
                 </div>
             </div>
         </div>
@@ -66,6 +152,8 @@
 </template>
 
 <script setup>
+    import dayjs from 'dayjs';
+
     const { id } = useRoute().params;
     const config = useRuntimeConfig();
     const userValue = useCookie('userValue');
@@ -120,6 +208,10 @@
         }
     }
 
+    const isBeforeToday = (date) => {
+        return dayjs(date).isBefore(dayjs(), 'day')
+    }
+
     updateTime();
 </script>
 
@@ -127,13 +219,22 @@
     @import '../assets/scss/global/global';
 
     .main-container.left-side{
-        display: grid;
-        grid-template-columns: 3fr 1fr;
-        margin-right: 2rem;
+        width: 428px;
+
+        .swiper-slide{
+            width: 100% !important;
+        }
+
+        .event-image{
+            width: 320px;
+            height: 320px;
+        }
     }
 
     .main-container.right-side{
         position: relative;
+        padding: 0 2rem;
+        flex-grow: 1;
 
         .event-title{
             font-weight: bold;
@@ -208,6 +309,67 @@
 
     .tab-content{
         padding: 2rem;
+
+        #timeline{
+            .single-timeline{
+                display: flex;
+                align-items: center;
+                margin-bottom: 2rem;
+
+                .timeline-circle{
+                    border-radius: 50%;
+                    border: 2px solid $dark-grey;
+                    background: white;
+                    width: 24px;
+                    height: 24px;
+                    margin-left: 20px;
+                    padding: 0.25rem;
+                    margin-right: calc(1rem + 20px);
+                    position: relative;
+
+                    &.finished{
+                        background: $primary;
+                        border: none;
+                        width: 64px;
+                        height: 64px;
+                        margin-left: 0;
+                        margin-right: 1rem;
+                        padding: 1rem;
+
+                        &.tailed::after{
+                            content: '';
+                            position: absolute;
+                            left: 50%;
+                            width: 5px;
+                            bottom: -76px;
+                            height: 56px;
+                            background: $primary;
+                            border-style: solid;
+                            transform: translate(-50%, -50%);
+                        }
+                    }
+
+                    &.tailed::after{
+                        content: '';
+                        position: absolute;
+                        left: 50%;
+                        width: 5px;
+                        bottom: -104px;
+                        height: 80px;
+                        z-index: -1;
+                        background: $dark-grey;
+                        border-style: solid;
+                        transform: translate(-50%, -50%);
+                    }
+                }
+
+                h2{
+                    color: $primary;
+                    font-weight: bold;
+                    font-size: 20px;
+                }
+            }
+        }
     }
 
     @media (max-width: 1244px) {
