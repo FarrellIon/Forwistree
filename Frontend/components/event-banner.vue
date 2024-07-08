@@ -1,5 +1,5 @@
 <template>
-    <div v-if="eventOngoing" class="event-banner px-32" style="margin-bottom: 4rem">
+    <div v-if="eventOngoing" class="event-banner px-8 lg:px-32" style="margin-bottom: 4rem">
         <div class="event-banner-container grid" style="grid-template-columns: 2fr 3fr 2fr;">
             <p class="label">Event Sekarang</p>
             <div class="images flex items-center">
@@ -34,8 +34,8 @@
                         <p class="measurement paragraph-font">Detik</p>
                     </div>
                 </div>
-                <NuxtLink :to="`/events/${eventOngoing.id}`">
-                    <div class="see-details">
+                <NuxtLink class="see-details" :to="`/events/${eventOngoing.id}`">
+                    <div>
                         <p>See Details ></p>
                     </div>
                 </NuxtLink>
@@ -99,6 +99,7 @@
             border-radius: 1rem;
             padding: 1rem;
             position: relative;
+            height: 100%;
 
             .label{
                 background: $primary;
@@ -112,7 +113,10 @@
 
             .images{
                 margin-top: 2rem;
+
                 .image{
+                    min-width: 96px;
+                    min-height: 96px;
                     max-width: 96px;
                     max-height: 96px;
                 }
@@ -176,7 +180,7 @@
                 }
             }
             
-            .see-details{
+            .see-details div{
                 position: absolute;
                 bottom: 1rem;
                 right: 1rem;
@@ -185,6 +189,46 @@
                 border-radius: 32px;
                 padding: 0.25rem 1rem;
             }
+        }
+    }
+
+    @media (max-width: 1244px){
+        .images{
+            height: 160px;
+            justify-content: center;
+        }
+
+        .event-banner-container{
+            display: block;
+            height: 460px !important;
+
+            .content{
+                margin: 1rem 0 !important;
+            }
+
+            .see-details div{
+                position: relative !important;
+                bottom: 0 !important;
+                right: 0 !important;
+                text-align: center;
+            }
+
+            .time{
+                right: 0 !important;
+                justify-content: center;
+                position: relative !important;
+                margin-bottom: 3rem;
+            }
+        }
+    }
+
+    @media (max-width: 430px){
+        .event-banner-container{
+            height: 100% !important;
+        }
+
+        .time{
+            display: none !important;
         }
     }
 </style>

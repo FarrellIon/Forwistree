@@ -1,8 +1,8 @@
 <template>
-    <div v-if="kategoriDetail">
+    <div v-if="kategoriDetail || id == 'semua'">
         <Navbar :active="'categories'"></Navbar>
         <div class="px-32 mb-16">
-            <div class="category" v-if="maxDiskon > 0">
+            <div class="category" v-if="maxDiskon > 0 && id != 'semua'">
                 <div class="left-side">
                     <div class="container">
                         <p class="title header-font">Kategori {{ kategoriDetail.nama }}</p>
@@ -57,7 +57,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="right-side">
+                <div v-if="id != 'semua'" class="right-side">
                     <div class="header">
                         <p class="header-title">Menampilkan <span class="text-primary">{{ kategoriDetail.buku.length }}</span> Buku <span class="font-bold">"{{ kategoriDetail.nama }}"</span></p>
                         <div class="pagination-container">
@@ -79,6 +79,42 @@
                     </div>
                     <div class="body">
                         <div v-for="buku in kategoriDetail.buku.slice((page - 1) * numberPerPage, ((page - 1) * numberPerPage) + numberPerPage)">
+                            <NuxtLink :to="`/books/${buku.id}`">
+                                <div class="book">
+                                    <div class="image">
+                                        <img :src="buku.gambar_buku[0].image" alt="">
+                                    </div>
+                                    <p class="nama paragraph-font">{{ buku.nama }}</p>
+                                    <p class="final-price paragraph-font">{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(buku.harga * ((100 - buku.diskon)/100)) }}</p>
+                                    <p v-if="buku.diskon > 0" class="initial-price paragraph-font"><s>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(buku.harga) }}</s></p>
+                                    <div v-if="buku.diskon > 0" class="discount paragraph-font">-{{ buku.diskon }}%</div>
+                                </div>
+                            </NuxtLink>
+                        </div>
+                    </div>
+                </div>
+                <div v-else class="right-side">
+                    <div class="header">
+                        <p class="header-title">Pilih kategori di samping!</p>
+                        <div class="pagination-container">
+                            <div class="pagination">
+                                <template v-if="id != 'semua'">
+                                    <UPagination v-model="page" :page-count="numberPerPage" :total="kategoriDetail.buku.length" />
+                                </template>
+                            </div>
+                            <div class="dropdown">
+                                <template>
+                                    <client-only>
+                                        <UDropdown :items="dropdownItems" :popper="{ placement: 'bottom-start' }">
+                                            <UButton color="white" label="Options" trailing-icon="i-heroicons-chevron-down-20-solid" />
+                                        </UDropdown>
+                                    </client-only>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="body">
+                        <div v-if="id != 'semua'" v-for="buku in kategoriDetail.buku.slice((page - 1) * numberPerPage, ((page - 1) * numberPerPage) + numberPerPage)">
                             <NuxtLink :to="`/books/${buku.id}`">
                                 <div class="book">
                                     <div class="image">

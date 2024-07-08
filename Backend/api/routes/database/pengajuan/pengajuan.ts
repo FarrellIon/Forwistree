@@ -5,6 +5,8 @@ import multer from "multer";
 const upload = multer();
 const router = express.Router();
 
+router.route('/get/pengaju').get(pengajuanController.getPengaju);
+
 router.route('/').get(pengajuanController.get);
 router.post('/', upload.fields([
     { name: 'file_sinopsis' }

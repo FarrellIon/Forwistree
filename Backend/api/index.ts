@@ -58,7 +58,7 @@ function ensureAuthenticated(req: Request, res: Response, next: () => any) {
             return next();
         }
         if(req.headers.uservalue != 'undefined'){
-            const admin = Admins.findById({ id: decryptString(req.headers.uservalue as string) });
+            const admin = Admins.findById({ id: decryptString((req.headers.uservalue as string).replace(/%3A/g, ':')) });
 
             if(!admin){
                 res.status(400).send('User tidak ditemukan');

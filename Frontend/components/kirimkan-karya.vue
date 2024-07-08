@@ -4,9 +4,11 @@
             <p class="title header-font mb-8">Kirimkan Karya Anda!</p>
             <p class="description paragraph-font mb-16">Kami mengundang Anda untuk menjadi bagian dari perjalanan kreatif kami. Kami percaya bahwa setiap cerita memiliki nilai dan keunikan tersendiri. Jadi, jika Anda memiliki impian untuk melihat karya Anda terbit, kami dengan senang hati menyambutnya!</p>
             <div class="flex justify-start items-center gap-4">
-                <div class="kirim-button paragraph-font">
-                    Kirimkan Karya >
-                </div>
+                <NuxtLink to="/publish">
+                    <div class="kirim-button paragraph-font">
+                        Kirimkan Karya >
+                    </div>
+                </NuxtLink>
                 <p class="pelajari-lebih paragraph-font">Pelajari Lebih</p>
             </div>
         </div>

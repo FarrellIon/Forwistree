@@ -26,7 +26,9 @@
                     </div>
                 </div>
                 <div class="details mt-8" data-aos="fade-right" data-aos-duration="1400" data-aos-easing="ease-out-cubic">
-                    <p>Lihat Detil</p>
+                    <NuxtLink to="/publish">
+                        <p>Ajukan Sekarang</p>
+                    </NuxtLink>
                     <img src="assets/images/right-arrow-primary.png" alt="">
                 </div>
             </div>

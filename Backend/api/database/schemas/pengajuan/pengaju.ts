@@ -1,11 +1,11 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 
 interface Pengaju {
     id: String,
     nama_pena: String,
     email: String,
     no_wa: String,
-    pengajuan_penerbitan: Schema.Types.ObjectId[],
+    pengajuan_penerbitan: Types.ObjectId[],
 }
 
 const PengajuSchema = new Schema<Pengaju>(

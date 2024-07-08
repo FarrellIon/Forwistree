@@ -1,10 +1,10 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 
 interface PengajuanPenerbitan {
     id: String,
-    pengaju: Schema.Types.ObjectId,
+    pengaju: Types.ObjectId,
     file_sinopsis: String,
-    accepted_by: Schema.Types.ObjectId,
+    accepted_by: Types.ObjectId,
     createdAt: Date,
     updatedAt: Date
 }

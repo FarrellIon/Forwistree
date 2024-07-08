@@ -82,8 +82,9 @@ class EventController{
             .populate('gambar_event');
 
             if (!event){
-                res.status(500).send('Tidak ada event yang sedang aktif');
-                return;
+                res.status(200).json({
+                    msg: "Tidak ada event yang sedang berlangsung"
+                });
             }
 
             res.status(200).json({

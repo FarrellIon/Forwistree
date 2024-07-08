@@ -8,8 +8,31 @@ import mime from 'mime-types';
 import { UploadApiErrorResponse, UploadApiResponse } from 'cloudinary';
 import { PengajuanPenerbitan } from '../../database/schemas/pengajuan/pengajuan_penerbitan';
 import { MasterPenulis } from '../../database/schemas/master_data/master_penulis';
+import { Pengaju } from '../../database/schemas/pengajuan/pengaju';
 
 class PengajuanController{
+    getPengaju = async(req: Request, res: Response) => {
+        try {
+            const pengaju = await Pengaju.find({})
+            .sort('-createdAt');
+
+            if (pengaju?.length === 0) {
+                res.status(200).json({
+                    msg: "Belum ada data pengaju"
+                });
+                return;
+            }
+
+            res.status(200).json({
+                pengaju,
+                msg: "Berhasil"
+            });
+        } catch (error) {
+            res.status(500).send("Terjadi kesalahan, error : " + error);
+            return;
+        }
+    }
+
     get = async(req: Request, res: Response) => {
         try {
             const pengajuan = await PengajuanPenerbitan.find({})
@@ -55,6 +78,7 @@ class PengajuanController{
         try{
             //Declarations
             const { 
+                checkbox,
                 pengaju,
                 ...rest
             } = req.body;
@@ -64,12 +88,13 @@ class PengajuanController{
             //Validators
             let errorMsg: string = '';
             let requiredFields;
-            if(!pengaju){
+
+            if(checkbox == 'false' || checkbox == undefined){
                 requiredFields = ['nama_pena', 'no_wa', 'email'];
     
                 for (const field of requiredFields) {
-                    if (!req.body[field]) {
-                        errorMsg += `Tidak ada ${field.replace(/_/g, ' ')}\n`;
+                    if (!req.body[field] || req.body[field] == undefined) {
+                        errorMsg += `Tidak ada ${field.replace(/_/g, ' ')}<br>`;
                     }
                 }
             }
@@ -79,7 +104,9 @@ class PengajuanController{
             }
 
             if(errorMsg != ''){
-                res.status(500).send(errorMsg);
+                res.status(201).json({
+                    msg: errorMsg
+                });
                 return;
             }
             
@@ -93,7 +120,9 @@ class PengajuanController{
             //Upload Sinopsis
             const validatorMsg: string = this.validateInputs(req);
             if(validatorMsg != ''){
-                res.status(500).send(validatorMsg);
+                res.status(201).json({
+                    msg: validatorMsg
+                });
                 return;
             }
 
@@ -111,16 +140,15 @@ class PengajuanController{
             });
             const file_sinopsis_url = uploadResult.secure_url;
 
-
             //Insert Pengajuan
             let pengajuDecrypted;
             let pengajuObj;
             let newPengajuanObj: any;
             const penulisObjectId = new Types.ObjectId();
             const penulisEncryptedId = encryptString(penulisObjectId.toString());
-            if(pengaju){
+            if(checkbox == 'true' && pengaju){
                 pengajuDecrypted = decryptString(pengaju);
-                pengajuObj = await MasterPenulis.findById({ _id: pengajuDecrypted });
+                pengajuObj = await Pengaju.findById({ _id: pengajuDecrypted });
                 if(pengajuObj){
                     const objectId = new Types.ObjectId();
                     const encryptedId = encryptString(objectId.toString());
@@ -143,7 +171,7 @@ class PengajuanController{
                     email: req.body.email
                 }
     
-                const newPenulis = await MasterPenulis.create(newPenulisObj);
+                const newPenulis = await Pengaju.create(newPenulisObj);
 
                 if(!newPenulis){
                     res.status(500).send('Data pengaju gagal dibuat');
@@ -171,7 +199,7 @@ class PengajuanController{
 
 
             //Insert pengajuan relations
-            const penulisRelationObj = await MasterPenulis.findById({ _id: pengajuDecrypted });
+            const penulisRelationObj = await Pengaju.findById({ _id: pengajuDecrypted });
             if(penulisRelationObj){
                 penulisRelationObj.pengajuan_penerbitan.push(newPengajuanObj);
                 penulisRelationObj.save();
@@ -186,6 +214,7 @@ class PengajuanController{
                 msg: "Berhasil"
             });
         } catch (error) {
+            console.log(error);
             res.status(500).send("Terjadi kesalahan, error : " + JSON.stringify(error));
             return;
         }
@@ -198,6 +227,7 @@ class PengajuanController{
             const decryptedId = decryptString(id);
 
             const { 
+                checkbox,
                 pengaju,
                 ...rest
             } = req.body;
@@ -279,7 +309,7 @@ class PengajuanController{
             
             //Update Pengajuan
             let newPengajuanObj;
-            if(pengaju){
+            if(checkbox == 'true' && pengaju){
                 const pengajuId = decryptString(pengaju);
                 newPengajuanObj = {
                     pengaju: pengajuId,
@@ -290,7 +320,7 @@ class PengajuanController{
                     ...rest
                 }
                 const pengajuId = pengajuan.pengaju;
-                const pengajuObj = await MasterPenulis.findByIdAndUpdate({ _id: pengajuId }, pengajuInsert, { new: true })
+                const pengajuObj = await Pengaju.findByIdAndUpdate({ _id: pengajuId }, pengajuInsert, { new: true })
 
                 if(!pengajuObj){
                     res.status(500).send('Data pengaju gagal diupdate');
@@ -310,27 +340,27 @@ class PengajuanController{
             }
 
 
-            if(pengaju){
+            if(checkbox == 'true' && pengaju){
                 //Remove Old Relations
-                const oldPenulisRelationObj = await MasterPenulis.findById({ _id: pengajuan.pengaju });
+                const oldPengajuRelationObj = await Pengaju.findById({ _id: pengajuan.pengaju });
 
-                if(oldPenulisRelationObj){
-                    oldPenulisRelationObj.pengajuan_penerbitan = oldPenulisRelationObj?.pengajuan_penerbitan.filter(item => item.toString() !== pengajuanId?.toString())
-                    oldPenulisRelationObj.save();
+                if(oldPengajuRelationObj){
+                    oldPengajuRelationObj.pengajuan_penerbitan = oldPengajuRelationObj?.pengajuan_penerbitan.filter(item => item.toString() !== pengajuanId?.toString())
+                    oldPengajuRelationObj.save();
                 }else{
-                    res.status(500).send('Relasi penulis tidak ditemukan!');
+                    res.status(500).send('Relasi pengaju tidak ditemukan!');
                     return;
                 }
 
                 
                 //Add relations
-                const newPenulisRelationObj = await MasterPenulis.findById({ _id: decryptString(pengaju) });
+                const newPengajuRelationObj = await Pengaju.findById({ _id: decryptString(pengaju) });
                 
-                if(newPenulisRelationObj){
-                    newPenulisRelationObj.pengajuan_penerbitan.push(updatedPengajuan._id);
-                    newPenulisRelationObj.save();
+                if(newPengajuRelationObj){
+                    newPengajuRelationObj.pengajuan_penerbitan.push(updatedPengajuan._id);
+                    newPengajuRelationObj.save();
                 }else{
-                    res.status(500).send('Relasi penulis tidak ditemukan!');
+                    res.status(500).send('Relasi pengaju tidak ditemukan!');
                     return;
                 }
             }
@@ -371,25 +401,31 @@ class PengajuanController{
 
         const { file_sinopsis } = (req as any).files;
 
-        if(req.body.nama_pena){
-            if (!validator.isAlphanumeric(req.body.nama_pena, undefined, {ignore: ' -,&!.?'})){
-                errorMsg += 'Nama pena penulis tidak valid';
+        if(req.body.checkbox == 'false' || req.body.checkbox == undefined){
+            if(req.body.nama_pena){
+                if (!validator.isAlphanumeric(req.body.nama_pena, undefined, {ignore: ' -,&!.?'})){
+                    errorMsg += 'Nama pena tidak valid';
+                    errorMsg += '<br>';
+                }
+                
+                if(!validator.isLength(req.body.nama_pena, { max: 30 })){    
+                    errorMsg += 'Nama pena maksimal 30 huruf';
+                    errorMsg += '<br>';
+                }
             }
-            
-            if(!validator.isLength(req.body.nama_pena, { max: 30 })){    
-                errorMsg += 'Nama pena penulis maksimal 30 huruf';
-            }
-        }
 
-        if(req.body.email){
-            if (!validator.isEmail(req.body.email)){
-                errorMsg += 'Email tidak valid';
+            if(req.body.email){
+                if (!validator.isEmail(req.body.email)){
+                    errorMsg += 'Email tidak valid';
+                    errorMsg += '<br>';
+                }
             }
-        }
-
-        if(req.body.no_wa){
-            if (!validator.isNumeric(req.body.no_wa)){
-                errorMsg += 'Nomor HP tidak valid';
+    
+            if(req.body.no_wa){
+                if (!validator.isNumeric(req.body.no_wa)){
+                    errorMsg += 'Nomor HP tidak valid';
+                    errorMsg += '<br>';
+                }
             }
         }
 
@@ -397,25 +433,25 @@ class PengajuanController{
             const fileType = mime.contentType(file_sinopsis[0].mimetype);
             if(fileType != 'application/pdf'){
                 errorMsg += 'File sinopsis harus file pdf';
-                errorMsg += '\n';
+                errorMsg += '<br>';
             }
 
             if(file_sinopsis.length > 1){
                 errorMsg += 'File sinopsis tidak boleh lebih dari 1';
-                errorMsg += '\n';
+                errorMsg += '<br>';
             }
         }
 
-        if(req.body.pengaju){
+        if(req.body.checkbox == 'true' && req.body.pengaju){
             try {
                 const pengajuId = decryptString(req.body.pengaju);
                 if(!MasterPenulis.exists({ _id: new Types.ObjectId(pengajuId) })){
                     errorMsg += 'Data pengaju tidak ditemukan';
-                    errorMsg += '\n';
+                    errorMsg += '<br>';
                 }
             } catch (error) {
                 errorMsg += 'Pengaju tidak valid';
-                errorMsg += '\n';
+                errorMsg += '<br>';
             }
         }
 

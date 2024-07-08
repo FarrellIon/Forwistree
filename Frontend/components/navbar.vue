@@ -1,29 +1,29 @@
 <template>
     <div class="navbar flex px-8 lg:px-16 items-center justify-between">
-        <div class="flex items-center">
+        <div class="min-width flex items-center" style="min-width: 226px;">
             <img class="size-20 mr-4" src="assets/images/logo.png" alt="">
             <span class="block md:hidden lg:block header-font text-2xl text-primary font-bold">Forwistree</span>
         </div>
-        <div class="lg:flex md:flex sm:hidden hidden gap-8 justify-center">
+        <div class="lg:flex md:flex sm:hidden hidden gap-8 justify-center" style="flex-grow: 1">
             <NuxtLink to="/">
                 <span :class="{'navbar-page': true, 'active': active == 'home'}">Home</span>
             </NuxtLink>
             <NuxtLink to="/products">
                 <span :class="{'navbar-page': true, 'active': active == 'products'}">Products</span>
             </NuxtLink>
-            <NuxtLink to="/categories">
+            <NuxtLink to="/categories/semua">
                 <span :class="{'navbar-page': true, 'active': active == 'categories'}">Categories</span>
             </NuxtLink>
             <NuxtLink to="/publish">
                 <span :class="{'navbar-page': true, 'active': active == 'publish'}">Publish a Book</span>
             </NuxtLink>
         </div>
-        <div class="navbar-right-side flex items-center justify-end">
+        <div class="min-width navbar-right-side flex items-center justify-end" style="min-width: 226px;">
             <!-- <img class="size-6 opacity-70" src="assets/images/search.png" alt=""> -->
-            <button id="loginBtn" class="hidden lg:block">Login</button>
-            <button id="registerBtn" class="hidden lg:block">Register</button>
+            <button id="loginBtn" class="hidden lg:block">Login Admin</button>
+            <!-- <button id="registerBtn" class="hidden lg:block">Register</button> -->
             <button id="loginBtnSmall" class="md:block hidden lg:hidden" title="Login"><img src="assets/images/login-primary.png" class="size-6" alt="login"></button>
-            <button id="registerBtnSmall" class="hidden md:block lg:hidden" title="Register"><img src="assets/images/edit.png" class="size-6" alt="login"></button>
+            <!-- <button id="registerBtnSmall" class="hidden md:block lg:hidden" title="Register"><img src="assets/images/edit.png" class="size-6" alt="login"></button> -->
             <button id="sidebarBtn" class="sm:block md:hidden lg:hidden" title="Side Menu" @click="isOpen = true"><img src="assets/images/menu-primary.png" class="size-6" alt="login"></button>
         </div>
     </div>
@@ -49,6 +49,9 @@
                 <img class="size-20 mr-4" src="assets/images/logo.png" alt="">
                 <span class="block md:hidden lg:block header-font text-2xl text-primary font-bold">Forwistree</span>
             </div>
+            </template>
+            <template #footer>
+                <button id="login-admin-navbar">Login Admin</button>
             </template>
 
             <div class="sidebar-links">
@@ -87,6 +90,14 @@ const isOpen = ref(false);
 
 <style lang="scss" scoped>
     @import '~/assets/scss/global/global';
+
+    #login-admin-navbar{
+        transition: 0.3s all ease-out;
+        
+        &:hover{
+            color: $primary;
+        }
+    }
 
     .navbar{
         background: $white;
@@ -193,6 +204,12 @@ const isOpen = ref(false);
             &:hover{
                 color: $primary;
             }
+        }
+    }
+
+    @media(max-width: 926px){
+        .min-width{
+            min-width: 80px !important;
         }
     }
 </style>
