@@ -37,6 +37,7 @@ class KategoriController{
     getOne = async(req: Request, res: Response) => {
         try {
             const { id } = req.params;
+            const { minDiskonParam, maxDiskonParam } = req.query;
             const decryptedId = decryptString(id);
             const kategori = await MasterKategori.findById({ _id: decryptedId })
             .populate({
@@ -46,6 +47,8 @@ class KategoriController{
                     select: 'image'
                 }
             });
+
+            const filteredBuku = kategori.buku.filter((b: { diskon: Number; }) => b.diskon >= (minDiskonParam as any) && b.diskon <= (maxDiskonParam as any));
 
             const buku = await Buku.findOne()
                 .where({kategori: decryptedId})
@@ -65,6 +68,7 @@ class KategoriController{
 
             res.status(200).json({
                 kategori,
+                filteredBuku,
                 maxDiskon,
                 msg: "Berhasil"
             });

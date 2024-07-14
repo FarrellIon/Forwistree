@@ -89,11 +89,12 @@ class PengajuanController{
             let errorMsg: string = '';
             let requiredFields;
 
-            if(checkbox == 'false' || checkbox == undefined){
+            if(checkbox == 'false' || checkbox == 'undefined' || (checkbox == 'true' && !pengaju)){
                 requiredFields = ['nama_pena', 'no_wa', 'email'];
     
                 for (const field of requiredFields) {
-                    if (!req.body[field] || req.body[field] == undefined) {
+                    console.log(req.body[field]);
+                    if (!req.body[field] || req.body[field] == 'undefined') {
                         errorMsg += `Tidak ada ${field.replace(/_/g, ' ')}<br>`;
                     }
                 }
@@ -401,7 +402,7 @@ class PengajuanController{
 
         const { file_sinopsis } = (req as any).files;
 
-        if(req.body.checkbox == 'false' || req.body.checkbox == undefined){
+        if(req.body.checkbox == 'false' || req.body.checkbox == 'undefined'){
             if(req.body.nama_pena){
                 if (!validator.isAlphanumeric(req.body.nama_pena, undefined, {ignore: ' -,&!.?'})){
                     errorMsg += 'Nama pena tidak valid';

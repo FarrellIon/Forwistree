@@ -37,6 +37,7 @@ class KategoriController{
     getOne = async(req: Request, res: Response) => {
         try {
             const { id } = req.params;
+            const { minDiskonParam, maxDiskonParam, minPageParam, maxPageParam } = req.query;
             const decryptedId = decryptString(id);
             const kategori = await MasterKategori.findById({ _id: decryptedId })
             .populate({
@@ -56,6 +57,16 @@ class KategoriController{
                 return;
             }
 
+            const listBuku = await Buku.find()
+                .where({kategori: decryptedId})
+                .populate('gambar_buku')
+                .sort('-diskon');
+
+            if(!listBuku){
+                res.status(404).send('Tidak ada buku yang ditemukan dalam kategori ini');
+                return;
+            }
+
             const maxDiskon = (buku as any).diskon;
 
             if (!kategori){
@@ -63,8 +74,12 @@ class KategoriController{
                 return;
             }
 
+            let filteredBuku = listBuku.filter(b => b.diskon >= (minDiskonParam as any) && b.diskon <= (maxDiskonParam as any));
+            filteredBuku = filteredBuku.filter(b => b.jumlah_halaman >= (minPageParam as any) && b.jumlah_halaman <= (maxPageParam as any));
+
             res.status(200).json({
                 kategori,
+                filteredBuku,
                 maxDiskon,
                 msg: "Berhasil"
             });

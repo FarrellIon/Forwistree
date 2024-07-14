@@ -1,8 +1,8 @@
 <template>
     <div v-if="kategoriDetail || id == 'semua'">
         <Navbar :active="'categories'"></Navbar>
-        <div class="px-32 mb-16">
-            <div class="category" v-if="maxDiskon > 0 && id != 'semua'">
+        <div class="px-8 lg:px-32 mb-16">
+            <div class="category category-big" v-if="maxDiskon > 0 && id != 'semua'">
                 <div class="left-side">
                     <div class="container">
                         <p class="title header-font">Kategori {{ kategoriDetail.nama }}</p>
@@ -15,6 +15,65 @@
                 </div>
                 <div class="right-side">
                     <div class="container">
+                        <NuxtLink v-for="buku in kategoriDetail.buku.slice(0,3)" :to="`/books/${buku.id}`">
+                            <div class="book">
+                                <div class="image">
+                                    <img :src="buku.gambar_buku[0].image" alt="">
+                                </div>
+                                <p class="nama paragraph-font">{{ buku.nama }}</p>
+                                <p class="final-price paragraph-font">{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(buku.harga * ((100 - buku.diskon)/100)) }}</p>
+                                <p v-if="buku.diskon > 0" class="initial-price paragraph-font"><s>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(buku.harga) }}</s></p>
+                                <div v-if="buku.diskon > 0" class="discount paragraph-font">-{{ buku.diskon }}%</div>
+                            </div>
+                        </NuxtLink>
+                    </div>
+                </div>
+            </div>
+            <div class="category category-small" v-if="maxDiskon > 0 && id != 'semua'">
+                <div class="left-side">
+                    <div class="container">
+                        <p class="title header-font">Kategori {{ kategoriDetail.nama }}</p>
+                        <div class="stick-bottom">
+                            <p class="paragraph-font">Diskon Hingga</p>
+                            <h2 class="percentage paragraph-font">{{ maxDiskon }}%</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="right-side">
+                    <div class="container">
+                        <NuxtLink v-for="buku in kategoriDetail.buku.slice(0,4)" :to="`/books/${buku.id}`">
+                            <div class="book">
+                                <div class="image">
+                                    <img :src="buku.gambar_buku[0].image" alt="">
+                                </div>
+                                <p class="nama paragraph-font">{{ buku.nama }}</p>
+                                <p class="final-price paragraph-font">{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(buku.harga * ((100 - buku.diskon)/100)) }}</p>
+                                <p v-if="buku.diskon > 0" class="initial-price paragraph-font"><s>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(buku.harga) }}</s></p>
+                                <div v-if="buku.diskon > 0" class="discount paragraph-font">-{{ buku.diskon }}%</div>
+                            </div>
+                        </NuxtLink>
+                        <NuxtLink v-for="buku in kategoriDetail.buku.slice(0,4)" :to="`/books/${buku.id}`">
+                            <div class="book">
+                                <div class="image">
+                                    <img :src="buku.gambar_buku[0].image" alt="">
+                                </div>
+                                <p class="nama paragraph-font">{{ buku.nama }}</p>
+                                <p class="final-price paragraph-font">{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(buku.harga * ((100 - buku.diskon)/100)) }}</p>
+                                <p v-if="buku.diskon > 0" class="initial-price paragraph-font"><s>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(buku.harga) }}</s></p>
+                                <div v-if="buku.diskon > 0" class="discount paragraph-font">-{{ buku.diskon }}%</div>
+                            </div>
+                        </NuxtLink>
+                        <NuxtLink v-for="buku in kategoriDetail.buku.slice(0,4)" :to="`/books/${buku.id}`">
+                            <div class="book">
+                                <div class="image">
+                                    <img :src="buku.gambar_buku[0].image" alt="">
+                                </div>
+                                <p class="nama paragraph-font">{{ buku.nama }}</p>
+                                <p class="final-price paragraph-font">{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(buku.harga * ((100 - buku.diskon)/100)) }}</p>
+                                <p v-if="buku.diskon > 0" class="initial-price paragraph-font"><s>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(buku.harga) }}</s></p>
+                                <div v-if="buku.diskon > 0" class="discount paragraph-font">-{{ buku.diskon }}%</div>
+                            </div>
+                        </NuxtLink>
                         <NuxtLink v-for="buku in kategoriDetail.buku.slice(0,4)" :to="`/books/${buku.id}`">
                             <div class="book">
                                 <div class="image">
@@ -38,28 +97,41 @@
                         </div>
                         <div class="filter-group">
                             <p class="filter-title">Kategori</p>
-                            <p class="filter-element">Horror</p>
-                            <p class="filter-element">Romance</p>
+                            <p v-for="kategori in listKategori" :class="{'filter-element': true, 'active': kategori.nama == kategoriDetail.nama}">
+                                <NuxtLink :to="`/categories/${kategori.id}`">{{ kategori.nama }}</NuxtLink>
+                            </p>
                         </div>
                         <div class="filter-group">
                             <p class="filter-title">Jumlah Halaman</p>
-                            <p class="filter-element">< 100</p>
-                            <p class="filter-element">101 - 200</p>
-                            <p class="filter-element">201 - 300</p>
-                            <p class="filter-element">> 300</p>
+                            <p class="filter-halaman filter-element active" data-min-page-param='0' data-max-page-param='99999' @click="filter($event, 'jumlah_halaman')">Semua</p>
+                            <p class="filter-halaman filter-element" data-min-page-param='0' data-max-page-param='100' @click="filter($event, 'jumlah_halaman')">< 100</p>
+                            <p class="filter-halaman filter-element" data-min-page-param='101' data-max-page-param='200' @click="filter($event, 'jumlah_halaman')">101 - 200</p>
+                            <p class="filter-halaman filter-element" data-min-page-param='201' data-max-page-param='300' @click="filter($event, 'jumlah_halaman')">201 - 300</p>
+                            <p class="filter-halaman filter-element" data-min-page-param='300' data-max-page-param='99999' @click="filter($event, 'jumlah_halaman')">> 300</p>
                         </div>
                         <div class="filter-group">
                             <p class="filter-title">Diskon</p>
-                            <p class="filter-element">0%</p>
-                            <p class="filter-element">0 - 15%</p>
-                            <p class="filter-element">16 - 30%</p>
-                            <p class="filter-element">> 30%</p>
+                            <p class="filter-diskon filter-element active" data-min-diskon-param='0' data-max-diskon-param='100' @click="filter($event, 'diskon')">Semua</p>
+                            <p class="filter-diskon filter-element" data-min-diskon-param='0' data-max-diskon-param='0' @click="filter($event, 'diskon')">0%</p>
+                            <p class="filter-diskon filter-element" data-min-diskon-param='1' data-max-diskon-param='15' @click="filter($event, 'diskon')">1 - 15%</p>
+                            <p class="filter-diskon filter-element" data-min-diskon-param='16' data-max-diskon-param='30' @click="filter($event, 'diskon')">16 - 30%</p>
+                            <p class="filter-diskon filter-element" data-min-diskon-param='30' data-max-diskon-param='100' @click="filter($event, 'diskon')">> 30%</p>
                         </div>
                     </div>
                 </div>
                 <div v-if="id != 'semua'" class="right-side">
                     <div class="header">
-                        <p class="header-title">Menampilkan <span class="text-primary">{{ kategoriDetail.buku.length }}</span> Buku <span class="font-bold">"{{ kategoriDetail.nama }}"</span></p>
+                        <p class="header-title">
+                            Menampilkan
+                            <span class="text-primary">{{ filteredBuku.length }}</span> Buku
+                            <span class="font-bold">"{{ kategoriDetail.nama }}"</span>
+                            <p class="filter-text">Filter : 
+                                <span v-if="maxDiskonParam != 0 && maxDiskonParam != 100" class="mr-2">Diskon <span class="text-primary">{{minDiskonParam}}% - {{maxDiskonParam}}%</span>,</span>
+                                <span v-else>Diskon diatas <span class="text-primary">{{ minDiskonParam }}%</span>, </span>
+                                <span v-if="maxPageParam != 0 && maxPageParam != 99999" ><span class="text-primary">{{minPageParam}} - {{maxPageParam}}</span> halaman</span>
+                                <span v-else>Diatas <span class="text-primary">{{ minPageParam }}</span> halaman</span>
+                            </p>
+                        </p>
                         <div class="pagination-container">
                             <div class="pagination">
                                 <template>
@@ -77,8 +149,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="body">
-                        <div v-for="buku in kategoriDetail.buku.slice((page - 1) * numberPerPage, ((page - 1) * numberPerPage) + numberPerPage)">
+                    <div v-if="filteredBuku == 'loading'" class="text-center text-3xl font-bold">Loading...</div>
+                    <div v-else-if="filteredBuku.length > 0" class="body">
+                        <div v-for="buku in filteredBuku.slice((page - 1) * numberPerPage, ((page - 1) * numberPerPage) + numberPerPage)">
                             <NuxtLink :to="`/books/${buku.id}`">
                                 <div class="book">
                                     <div class="image">
@@ -92,6 +165,7 @@
                             </NuxtLink>
                         </div>
                     </div>
+                    <div v-else class="text-center text-3xl font-bold">Tidak ada buku dengan filter yang dipilih / dalam kategori ini.</div>
                 </div>
                 <div v-else class="right-side">
                     <div class="header">
@@ -167,11 +241,17 @@
     ]
 
     let kategoriDetail = ref();
+    let filteredBuku = ref();
+    let listKategori = ref();
     let fetchedKategoriDetail = ref();
     let maxDiskon = ref();
+    let minDiskonParam = ref(0);
+    let maxDiskonParam = ref(100);
+    let minPageParam = ref(0);
+    let maxPageParam = ref(99999);
 
     const fetchKategoriDetail = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori/`+id, {
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori/${id}?minDiskonParam=${minDiskonParam.value}&maxDiskonParam=${maxDiskonParam.value}&minPageParam=${minPageParam.value}&maxPageParam=${maxPageParam.value}`, {
             headers: {
                 userValue: userValue,
             }
@@ -180,15 +260,56 @@
         if(fetchResult.data._rawValue){
             fetchedKategoriDetail.value = fetchResult.data._rawValue;
             kategoriDetail.value = fetchedKategoriDetail.value.kategori;
+            filteredBuku.value = fetchedKategoriDetail.value.filteredBuku;
             maxDiskon.value = fetchedKategoriDetail.value.maxDiskon;
         }else{
             setTimeout(fetchKategoriDetail, 2000)
             fetchedKategoriDetail.value = null;
         }
     }
+    
+    const fetchListKategori = async () => {
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori`, {
+            headers: {
+                userValue: userValue,
+            }
+        });
+
+        if(fetchResult.data._rawValue){
+            listKategori.value = fetchResult.data._rawValue.kategori;
+        }else{
+            setTimeout(fetchListKategori, 2000)
+            listKategori.value = null;
+        }
+    }
+
+    const filter = (event, filterType) => {
+        if(filterType == 'jumlah_halaman'){
+            const elements = document.getElementsByClassName('filter-halaman');
+
+            for (let i = 0; i < elements.length; i++) {
+                elements[i].classList.remove('active');
+            }
+            minPageParam.value = event.target.getAttribute('data-min-page-param');
+            maxPageParam.value = event.target.getAttribute('data-max-page-param');
+        }else if(filterType == 'diskon'){
+            const elements = document.getElementsByClassName('filter-diskon');
+
+            for (let i = 0; i < elements.length; i++) {
+                elements[i].classList.remove('active');
+            }
+            minDiskonParam.value = event.target.getAttribute('data-min-diskon-param');
+            maxDiskonParam.value = event.target.getAttribute('data-max-diskon-param');
+        }
+        event.target.classList.add('active');
+
+        filteredBuku.value = 'loading';
+        fetchKategoriDetail();
+    }
 
     onMounted(() => {
         fetchKategoriDetail();
+        fetchListKategori();
     });
 </script>
 
@@ -220,7 +341,7 @@
             border-radius: 8px 0 0 8px;
             color: $white;
             display: flex;
-            width: calc(100% + 80px);
+            width: calc(100% + 160px);
             position: relative;
             min-height: 320px;
 
@@ -315,7 +436,6 @@
         column-gap: 2rem;
 
         .left-side{
-            background: $cream;
             padding: 1rem;
 
             .filter-header{
@@ -344,9 +464,15 @@
 
                     .filter-element{
                         font-size: 14px;
+                        transition: 0.3s all ease-out;
 
                         &.active{
                             color: $primary;
+                        }
+
+                        &:hover{
+                            color: $primary;
+                            cursor: pointer;
                         }
                     }
                 }
@@ -420,6 +546,77 @@
                     right: 1.5rem;
                     font-weight: bold;
                 }
+            }
+        }
+    }
+
+    .category-small{
+        display: none;
+    }
+
+    @media(max-width: 1000px){
+        .filter{
+            .body{
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    }
+
+    @media(max-width: 900px){
+        .category-big{
+            display: none;
+        }
+
+        .category-small{
+            display: block;
+        }
+
+        .category{
+            .left-side{
+                width: 100%;
+                border-radius: 8px;
+                min-height: 0;
+                justify-content: center;
+
+                .container{
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+
+                    .stick-bottom{
+                        position: relative;
+                        bottom: 0;
+                        left: 0;
+                    }
+                }
+            }
+
+            .right-side{
+                border-radius: 0 0 8px 8px;
+
+                .container{
+                    margin: 0 auto;
+                    overflow-x: scroll;
+                }
+            }
+        }
+    }
+    
+    @media(max-width: 540px){
+        .left-side{
+            .container{
+                display: block !important;
+                padding: 2rem !important;
+
+                .stick-bottom{
+                    margin-top: 1.5rem;
+                }
+            }
+        }
+
+        .filter{
+            .body{
+                grid-template-columns: 1fr;
             }
         }
     }
