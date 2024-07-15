@@ -93,7 +93,6 @@ class PengajuanController{
                 requiredFields = ['nama_pena', 'no_wa', 'email'];
     
                 for (const field of requiredFields) {
-                    console.log(req.body[field]);
                     if (!req.body[field] || req.body[field] == 'undefined') {
                         errorMsg += `Tidak ada ${field.replace(/_/g, ' ')}<br>`;
                     }

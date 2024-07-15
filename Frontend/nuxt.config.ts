@@ -25,6 +25,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public:{
       API_HOST: process.env.API_HOST,
+      FRONTEND_URL: process.env.FRONTEND_URL,
     }
   }
 })

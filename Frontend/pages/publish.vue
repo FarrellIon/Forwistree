@@ -58,7 +58,7 @@
     let canCloseModal = ref(false);
     let modalHeader = ref("Loading...");
     let modalContent = ref("Pengajuan anda sedang diproses...");
-    let modalImage = ref("https://forwistree.vercel.app/_nuxt/assets/images/information.png");
+    let modalImage = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`);
 
     const fetchPengaju = async () => {
         let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/pengajuan/pengajuan/get/pengaju`, {
@@ -100,7 +100,7 @@
     const onSubmit = async (event) => {
         modalHeader.value = "Loading...";
         modalContent.value = "Pengajuan anda sedang diproses...";
-        modalImage.value = "https://forwistree.vercel.app/_nuxt/assets/images/information.png";
+        modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`;
         canCloseModal.value = false;
 
         const formData = new FormData();
@@ -124,12 +124,12 @@
         
         if(formResult.msg == 'Berhasil'){
             modalHeader.value = "Berhasil";
-            modalImage.value = "https://forwistree.vercel.app/_nuxt/assets/images/success.png";
+            modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/success.png`;
             modalContent.value = "Pengajuan berhasil dikirim, kami akan secepatnya hubungi melalui WhatsApp!";
             canCloseModal.value = true;
         }else{
             modalHeader.value = "Gagal";
-            modalImage.value = "https://forwistree.vercel.app/_nuxt/assets/images/failed.png";
+            modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
             modalContent.value = 'Pengajuan gagal dikirim, terjadi kesalahan : <br>'+formResult.msg.replace(/\n/g, '<br>');
             canCloseModal.value = true;
         }

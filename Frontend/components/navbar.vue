@@ -20,9 +20,13 @@
         </div>
         <div class="min-width navbar-right-side flex items-center justify-end" style="min-width: 226px;">
             <!-- <img class="size-6 opacity-70" src="assets/images/search.png" alt=""> -->
-            <button id="loginBtn" class="hidden lg:block">Login Admin</button>
+            <NuxtLink :to="`/login`">
+                <button id="loginBtn" class="hidden lg:block">Login Admin</button>
+            </NuxtLink>
             <!-- <button id="registerBtn" class="hidden lg:block">Register</button> -->
-            <button id="loginBtnSmall" class="md:block hidden lg:hidden" title="Login"><img src="assets/images/login-primary.png" class="size-6" alt="login"></button>
+            <NuxtLink :to="`/login`">
+                <button id="loginBtnSmall" class="md:block hidden lg:hidden" title="Login"><img src="assets/images/login-primary.png" class="size-6" alt="login"></button>
+            </NuxtLink>
             <!-- <button id="registerBtnSmall" class="hidden md:block lg:hidden" title="Register"><img src="assets/images/edit.png" class="size-6" alt="login"></button> -->
             <button id="sidebarBtn" class="sm:block md:hidden lg:hidden" title="Side Menu" @click="isOpen = true"><img src="assets/images/menu-primary.png" class="size-6" alt="login"></button>
         </div>
