@@ -70,7 +70,7 @@
                 body: formData
             });
 
-            await navigateTo('/admin');
+            await navigateTo('/admin/dashboard');
         }catch (error){
             modalHeader.value = "Gagal";
             modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
