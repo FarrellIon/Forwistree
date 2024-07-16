@@ -1,5 +1,5 @@
 <template>
-    <div id="form-pengajuan" class="flex justify-center items-center px-8 lg:px-32 pt-8 pb-16" style="gap: 2rem;">
+    <div id="form-login" class="flex justify-center items-center px-8 lg:px-32 pt-8 pb-16" style="gap: 2rem;">
         <div class="image" style="flex-grow: 1">
             <img src="assets/images/login-vector.png" alt="">
         </div>
@@ -44,7 +44,7 @@
     let isOpen = ref(false);
     let canCloseModal = ref(false);
     let modalHeader = ref("Loading...");
-    let modalContent = ref("Pengajuan anda sedang diproses...");
+    let modalContent = ref("Sedang login...");
     let modalImage = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`);
 
     const state = reactive({
@@ -63,14 +63,15 @@
         formData.append('password', state.password);
         
         isOpen.value = true;
-        const formResult = await $fetch(`${config.public.API_HOST}/api/auth/login`, {
-            method: 'POST',
-            body: formData
-        });
-        
-        if(formResult.msg == 'Berhasil'){
+
+        try{
+            const formResult = await $fetch(`${config.public.API_HOST}/api/auth/login`, {
+                method: 'POST',
+                body: formData
+            });
+
             await navigateTo('/admin');
-        }else{
+        }catch (error){
             modalHeader.value = "Gagal";
             modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
             modalContent.value = 'Username atau password anda salah!';
@@ -79,10 +80,10 @@
     }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
     @import '../assets/scss/global/global';
 
-    #form-pengajuan{
+    #form-login{
         width: 90vw;
         margin: auto;
         height: 90vh;
@@ -95,6 +96,16 @@
         --tw-bg-opacity: 1;
         background-color: $primary;
     }
+    
+    .hover\:bg-primary-600:hover{
+        --tw-bg-opacity: 1;
+        background-color: $secondary;
+    }
+    
+    #form-login .focus\:ring-primary-500:focus{
+        --tw-ring-opacity: 1;
+        --tw-ring-color: #0F7292 !important;
+    }
 
     #modal-card{
         img{
@@ -103,5 +114,9 @@
             margin: 0 auto;
             margin-bottom: 1rem;
         }
+    }
+
+    @media(max-width: 840px){
+        
     }
 </style>
