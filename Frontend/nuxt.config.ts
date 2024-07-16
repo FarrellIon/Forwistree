@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  modules: ['nuxt-aos', 'nuxt-swiper', 'dayjs-nuxt', '@nuxt/ui'],
+  modules: ['nuxt-aos', 'nuxt-swiper', 'dayjs-nuxt', '@nuxt/ui', '@nuxtjs/color-mode'],
   colorMode: {
     preference: 'light'
   },

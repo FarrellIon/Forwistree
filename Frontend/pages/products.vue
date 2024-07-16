@@ -8,9 +8,14 @@
       <KirimkanKarya></KirimkanKarya>
       <Footer></Footer>
     </div>
-  </template>
-  <style>
-  html, body{
-    height: 100vh;
-  }
-  </style>
+</template>
+<script setup>
+definePageMeta({
+  colorMode: 'light',
+})
+</script>
+<style>
+html, body{
+  height: 100vh;
+}
+</style>

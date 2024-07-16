@@ -49,6 +49,9 @@
 </template>
 
 <script setup>
+    definePageMeta({
+        colorMode: 'light',
+    })
     const options = ref([]);
 
     const config = useRuntimeConfig();

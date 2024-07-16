@@ -10,6 +10,11 @@
     <Footer></Footer>
   </div>
 </template>
+<script setup>
+definePageMeta({
+  colorMode: 'light',
+})
+</script>
 <style>
 html, body{
   height: 100vh;

@@ -55,7 +55,9 @@
             </div>
             </template>
             <template #footer>
-                <button id="login-admin-navbar">Login Admin</button>
+                <NuxtLink :to="`/login`">
+                    <button id="login-admin-navbar">Login Admin</button>
+                </NuxtLink>
             </template>
 
             <div class="sidebar-links">

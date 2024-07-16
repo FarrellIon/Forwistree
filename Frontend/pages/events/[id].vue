@@ -152,6 +152,9 @@
 </template>
 
 <script setup>
+    definePageMeta({
+        colorMode: 'light',
+    })
     import dayjs from 'dayjs';
 
     const { id } = useRoute().params;

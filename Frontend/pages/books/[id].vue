@@ -104,6 +104,9 @@
 </template>
 
 <script setup>
+    definePageMeta({
+        colorMode: 'light',
+    })
     const { id } = useRoute().params;
     const config = useRuntimeConfig();
     const userValue = useCookie('userValue');
