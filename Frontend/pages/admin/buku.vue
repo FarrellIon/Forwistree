@@ -111,7 +111,7 @@
                     </div>
                 </template>
 
-                <UForm id="form-input" :state="state" class="space-y-4">
+                <UForm :state="state" class="space-y-4">
                     <UFormGroup label="Nama Buku" required>
                         <UInput v-model="state.nama_buku" placeholder="Masukkan nama buku..." icon="i-heroicons-book-open" />
                     </UFormGroup>
@@ -130,13 +130,19 @@
                         </UFormGroup>
                     </div>
 
-                    <UFormGroup label="Jumlah Halaman" required>
-                        <UInput v-model="state.jumlah_halaman" placeholder="Masukkan jumlah halaman buku..." icon="i-heroicons-bookmark" >
-                            <template #trailing>
-                                <span class="text-gray-500 dark:text-gray-400 text-xs">Halaman</span>
-                            </template>
-                        </UInput>
-                    </UFormGroup>
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; column-gap: 2rem;">
+                        <UFormGroup label="Jumlah Halaman" required>
+                            <UInput v-model="state.jumlah_halaman" placeholder="Masukkan jumlah halaman buku..." icon="i-heroicons-bookmark" >
+                                <template #trailing>
+                                    <span class="text-gray-500 dark:text-gray-400 text-xs">Halaman</span>
+                                </template>
+                            </UInput>
+                        </UFormGroup>
+                    
+                        <UFormGroup label="Link Shopee" required>
+                            <UInput v-model="state.link_shopee" placeholder="Masukkan link shopee..." icon="i-heroicons-link" />
+                        </UFormGroup>
+                    </div>
 
                     <div class="grid" style="grid-template-columns: 1fr 1fr; column-gap: 2rem;">
                         <UFormGroup label="Harga" required>
@@ -155,10 +161,6 @@
                             </UInput>
                         </UFormGroup>
                     </div>
-                    
-                    <UFormGroup label="Link Shopee" required>
-                        <UInput v-model="state.link_shopee" placeholder="Masukkan link shopee..." icon="i-heroicons-link" />
-                    </UFormGroup>
 
                     <div class="grid" style="grid-template-columns: 1fr 1fr; column-gap: 2rem;">
                         <UFormGroup label="Bestseller">
@@ -447,14 +449,23 @@ onMounted(() => {
         color: $primary;
     }
 
-    #admin-panel .hover\:bg-primary-50:hover{
+    #admin-panel .hover\:bg-primary-50:hover, .hover\:bg-primary-50:hover{
         --tw-bg-opacity: 1;
         background-color: #dbf6ff;
     }
 
-    #admin-panel .focus\:ring-primary-500:focus, #form-input .focus\:ring-primary-500:focus{
+    #admin-panel .focus\:ring-primary-500:focus, #form-input .focus\:ring-primary-500:focus, .focus\:ring-primary-500:focus{
         --tw-ring-opacity: 1;
         --tw-ring-color: #0F7292 !important;
+    }
+
+    #modal-add .sm\:max-w-lg{
+        max-width: 64rem;
+    }
+
+    .focus-visible\:ring-primary-500:focus-visible {
+        --tw-ring-opacity: 1;
+        --tw-ring-color: #0F7292;
     }
 </style>
 
