@@ -1,0 +1,503 @@
+<template>
+    <div id="admin-panel" style="display: grid; grid-template-columns: 1fr 9fr">
+        <AdminSidebar></AdminSidebar>
+        <UCard class="w-full" :ui="{
+            base: '',
+            ring: '',
+            divide: 'divide-y divide-gray-200 dark:divide-gray-700',
+            header: { padding: 'px-4 py-5' },
+            body: { padding: '', base: 'divide-y divide-gray-200 dark:divide-gray-700' },
+            footer: { padding: 'p-4' }
+        }">
+            <template #header>
+                <h2 class="font-semibold text-xl text-gray-900 dark:text-white leading-tight">
+                    Data Buku
+                </h2>
+            </template>
+
+            <!-- Filters -->
+            <div class="flex items-center justify-between gap-3 px-4 py-3">
+                <UInput v-model="search" icon="i-heroicons-magnifying-glass-20-solid" placeholder="Search..." />
+
+                <UButton icon="i-heroicons-plus" color="primary" size="xs" @click="isOpenAdd = true">
+                    Tambah Buku
+                </UButton>
+            </div>
+
+            <!-- Header and Action buttons -->
+            <div class="flex justify-between items-center w-full px-4 py-3">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-sm leading-5">Rows per page:</span>
+
+                    <USelect v-model="pageCount" :options="[5, 10, 20]" class="me-2 w-20" size="xs" />
+                </div>
+
+                <div class="flex gap-1.5 items-center">
+                    <USelectMenu v-model="selectedColumns" :options="columns" multiple>
+                        <UButton icon="i-heroicons-view-columns" color="gray" size="xs">
+                            Columns
+                        </UButton>
+                    </USelectMenu>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <UTable :rows="filteredBooks" :columns="columnsTable" :loading="pending"
+                sort-asc-icon="i-heroicons-arrow-up" sort-desc-icon="i-heroicons-arrow-down" sort-mode="manual"
+                class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }"
+                @select="select">
+
+                <template #jumlah_halaman-data="{ row }">
+                    {{ row.jumlah_halaman }} Halaman
+                </template>
+
+                <template #harga-data="{ row }">
+                    {{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(row.harga) }}
+                </template>
+
+                <template #diskon-data="{ row }">
+                    {{ row.diskon }}%
+                </template>
+
+                <template #status_bestseller-data="{ row }">
+                    <UBadge size="xs" :label="row.status_bestseller ? 'Bestseller' : '-'"
+                        :color="row.status_bestseller ? 'primary' : 'transparent'" />
+                </template>
+
+                <template #actions-data="{ row }">
+                    <UButton class="edit mr-2" icon="i-heroicons-pencil" size="2xs" color="orange" variant="outline"
+                        :ui="{ rounded: 'rounded-full' }" square  @click="edit($event)" />
+
+                    <UButton class="delete" icon="i-heroicons-trash" size="2xs" color="red" variant="outline"
+                        :ui="{ rounded: 'rounded-full' }" square />
+                </template>
+            </UTable>
+
+            <!-- Number of rows & Pagination -->
+            <template #footer>
+                <div class="flex flex-wrap justify-between items-center">
+                    <div>
+                        <span class="text-sm leading-5">
+                            Showing
+                            <span class="font-medium">{{ pageFrom }}</span>
+                            to
+                            <span class="font-medium">{{ pageTo }}</span>
+                            of
+                            <span class="font-medium">{{ pageTotal }}</span>
+                            results
+                        </span>
+                    </div>
+
+                    <UPagination v-model="page" :page-count="pageCount" :total="pageTotal" :ui="{
+                        wrapper: 'flex items-center gap-1',
+                        rounded: '!rounded-full min-w-[32px] justify-center',
+                        default: {
+                            activeButton: {
+                                variant: 'outline'
+                            }
+                        }
+                    }" />
+                </div>
+            </template>
+        </UCard>
+        <UModal id="modal-add" v-model="isOpenAdd">
+            <UCard :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
+                <template #header>
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">
+                            Tambah Buku
+                        </h3>
+                        <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1" @click="isOpenAdd = false" />
+                    </div>
+                </template>
+
+                <UForm id="form-input" :state="state" class="space-y-4">
+                    <UFormGroup label="Nama Buku" required>
+                        <UInput v-model="state.nama_buku" placeholder="Masukkan nama buku..." icon="i-heroicons-book-open" />
+                    </UFormGroup>
+
+                    <UFormGroup label="Deskripsi Buku" required>
+                        <UTextarea v-model="state.deskripsi_buku" placeholder="Masukkan deskripsi buku..." resize />
+                    </UFormGroup>
+                    
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; column-gap: 2rem;">
+                        <UFormGroup label="Kategori" required>
+                            <USelectMenu v-model="state.kategori" placeholder="Pilih kategori..." :options="kategoriOptions"/>
+                        </UFormGroup>
+
+                        <UFormGroup label="Penulis" required>
+                            <USelectMenu v-model="state.penulis" placeholder="Pilih penulis..." :options="penulisOptions"/>
+                        </UFormGroup>
+                    </div>
+
+                    <UFormGroup label="Jumlah Halaman" required>
+                        <UInput v-model="state.jumlah_halaman" placeholder="Masukkan jumlah halaman buku..." icon="i-heroicons-bookmark" >
+                            <template #trailing>
+                                <span class="text-gray-500 dark:text-gray-400 text-xs">Halaman</span>
+                            </template>
+                        </UInput>
+                    </UFormGroup>
+
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; column-gap: 2rem;">
+                        <UFormGroup label="Harga" required>
+                            <UInput type="number" v-model="state.harga" placeholder="Masukkan harga buku..." >
+                                <template #leading>
+                                    <span class="text-gray-500 dark:text-gray-400 text-xs">Rp</span>
+                                </template>
+                            </UInput>
+                        </UFormGroup>
+
+                        <UFormGroup label="Diskon">
+                            <UInput v-model="state.diskon" placeholder="Masukkan diskon..." >
+                                <template #trailing>
+                                    <span class="text-gray-500 dark:text-gray-400 text-xs">%</span>
+                                </template>
+                            </UInput>
+                        </UFormGroup>
+                    </div>
+                    
+                    <UFormGroup label="Link Shopee" required>
+                        <UInput v-model="state.link_shopee" placeholder="Masukkan link shopee..." icon="i-heroicons-link" />
+                    </UFormGroup>
+
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; column-gap: 2rem;">
+                        <UFormGroup label="Bestseller">
+                            <UCheckbox label="Tandai Buku Sebagai Bestseller" :model-value="false" />
+                        </UFormGroup>
+
+                        <UFormGroup label="Editor's Pick">
+                            <UCheckbox label="Tandai Buku Sebagai Editor's Pick" :model-value="false" />
+                        </UFormGroup>
+                    </div>
+
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; column-gap: 2rem;">
+                        <UFormGroup label="File Sinopsis">
+                            <UInput v-model="state.file_sinopsis" type="file" size="md" @change="uploadSinopsis($event)" icon="i-heroicons-folder" />
+                        </UFormGroup>
+
+                        <UFormGroup label="Gambar Buku">
+                            <UInput v-model="state.gambar_buku" type="file" size="md" @change="uploadGambar($event)" icon="i-heroicons-photo" multiple />
+                        </UFormGroup>
+                    </div>
+                </UForm>
+
+                <template #footer>
+                    <div class="flex items-center justify-end">
+                        <UButton color="grey" variant="soft" @click="isOpenAdd = false">Close</UButton>
+                        <UButton color="primary" type="submit" variant="solid" @click="insert">Tambah</UButton>
+                    </div>
+                </template>
+            </UCard>
+        </UModal>
+        <UModal v-model="isOpenStatus" prevent-close>
+            <UCard id="modal-card" :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
+                <template #header>
+                    <h3 style="font-weight: bold; font-size: 22px; text-align: center;">{{ modalHeader }}</h3>
+                </template>
+
+                <img :src="modalImage" alt="">
+                <p style="text-align: center; margin-bottom: 1rem;" v-html="modalContent"></p>
+                <div v-if="canCloseModal" class="flex justify-center">
+                    <UButton id="button-status" data-type="input" label="Tutup" @click="closeStatusModal($event)" />
+                </div>
+            </UCard>
+        </UModal>
+    </div>
+</template>
+
+<script setup lang="ts">
+definePageMeta({
+    colorMode: 'light',
+})
+
+// Columns
+const columns = [{
+    key: 'number',
+    label: '#',
+}, {
+    key: 'nama',
+    label: 'Nama',
+}, {
+    key: 'kategori.nama',
+    label: 'Kategori',
+}, {
+    key: 'jumlah_halaman',
+    label: 'Jumlah Halaman',
+}, {
+    key: 'harga',
+    label: 'Harga',
+}, {
+    key: 'diskon',
+    label: 'Diskon',
+}, {
+    key: 'status_bestseller',
+    label: 'Status Bestseller',
+}, {
+    key: 'actions',
+    label: 'Actions',
+}]
+
+const selectedColumns = ref(columns)
+const columnsTable = computed(() => columns.filter((column) => selectedColumns.value.includes(column)))
+
+// Selected Rows
+const selectedRows = ref([])
+
+function select(row) {
+    const index = selectedRows.value.findIndex((item) => item.id === row.id)
+    if (index === -1) {
+        selectedRows.value.push(row)
+    } else {
+        selectedRows.value.splice(index, 1)
+    }
+}
+
+const search = ref('')
+const pending = ref(true)
+const isOpenAdd = ref(false)
+
+// Pagination
+const sort = ref({ column: 'id', direction: 'asc' as const })
+const page = ref(1)
+const pageCount = ref(10)
+const pageTotal = ref(0)
+const pageFrom = computed(() => (page.value - 1) * pageCount.value + 1)
+const pageTo = computed(() => Math.min(page.value * pageCount.value, pageTotal.value))
+
+// Data
+let listBuku = ref([]);
+const config = useRuntimeConfig();
+const userValue = useCookie('userValue');
+
+// Form
+const kategoriOptions = ref([]);
+const penulisOptions = ref([]);
+const state = reactive({
+    nama_buku: undefined,
+    deskripsi_buku: undefined,
+    kategori: undefined,
+    penulis: undefined,
+    jumlah_halaman: undefined,
+    harga: undefined,
+    diskon: undefined,
+    link_shopee: undefined,
+    status_bestseller: false,
+    status_editors_pick: false,
+    file_sinopsis: undefined,
+    gambar_buku: []
+});
+
+//Modal Popup
+let isOpenStatus = ref(false);
+let canCloseModal = ref(false);
+let modalHeader = ref("Loading...");
+let modalContent = ref("Data sedang diinput...");
+let modalImage = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`);
+
+const uploadSinopsis = (files) => {
+    const file = files[0];
+    state.file_sinopsis = file;
+}
+
+const uploadGambar = (files) => {
+    state.gambar_buku = files;
+    // console.log(files);
+    // for (const file of files) {
+    //     state.gambar_buku.push(file);
+    // }
+}
+
+const fetchListBuku = async () => {
+    let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku`, {
+        headers: {
+            userValue: userValue,
+        }
+    });
+
+    if(fetchResult.data._rawValue){
+        listBuku.value = fetchResult.data._rawValue.buku.map((book, index) => ({
+          ...book,
+          number: index + 1
+        }));
+        pending.value = false;
+        pageTotal.value = listBuku.value.length
+    }else{
+        setTimeout(fetchListBuku, 2000)
+        listBuku.value = [];
+        pending.value = true;
+    }
+}
+
+const fetchKategori = async () => {
+    let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori`, {
+        headers: {
+            userValue: userValue.value,
+        }
+    });
+
+    if(fetchResult.data._rawValue){
+        if(fetchResult.data._rawValue.msg != 'Belum ada data kategori'){
+            const apiOptions = fetchResult.data._rawValue.kategori.map(item => {
+                return { label: item.nama, id: item.id };
+            });
+            kategoriOptions.value = kategoriOptions.value.concat(apiOptions);
+        }else{
+            kategoriOptions.value = [];
+        }
+    }else{
+        setTimeout(fetchKategori, 2000);
+        kategoriOptions.value = [];
+    }
+}
+
+const fetchPenulis = async () => {
+    let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/penulis`, {
+        headers: {
+            userValue: userValue.value,
+        }
+    });
+
+    if(fetchResult.data._rawValue){
+        if(fetchResult.data._rawValue.msg != 'Belum ada data penulis'){
+            const apiOptions = fetchResult.data._rawValue.penulis.map(item => {
+                return { label: item.nama_pena, id: item.id };
+            });
+            penulisOptions.value = penulisOptions.value.concat(apiOptions);
+        }else{
+            penulisOptions.value = [];
+        }
+    }else{
+        setTimeout(fetchPenulis, 2000);
+        penulisOptions.value = [];
+    }
+}
+
+const filteredBooks = computed(() => {
+    if (!search.value) {
+        return listBuku.value;
+    }
+    return listBuku.value.filter(book =>
+        book.nama.toLowerCase().includes(search.value.toLowerCase())
+    );
+});
+
+const closeStatusModal = (event) => {
+    isOpenStatus.value = false;
+}
+
+const edit = (event) => {
+    console.log(event);
+}
+
+const insert = async (event) => {
+    modalHeader.value = "Loading...";
+    modalContent.value = "Data sedang diinput...";
+    modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`;
+    canCloseModal.value = false;
+
+    const formData = new FormData();
+    formData.append('nama', state.nama_buku);
+    formData.append('deskripsi_buku', state.deskripsi_buku);
+    formData.append('kategori', state.kategori.id);
+    formData.append('penulis_buku', state.penulis.id);
+    formData.append('jumlah_halaman', state.jumlah_halaman);
+    formData.append('harga', state.harga);
+    formData.append('diskon', state.diskon);
+    formData.append('link_shopee', state.link_shopee);
+    formData.append('status_bestseller', state.status_bestseller);
+    formData.append('status_editors_pick', state.status_editors_pick);
+    formData.append('file_sinopsis', state.file_sinopsis);
+    for(let i = 0; i < state.gambar_buku.length; i++){
+        formData.append('gambar_buku', state.gambar_buku[i]);
+    }
+    
+    isOpenStatus.value = true;
+    const formResult = await $fetch(`${config.public.API_HOST}/api/database/collection/buku`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            userValue: userValue.value,
+        }
+    });
+    
+    if(formResult.msg == 'Berhasil'){
+        modalHeader.value = "Berhasil";
+        modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/success.png`;
+        modalContent.value = "Pengajuan berhasil dikirim, kami akan secepatnya hubungi melalui WhatsApp!";
+        canCloseModal.value = true;
+    }else{
+        modalHeader.value = "Gagal";
+        modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
+        modalContent.value = 'Pengajuan gagal dikirim, terjadi kesalahan : <br>'+formResult.msg.replace(/\n/g, '<br>');
+        canCloseModal.value = true;
+    }
+}
+
+onMounted(() => {
+    fetchListBuku();
+    fetchKategori();
+    fetchPenulis();
+});
+</script>
+
+<style lang="scss">
+    @import '../assets/scss/global/global';
+    #admin-panel .text-primary-500, #form-input .text-primary-500{
+        --tw-text-opacity: 1;
+        color: $primary;
+    }
+
+    #admin-panel .hover\:bg-primary-50:hover{
+        --tw-bg-opacity: 1;
+        background-color: #dbf6ff;
+    }
+
+    #admin-panel .focus\:ring-primary-500:focus, #form-input .focus\:ring-primary-500:focus{
+        --tw-ring-opacity: 1;
+        --tw-ring-color: #0F7292 !important;
+    }
+</style>
+
+<style lang="scss" scoped>
+    @import '../assets/scss/global/global';
+    .bg-primary-500{
+        background-color: $primary;
+    }
+    
+    button.bg-primary-500{
+        background-color: $primary;
+
+        &:hover{
+            background-color: $secondary;
+        }
+    }
+
+    #modal-card{
+        img{
+            width: 96px;
+            height: 96px;
+            margin: 0 auto;
+            margin-bottom: 1rem;
+        }
+    }
+
+    .edit{
+        transition: 0.3s all ease-out;
+        
+        &:hover{
+            color: $white;
+            background-color: rgb(249 115 22);
+            box-shadow: none;
+        }
+    }
+    
+    .delete{
+        transition: 0.3s all ease-out;
+        
+        &:hover{
+            color: $white;
+            background-color: rgb(239 68 68);
+            box-shadow: none;
+        }
+    }
+</style>

@@ -207,7 +207,9 @@ class BukuController{
             }
 
             if(errorMsg != ''){
-                res.status(500).send(errorMsg);
+                res.status(201).json({
+                    msg: errorMsg
+                });
                 return;
             }
             
