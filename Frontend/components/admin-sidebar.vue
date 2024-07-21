@@ -7,40 +7,40 @@
                     <span class="truncate relative">Manajemen Data</span>
                 </li>
                 <li>
-                <a class="sidebar-element" href="/components/vertical-navigation">
-                    <span class="i-heroicons-book-open icon"></span>
-                    <span class="truncate relative">Buku</span>
-                </a>
+                    <NuxtLink :class="{'sidebar-element': true, 'active': active == 'buku'}" :to="`/admin/buku`">
+                        <span class="i-heroicons-book-open icon"></span>
+                        <span class="truncate relative">Buku</span>
+                    </NuxtLink>
                 </li>
                 <li>
-                <a class="sidebar-element" href="/getting-started/installation">
-                    <span class="i-heroicons-calendar icon"></span>
-                    <span class="truncate relative">Events</span>
-                </a>
+                    <NuxtLink class="sidebar-element" :to="`/admin/events`">
+                        <span class="i-heroicons-calendar icon"></span>
+                        <span class="truncate relative">Events</span>
+                    </NuxtLink>
                 </li>
                 <li>
-                <a class="sidebar-element" href="/components/command-palette">
-                    <span class="i-heroicons-tag icon"></span>
-                    <span class="truncate relative">Kategori Buku</span>
-                </a>
+                    <NuxtLink class="sidebar-element" :to="`/admin/kategori-buku`">
+                        <span class="i-heroicons-tag icon"></span>
+                        <span class="truncate relative">Kategori Buku</span>
+                    </NuxtLink>
                 </li>
                 <li>
-                <a class="sidebar-element" href="/components/command-palette">
-                    <span class="i-heroicons-briefcase icon"></span>
-                    <span class="truncate relative">Mitra Event</span>
-                </a>
+                    <NuxtLink class="sidebar-element" :to="`/admin/mitra-event`">
+                        <span class="i-heroicons-briefcase icon"></span>
+                        <span class="truncate relative">Mitra Event</span>
+                    </NuxtLink>
                 </li>
                 <li>
-                <a class="sidebar-element" href="/components/command-palette">
-                    <span class="i-heroicons-pencil icon"></span>
-                    <span class="truncate relative">Penulis Buku</span>
-                </a>
+                    <NuxtLink class="sidebar-element" :to="`/admin/penulis-buku`">
+                        <span class="i-heroicons-pencil icon"></span>
+                        <span class="truncate relative">Penulis Buku</span>
+                    </NuxtLink>
                 </li>
                 <li>
-                <a class="sidebar-element" href="/components/command-palette">
-                    <span class="i-heroicons-document icon"></span>
-                    <span class="truncate relative">Pengajuan</span>
-                </a>
+                    <NuxtLink class="sidebar-element" :to="`/admin/pengajuan`">
+                        <span class="i-heroicons-document icon"></span>
+                        <span class="truncate relative">Pengajuan</span>
+                    </NuxtLink>
                 </li>
                 <div class="flex items-center align-center text-center p-2 w-full flex-row">
                 <div class="flex border-gray-200 dark:border-gray-800 w-full border-t border-solid"></div>
@@ -64,6 +64,17 @@
     </div>
 </template>
 
+<script>
+export default {
+    props: {
+        active: {
+            type: String,
+            required: false
+        }
+    }
+}
+</script>
+
 <script setup>
 </script>
 
@@ -72,7 +83,8 @@
 
 nav{
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-    height: 100vh;
+    height: 120svh;
+    position: fixed;
 }
 
 .logo{
@@ -103,7 +115,7 @@ nav{
     outline: none;
     transition: 0.15s all ease-out;
 
-    &:hover {
+    &:hover, &.active {
         color: $primary; /* hover:text-gray-900 */
 
         .icon{

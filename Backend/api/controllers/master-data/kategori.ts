@@ -53,7 +53,7 @@ class KategoriController{
                 .sort('-diskon');
 
             if(!buku){
-                res.status(404).send('Tidak ada buku yang ditemukan dalam kategori ini');
+                res.status(404).json('Tidak ada buku yang ditemukan dalam kategori ini');
                 return;
             }
 
@@ -63,7 +63,7 @@ class KategoriController{
                 .sort('-diskon');
 
             if(!listBuku){
-                res.status(404).send('Tidak ada buku yang ditemukan dalam kategori ini');
+                res.status(404).json('Tidak ada buku yang ditemukan dalam kategori ini');
                 return;
             }
 
@@ -85,6 +85,27 @@ class KategoriController{
             });
         } catch (error) {
             res.status(500).send("Terjadi kesalahan, error : " + error);
+            return;
+        }
+    }
+
+    edit = async(req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+            const decryptedId = decryptString(id);
+            const kategori = await MasterKategori.findById({ _id: decryptedId });
+
+            if (!kategori){
+                res.status(500).json('Tidak ditemukan kategori dengan id tersebut');
+                return;
+            }
+
+            res.status(200).json({
+                kategori,
+                msg: "Berhasil"
+            });
+        } catch (error) {
+            res.status(500).json("Terjadi kesalahan, error : " + error);
             return;
         }
     }
@@ -142,7 +163,8 @@ class KategoriController{
 
             const objectId = new Types.ObjectId();
             const encryptedId = encryptString(objectId.toString());
-            const adminObjectId = (req.user! as any)._id;
+            const adminEncryptedObjectId = decryptString(req.headers.uservalue as any);
+            const adminObjectId = new Types.ObjectId(adminEncryptedObjectId);
 
             const newKategoriObj = {
                 _id: objectId,

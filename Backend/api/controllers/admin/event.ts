@@ -28,7 +28,7 @@ class EventController{
             .sort('-createdAt');
 
             if (event?.length === 0) {
-                res.status(500).send('Belum ada data event');
+                res.status(500).json('Belum ada data event');
                 return;
             }
 
@@ -37,7 +37,7 @@ class EventController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(500).json("Terjadi kesalahan, error : " + error);
             return;
         }
     }
@@ -57,7 +57,7 @@ class EventController{
             .populate('gambar_event', 'image');
 
             if (!event){
-                res.status(500).send('Tidak ditemukan event dengan id tersebut');
+                res.status(500).json('Tidak ditemukan event dengan id tersebut');
                 return;
             }
 
@@ -66,7 +66,7 @@ class EventController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(500).json("Terjadi kesalahan, error : " + error);
             return;
         }
     }
@@ -82,9 +82,10 @@ class EventController{
             .populate('gambar_event');
 
             if (!event){
-                res.status(200).json({
+                res.status(201).json({
                     msg: "Tidak ada event yang sedang berlangsung"
                 });
+                return
             }
 
             res.status(200).json({
@@ -92,7 +93,7 @@ class EventController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(500).json("Terjadi kesalahan, error : " + error);
             return;
         }
     }

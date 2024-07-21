@@ -65,7 +65,11 @@
         });
 
         if(fetchResult.data._rawValue){
-            eventOngoing.value = fetchResult.data._rawValue.event;
+            if(fetchResult.data._rawValue.msg == 'Tidak ada event yang sedang berlangsung'){
+                eventOngoing.value = null;
+            }else{
+                eventOngoing.value = fetchResult.data._rawValue.event;
+            }
         }else{
             setTimeout(fetchEventOngoing, 2000)
             eventOngoing.value = null;

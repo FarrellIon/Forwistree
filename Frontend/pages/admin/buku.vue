@@ -1,7 +1,7 @@
 <template>
-    <div id="admin-panel" style="display: grid; grid-template-columns: 1fr 9fr">
-        <AdminSidebar></AdminSidebar>
-        <UCard class="w-full" :ui="{
+    <div id="admin-panel" style="display: flex;">
+        <AdminSidebar :active="'buku'" style="min-width: 158px"></AdminSidebar>
+        <UCard style="flex-grow: 1;" class="w-full" :ui="{
             base: '',
             ring: '',
             divide: 'divide-y divide-gray-200 dark:divide-gray-700',
@@ -19,7 +19,7 @@
             <div class="flex items-center justify-between gap-3 px-4 py-3">
                 <UInput v-model="search" icon="i-heroicons-magnifying-glass-20-solid" placeholder="Search..." />
 
-                <UButton icon="i-heroicons-plus" color="primary" size="xs" @click="isOpenAdd = true">
+                <UButton icon="i-heroicons-plus" color="primary" size="xs" @click="openAddModal">
                     Tambah Buku
                 </UButton>
             </div>
@@ -34,7 +34,7 @@
 
                 <div class="flex gap-1.5 items-center">
                     <USelectMenu v-model="selectedColumns" :options="columns" multiple>
-                        <UButton icon="i-heroicons-view-columns" color="gray" size="xs">
+                        <UButton icon="i-heroicons-view-columns" color="gray" size="xs" class="px-12">
                             Columns
                         </UButton>
                     </USelectMenu>
@@ -42,7 +42,7 @@
             </div>
 
             <!-- Table -->
-            <UTable :rows="filteredBooks" :columns="columnsTable" :loading="pending"
+            <UTable :rows="filteredBooks.slice((page - 1) * pageCount, ((page - 1) * pageCount) + pageCount)" :columns="columnsTable" :loading="pending"
                 sort-asc-icon="i-heroicons-arrow-up" sort-desc-icon="i-heroicons-arrow-down" sort-mode="manual"
                 class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }"
                 @select="select">
@@ -65,11 +65,9 @@
                 </template>
 
                 <template #actions-data="{ row }">
-                    <UButton class="edit mr-2" icon="i-heroicons-pencil" size="2xs" color="orange" variant="outline"
-                        :ui="{ rounded: 'rounded-full' }" square  @click="edit($event)" />
+                    <UButton class="edit mr-2" :data-id="row.id" icon="i-heroicons-pencil" size="2xs" color="orange" variant="outline" :ui="{ rounded: 'rounded-full' }" square @click="editData($event)" />
 
-                    <UButton class="delete" icon="i-heroicons-trash" size="2xs" color="red" variant="outline"
-                        :ui="{ rounded: 'rounded-full' }" square />
+                    <UButton class="delete" :data-id="row.id" icon="i-heroicons-trash" size="2xs" color="red" variant="outline" :ui="{ rounded: 'rounded-full' }" square @click="deleteData($event)" />
                 </template>
             </UTable>
 
@@ -100,12 +98,12 @@
                 </div>
             </template>
         </UCard>
-        <UModal id="modal-add" v-model="isOpenAdd">
-            <UCard :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
+        <UModal id="modal-add" v-model="isOpenAdd" prevent-close>
+            <UCard v-if="!loading" :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
                 <template #header>
                     <div class="flex items-center justify-between">
                         <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">
-                            Tambah Buku
+                            {{ mainModalTitle }}
                         </h3>
                         <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1" @click="isOpenAdd = false" />
                     </div>
@@ -164,32 +162,35 @@
 
                     <div class="grid" style="grid-template-columns: 1fr 1fr; column-gap: 2rem;">
                         <UFormGroup label="Bestseller">
-                            <UCheckbox label="Tandai Buku Sebagai Bestseller" :model-value="false" />
+                            <UCheckbox label="Tandai Buku Sebagai Bestseller" v-model="state.status_bestseller"/>
                         </UFormGroup>
 
                         <UFormGroup label="Editor's Pick">
-                            <UCheckbox label="Tandai Buku Sebagai Editor's Pick" :model-value="false" />
+                            <UCheckbox label="Tandai Buku Sebagai Editor's Pick" v-model="state.status_editors_pick"/>
                         </UFormGroup>
                     </div>
 
                     <div class="grid" style="grid-template-columns: 1fr 1fr; column-gap: 2rem;">
-                        <UFormGroup label="File Sinopsis">
-                            <UInput v-model="state.file_sinopsis" type="file" size="md" @change="uploadSinopsis($event)" icon="i-heroicons-folder" />
+                        <UFormGroup label="File Sinopsis" :required="!isEditing">
+                            <UInput type="file" size="md" @change="uploadSinopsis($event)" icon="i-heroicons-folder" />
                         </UFormGroup>
 
-                        <UFormGroup label="Gambar Buku">
-                            <UInput v-model="state.gambar_buku" type="file" size="md" @change="uploadGambar($event)" icon="i-heroicons-photo" multiple />
+                        <UFormGroup label="Gambar Buku" :required="!isEditing">
+                            <UInput type="file" size="md" @change="uploadGambar($event)" icon="i-heroicons-photo" multiple />
                         </UFormGroup>
                     </div>
                 </UForm>
 
                 <template #footer>
                     <div class="flex items-center justify-end">
-                        <UButton color="grey" variant="soft" @click="isOpenAdd = false">Close</UButton>
-                        <UButton color="primary" type="submit" variant="solid" @click="insert">Tambah</UButton>
+                        <UButton color="grey" variant="soft" @click="closeAddModal">Tutup</UButton>
+                        <UButton color="primary" :data-tipe="dataTipeSubmit" type="submit" variant="solid" @click="insert">{{ mainModalButton }}</UButton>
                     </div>
                 </template>
             </UCard>
+            <div v-else>
+                <h3 class="font-bold text-center text-3xl my-4">{{ editLoadingText }}</h3>
+            </div>
         </UModal>
         <UModal v-model="isOpenStatus" prevent-close>
             <UCard id="modal-card" :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
@@ -200,7 +201,24 @@
                 <img :src="modalImage" alt="">
                 <p style="text-align: center; margin-bottom: 1rem;" v-html="modalContent"></p>
                 <div v-if="canCloseModal" class="flex justify-center">
-                    <UButton id="button-status" data-type="input" label="Tutup" @click="closeStatusModal($event)" />
+                    <UButton data-type="input" label="Tutup" @click="closeStatusModal($event)" />
+                </div>
+            </UCard>
+        </UModal>
+        <UModal v-model="isOpenDelete" prevent-close>
+            <UCard id="modal-delete-card" :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
+                <template #header>
+                    <h3 style="font-weight: bold; font-size: 22px; text-align: center;">{{ modalDeleteHeader }}</h3>
+                </template>
+
+                <img :src="modalDeleteImage" alt="">
+                <p style="text-align: center; margin-bottom: 1rem;" v-html="modalDeleteContent"></p>
+                <div v-if="modalDeleteConfirm" class="flex justify-center" style="gap: 1rem;">
+                    <UButton data-type="input" label="Tutup" variant="soft" color="gray" @click="closeStatusModalDelete($event)" />
+                    <UButton data-type="input" label="Hapus Data" color="red" @click="deleteDataAPI($event)" />
+                </div>
+                <div v-if="canCloseModalDelete" class="flex justify-center">
+                    <UButton data-type="input" label="Tutup" @click="closeStatusModalDelete($event)" />
                 </div>
             </UCard>
         </UModal>
@@ -257,6 +275,7 @@ function select(row) {
 const search = ref('')
 const pending = ref(true)
 const isOpenAdd = ref(false)
+const isOpenDelete = ref(false)
 
 // Pagination
 const sort = ref({ column: 'id', direction: 'asc' as const })
@@ -290,11 +309,27 @@ const state = reactive({
 });
 
 //Modal Popup
+let loading = ref(false);
+let isEditing = ref(false);
+let mainModalTitle = ref('Tambah Buku');
+let mainModalButton = ref('Tambah');
+let editLoadingText = ref('Loading...');
+let dataTipeSubmit = ref('insert');
+
 let isOpenStatus = ref(false);
 let canCloseModal = ref(false);
 let modalHeader = ref("Loading...");
 let modalContent = ref("Data sedang diinput...");
 let modalImage = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`);
+
+let canCloseModalDelete = ref(false);
+let modalDeleteHeader = ref("Yakin ingin menghapus data?");
+let modalDeleteContent = ref('');
+let modalDeleteConfirm = ref(true);
+let modalDeleteImage = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/question.png`);
+
+let pendingEdit;
+let pendingDelete;
 
 const uploadSinopsis = (files) => {
     const file = files[0];
@@ -303,10 +338,6 @@ const uploadSinopsis = (files) => {
 
 const uploadGambar = (files) => {
     state.gambar_buku = files;
-    // console.log(files);
-    // for (const file of files) {
-    //     state.gambar_buku.push(file);
-    // }
 }
 
 const fetchListBuku = async () => {
@@ -383,15 +414,116 @@ const filteredBooks = computed(() => {
     );
 });
 
-const closeStatusModal = (event) => {
-    isOpenStatus.value = false;
+const openAddModal = () => {
+    resetForm();
+    isOpenAdd.value = true;
 }
 
-const edit = (event) => {
-    console.log(event);
+const closeAddModal = () => {
+    resetForm();
+    isOpenAdd.value = false;
+}
+
+const closeStatusModal = (event) => {
+    isOpenStatus.value = false;
+    isOpenAdd.value = true;
+}
+
+const closeStatusModalDelete = (event) => {
+    isOpenDelete.value = false;
+
+    canCloseModalDelete.value = false;
+    modalDeleteHeader.value = "Yakin ingin menghapus data?";
+    modalDeleteContent.value = '';
+    modalDeleteConfirm.value = true;
+    modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/question.png`;
+}
+
+const editData = (event) => {
+    if(event.target.getAttribute('data-id')){
+        pendingEdit = event.target.getAttribute('data-id');
+    }else if(event.target.parentElement.getAttribute('data-id')){
+        pendingEdit = event.target.parentElement.getAttribute('data-id');
+    }
+    isOpenAdd.value = true;
+    isEditing.value = true;
+    loading.value = true;
+    mainModalTitle.value = 'Edit Buku';
+    mainModalButton.value = 'Edit';
+    dataTipeSubmit.value = 'edit';
+
+    fetchBukuDetail(pendingEdit);
+}
+
+const fetchBukuDetail = async (id_buku) => {
+    let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/${id_buku}`, {
+        headers: {
+            userValue: userValue,
+        }
+    });
+
+    if(fetchResult.data._rawValue){
+        if(fetchResult.data._rawValue.msg == 'Berhasil'){
+            let buku = fetchResult.data._rawValue.buku;
+            state.nama_buku = buku.nama;
+            state.deskripsi_buku = buku.deskripsi;
+            state.kategori = {'label': buku.kategori.nama, 'id': buku.kategori.id};
+            state.penulis = {'label': buku.pivot_penulis_buku[0].penulis.nama_pena, 'id': buku.pivot_penulis_buku[0].penulis.id};
+            state.jumlah_halaman = buku.jumlah_halaman;
+            state.harga = buku.harga;
+            state.diskon = buku.diskon;
+            state.link_shopee = buku.link_shopee;
+            state.status_bestseller = buku.status_bestseller;
+            state.status_editors_pick = buku.status_editors_pick;
+
+            loading.value = false;
+        }else{
+            editLoadingText.value = 'Terjadi kesalahan, silahkan hubungi admin!';
+        }
+    }else{
+        setTimeout(fetchBukuDetail, 2000)
+    }
+}
+
+const deleteData = (event) => {
+    if(event.target.getAttribute('data-id')){
+        pendingDelete = event.target.getAttribute('data-id');
+    }else if(event.target.parentElement.getAttribute('data-id')){
+        pendingDelete = event.target.parentElement.getAttribute('data-id');
+    }
+    isOpenDelete.value = true;
+}
+
+const deleteDataAPI = async (event) => {
+    modalDeleteConfirm.value = false;
+    modalDeleteHeader.value = "Loading...";
+    modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`;
+    modalDeleteContent.value = "Data sedang dihapus...";
+    
+    const formResult = await $fetch(`${config.public.API_HOST}/api/database/collection/buku/${pendingDelete}`, {
+        method: 'DELETE',
+        headers: {
+            userValue: userValue.value,
+        }
+    });
+    
+    if(formResult.msg == 'Berhasil'){
+        modalDeleteHeader.value = "Berhasil";
+        modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/success.png`;
+        modalDeleteContent.value = "Data berhasil dihapus";
+        canCloseModalDelete.value = true;
+        
+        fetchListBuku();
+    }else{
+        modalDeleteHeader.value = "Gagal";
+        modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
+        modalDeleteContent.value = 'Data gagal dihapus, terjadi kesalahan : <br>'+formResult.msg.replace(/\n/g, '<br>');
+        canCloseModalDelete.value = true;
+    }
 }
 
 const insert = async (event) => {
+    isOpenStatus.value = true;
     modalHeader.value = "Loading...";
     modalContent.value = "Data sedang diinput...";
     modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`;
@@ -399,9 +531,13 @@ const insert = async (event) => {
 
     const formData = new FormData();
     formData.append('nama', state.nama_buku);
-    formData.append('deskripsi_buku', state.deskripsi_buku);
-    formData.append('kategori', state.kategori.id);
-    formData.append('penulis_buku', state.penulis.id);
+    formData.append('deskripsi', state.deskripsi_buku);
+    if(state.kategori){
+        formData.append('kategori', state.kategori.id);
+    }
+    if(state.penulis){
+        formData.append('penulis_buku', state.penulis.id);
+    }
     formData.append('jumlah_halaman', state.jumlah_halaman);
     formData.append('harga', state.harga);
     formData.append('diskon', state.diskon);
@@ -413,26 +549,71 @@ const insert = async (event) => {
         formData.append('gambar_buku', state.gambar_buku[i]);
     }
     
-    isOpenStatus.value = true;
-    const formResult = await $fetch(`${config.public.API_HOST}/api/database/collection/buku`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            userValue: userValue.value,
+    if(event.target.getAttribute('data-tipe') == 'insert'){
+        const formResult = await $fetch(`${config.public.API_HOST}/api/database/collection/buku`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                userValue: userValue.value,
+            }
+        });
+        
+        if(formResult.msg == 'Berhasil'){
+            modalHeader.value = "Berhasil";
+            modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/success.png`;
+            modalContent.value = "Data berhasil diinput";
+            canCloseModal.value = true;
+            
+            fetchListBuku();
+        }else{
+            modalHeader.value = "Gagal";
+            modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
+            modalContent.value = 'Data gagal diinput, terjadi kesalahan : <br>'+formResult.msg.replace(/\n/g, '<br>');
+            canCloseModal.value = true;
         }
-    });
-    
-    if(formResult.msg == 'Berhasil'){
-        modalHeader.value = "Berhasil";
-        modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/success.png`;
-        modalContent.value = "Pengajuan berhasil dikirim, kami akan secepatnya hubungi melalui WhatsApp!";
-        canCloseModal.value = true;
     }else{
-        modalHeader.value = "Gagal";
-        modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
-        modalContent.value = 'Pengajuan gagal dikirim, terjadi kesalahan : <br>'+formResult.msg.replace(/\n/g, '<br>');
-        canCloseModal.value = true;
+        const formResult = await $fetch(`${config.public.API_HOST}/api/database/collection/buku/${pendingEdit}`, {
+            method: 'PATCH',
+            body: formData,
+            headers: {
+                userValue: userValue.value,
+            }
+        });
+        
+        if(formResult.msg == 'Berhasil'){
+            modalHeader.value = "Berhasil";
+            modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/success.png`;
+            modalContent.value = "Data berhasil diedit";
+            canCloseModal.value = true;
+
+            fetchListBuku();
+        }else{
+            modalHeader.value = "Gagal";
+            modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
+            modalContent.value = 'Data gagal diedit, terjadi kesalahan : <br>'+formResult.msg.replace(/\n/g, '<br>');
+            canCloseModal.value = true;
+        }
     }
+}
+
+const resetForm = async () => {
+    state.nama_buku = undefined;
+    state.deskripsi_buku = undefined;
+    state.kategori = undefined;
+    state.penulis = undefined;
+    state.jumlah_halaman = undefined;
+    state.harga = undefined;
+    state.diskon = undefined;
+    state.link_shopee = undefined;
+    state.status_bestseller = false;
+    state.status_editors_pick = false;
+    state.file_sinopsis = undefined;
+    state.gambar_buku = [];
+
+    isEditing.value = false;
+    mainModalTitle.value = 'Tambah Buku';
+    mainModalButton.value = 'Tambah';
+    dataTipeSubmit.value = 'insert';
 }
 
 onMounted(() => {
@@ -444,7 +625,7 @@ onMounted(() => {
 
 <style lang="scss">
     @import '../assets/scss/global/global';
-    #admin-panel .text-primary-500, #form-input .text-primary-500{
+    #admin-panel .text-primary-500, #form-input .text-primary-500, .text-primary-500{
         --tw-text-opacity: 1;
         color: $primary;
     }
@@ -483,7 +664,7 @@ onMounted(() => {
         }
     }
 
-    #modal-card{
+    #modal-card, #modal-delete-card{
         img{
             width: 96px;
             height: 96px;

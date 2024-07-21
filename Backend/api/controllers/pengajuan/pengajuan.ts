@@ -104,7 +104,7 @@ class PengajuanController{
             }
 
             if(errorMsg != ''){
-                res.status(201).json({
+                res.status(500).json({
                     msg: errorMsg
                 });
                 return;
@@ -120,7 +120,7 @@ class PengajuanController{
             //Upload Sinopsis
             const validatorMsg: string = this.validateInputs(req);
             if(validatorMsg != ''){
-                res.status(201).json({
+                res.status(500).json({
                     msg: validatorMsg
                 });
                 return;
@@ -159,7 +159,9 @@ class PengajuanController{
                         file_sinopsis: file_sinopsis_url
                     }
                 }else{
-                    res.status(500).send('Pengaju tidak ditemukan');
+                    res.status(500).json({
+                        msg: 'Pengaju tidak ditemukan'
+                    });
                     return;
                 }
             }else{
@@ -174,7 +176,9 @@ class PengajuanController{
                 const newPenulis = await Pengaju.create(newPenulisObj);
 
                 if(!newPenulis){
-                    res.status(500).send('Data pengaju gagal dibuat');
+                    res.status(500).json({
+                        msg: 'Data pengaju gagal dibuat'
+                    });
                     return;
                 }
 
@@ -193,7 +197,9 @@ class PengajuanController{
             const newPengajuan = await PengajuanPenerbitan.create(newPengajuanObj);
 
             if(!newPengajuan){
-                res.status(500).send('Data pengajuan gagal dibuat');
+                res.status(500).json({
+                    msg: 'Data pengajuan gagal dibuat'
+                });
                 return;
             }
 
@@ -204,7 +210,9 @@ class PengajuanController{
                 penulisRelationObj.pengajuan_penerbitan.push(newPengajuanObj);
                 penulisRelationObj.save();
             }else{
-                res.status(500).send('Relasi penulis tidak ditemukan!');
+                res.status(500).json({
+                    msg: 'Relasi penulis tidak ditemukan!'
+                });
                 return;
             }
 
@@ -215,7 +223,9 @@ class PengajuanController{
             });
         } catch (error) {
             console.log(error);
-            res.status(500).send("Terjadi kesalahan, error : " + JSON.stringify(error));
+            res.status(500).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }

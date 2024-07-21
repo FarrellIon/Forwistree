@@ -97,6 +97,9 @@
             </div>
         </div>
     </div>
+    <div v-else-if="bukuTidakDitemukan">
+        <p class="text-center" style="font-size: 44px; margin: 8rem 0">Buku tidak ditemukan, silahkan cek link kembali!</p>
+    </div>
     <div class="loading" v-else>
         <p class="text-center" style="font-size: 44px; margin: 8rem 0">Loading...</p>
     </div>
@@ -107,6 +110,7 @@
     definePageMeta({
         colorMode: 'light',
     })
+    const bukuTidakDitemukan = ref(false);
     const { id } = useRoute().params;
     const config = useRuntimeConfig();
     const userValue = useCookie('userValue');
@@ -126,8 +130,12 @@
         });
 
         if(fetchResult.data._rawValue){
-            bukuDetail.value = fetchResult.data._rawValue.buku;
-            mainImage.value = bukuDetail.value.gambar_buku[0].image;
+            if(fetchResult.data._rawValue.msg == 'Berhasil'){
+                bukuDetail.value = fetchResult.data._rawValue.buku;
+                mainImage.value = bukuDetail.value.gambar_buku[0].image;
+            }else{
+                bukuTidakDitemukan.value = true;
+            }
         }else{
             setTimeout(fetchBukuDetail, 2000)
             bukuDetail.value = null;
