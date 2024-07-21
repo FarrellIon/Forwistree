@@ -28,7 +28,9 @@ class PengajuanController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -39,7 +41,9 @@ class PengajuanController{
             .sort('-createdAt');
 
             if (pengajuan?.length === 0) {
-                res.status(500).send('Belum ada data pengajuan');
+                res.status(201).json({
+                    msg: 'Belum ada data pengajuan'
+                });
                 return;
             }
 
@@ -48,7 +52,9 @@ class PengajuanController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -60,7 +66,9 @@ class PengajuanController{
             const pengajuan = await PengajuanPenerbitan.findById({ _id: decryptedId });
 
             if (!pengajuan){
-                res.status(500).send('Tidak ditemukan pengajuan dengan id tersebut');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan pengajuan dengan id tersebut'
+                });
                 return;
             }
 
@@ -69,7 +77,9 @@ class PengajuanController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -104,7 +114,7 @@ class PengajuanController{
             }
 
             if(errorMsg != ''){
-                res.status(500).json({
+                res.status(201).json({
                     msg: errorMsg
                 });
                 return;
@@ -120,7 +130,7 @@ class PengajuanController{
             //Upload Sinopsis
             const validatorMsg: string = this.validateInputs(req);
             if(validatorMsg != ''){
-                res.status(500).json({
+                res.status(201).json({
                     msg: validatorMsg
                 });
                 return;
@@ -159,7 +169,7 @@ class PengajuanController{
                         file_sinopsis: file_sinopsis_url
                     }
                 }else{
-                    res.status(500).json({
+                    res.status(201).json({
                         msg: 'Pengaju tidak ditemukan'
                     });
                     return;
@@ -176,7 +186,7 @@ class PengajuanController{
                 const newPenulis = await Pengaju.create(newPenulisObj);
 
                 if(!newPenulis){
-                    res.status(500).json({
+                    res.status(201).json({
                         msg: 'Data pengaju gagal dibuat'
                     });
                     return;
@@ -197,7 +207,7 @@ class PengajuanController{
             const newPengajuan = await PengajuanPenerbitan.create(newPengajuanObj);
 
             if(!newPengajuan){
-                res.status(500).json({
+                res.status(201).json({
                     msg: 'Data pengajuan gagal dibuat'
                 });
                 return;
@@ -210,8 +220,8 @@ class PengajuanController{
                 penulisRelationObj.pengajuan_penerbitan.push(newPengajuanObj);
                 penulisRelationObj.save();
             }else{
-                res.status(500).json({
-                    msg: 'Relasi penulis tidak ditemukan!'
+                res.status(201).json({
+                    msg: 'Relasi penulis tidak ditemukan'
                 });
                 return;
             }
@@ -222,8 +232,7 @@ class PengajuanController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            console.log(error);
-            res.status(500).json({
+            res.status(201).json({
                 msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
             });
             return;
@@ -247,20 +256,26 @@ class PengajuanController{
             const pengajuanId = pengajuan?._id;
 
             if (!pengajuan){
-                res.status(500).send('Tidak ditemukan pengajuan dengan id tersebut!');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan pengajuan dengan id tersebut'
+                });
                 return;
             }
             
 
             //Validators
             if (Object.keys(req.body).length === 0){
-                res.status(500).send('Belum ada data yang diinput');
+                res.status(201).json({
+                    msg: 'Belum ada data yang diinput'
+                });
                 return;
             }
 
             const validatorMsg: string = this.validateInputs(req);
             if(validatorMsg != ''){
-                res.status(500).send(validatorMsg);
+                res.status(201).json({
+                    msg: validatorMsg
+                });
                 return;
             }
 
@@ -333,7 +348,9 @@ class PengajuanController{
                 const pengajuObj = await Pengaju.findByIdAndUpdate({ _id: pengajuId }, pengajuInsert, { new: true })
 
                 if(!pengajuObj){
-                    res.status(500).send('Data pengaju gagal diupdate');
+                    res.status(201).json({
+                        msg: 'Data pengaju gagal diupdate'
+                    });
                     return;
                 }
 
@@ -345,7 +362,9 @@ class PengajuanController{
             const updatedPengajuan = await PengajuanPenerbitan.findByIdAndUpdate({ _id: decryptedId }, newPengajuanObj, { new: true });
 
             if(!updatedPengajuan){
-                res.status(500).send('Tidak ditemukan pengajuan dengan id tersebut!');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan pengajuan dengan id tersebut'
+                });
                 return;
             }
 
@@ -358,7 +377,9 @@ class PengajuanController{
                     oldPengajuRelationObj.pengajuan_penerbitan = oldPengajuRelationObj?.pengajuan_penerbitan.filter(item => item.toString() !== pengajuanId?.toString())
                     oldPengajuRelationObj.save();
                 }else{
-                    res.status(500).send('Relasi pengaju tidak ditemukan!');
+                    res.status(201).json({
+                        msg: 'Relasi pengaju tidak ditemukan'
+                    });
                     return;
                 }
 
@@ -370,7 +391,9 @@ class PengajuanController{
                     newPengajuRelationObj.pengajuan_penerbitan.push(updatedPengajuan._id);
                     newPengajuRelationObj.save();
                 }else{
-                    res.status(500).send('Relasi pengaju tidak ditemukan!');
+                    res.status(201).json({
+                        msg: 'Relasi pengaju tidak ditemukan'
+                    });
                     return;
                 }
             }
@@ -380,7 +403,9 @@ class PengajuanController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + JSON.stringify(error));
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -392,7 +417,9 @@ class PengajuanController{
             const pengajuan = await PengajuanPenerbitan.findByIdAndDelete({ _id: decryptedId });
 
             if (!pengajuan){
-                res.status(500).send('Tidak ditemukan pengajuan dengan id tersebut!');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan pengajuan dengan id tersebut'
+                });
                 return;
             }
 
@@ -401,7 +428,9 @@ class PengajuanController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }

@@ -21,8 +21,7 @@ class EventController{
                 path: 'pivot_mitra_event',
                 select: 'mitra',
                 populate: {
-                    path: 'mitra',
-                    select: 'nama'
+                    path: 'mitra'
                 }
             })
             .sort('-createdAt');
@@ -37,7 +36,9 @@ class EventController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).json("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -66,7 +67,9 @@ class EventController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).json("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -93,7 +96,9 @@ class EventController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).json("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -122,7 +127,9 @@ class EventController{
 
             const validatorMsg: string = this.validateInputs(req);
             if(validatorMsg != ''){
-                res.status(500).send(validatorMsg);
+                res.status(201).json({
+                    msg: validatorMsg
+                });
                 return;
             }
             
@@ -131,7 +138,9 @@ class EventController{
             }
 
             if(errorMsg != ''){
-                res.status(500).send(errorMsg);
+                res.status(201).json({
+                    msg: errorMsg
+                });
                 return;
             }
             
@@ -149,7 +158,8 @@ class EventController{
             //Insert Event
             const objectId = new Types.ObjectId();
             const encryptedId = encryptString(objectId.toString());
-            const adminObjectId = (req.user! as any)._id;
+            const adminEncryptedObjectId = decryptString(req.headers.uservalue as any);
+            const adminObjectId = new Types.ObjectId(adminEncryptedObjectId);
 
             const newEventObj = {
                 _id: objectId,
@@ -167,6 +177,7 @@ class EventController{
             const unique_id = crypto.randomBytes(8).toString("hex");
             const nama_folder = 'forwistree/event/'+judul.replace(/ /g,"_")+'_'+unique_id;
             const gambar_event_array = Array.isArray(gambar_event) ? gambar_event : [gambar_event];
+            console.log(gambar_event_array);
             gambar_event_array.forEach(async (gambar: GambarEvent) => {
                 const uploadGambarResult: UploadResult = await new Promise((resolve, reject) => {
                     cloudinary.v2.uploader.upload_stream({folder: nama_folder}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
@@ -198,7 +209,9 @@ class EventController{
                     eventRelationObj.gambar_event.push(newGambarEventObj as any);
                     eventRelationObj.save();
                 }else{
-                    res.status(500).send('Relasi event tidak ditemukan!');
+                    res.status(201).json({
+                        msg: 'Relasi event tidak ditemukan'
+                    });
                     return;
                 }
             });
@@ -228,7 +241,9 @@ class EventController{
                     eventRelationObj.pivot_mitra_event.push(pivotMitraEventObjectId);
                     eventRelationObj.save();
                 }else{
-                    res.status(500).send('Relasi event tidak ditemukan!');
+                    res.status(201).json({
+                        msg: 'Relasi event tidak ditemukan'
+                    });
                     return;
                 }
                 
@@ -237,7 +252,9 @@ class EventController{
                     mitraRelationObj.pivot_mitra_event.push(pivotMitraEventObjectId);
                     mitraRelationObj.save();
                 }else{
-                    res.status(500).send('Relasi mitra tidak ditemukan!');
+                    res.status(201).json({
+                        msg: 'Relasi mitra tidak ditemukan'
+                    });
                     return;
                 }
             });
@@ -249,7 +266,9 @@ class EventController{
                 adminRelationObj.events.push(newEventObj);
                 adminRelationObj.save();
             }else{
-                res.status(500).send('Relasi admin tidak ditemukan!');
+                res.status(201).json({
+                    msg: 'Relasi admin tidak ditemukan'
+                });
                 return;
             }
 
@@ -259,7 +278,9 @@ class EventController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + JSON.stringify(error));
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -280,20 +301,26 @@ class EventController{
             const event = await Events.findById({ _id: decryptedId });
 
             if (!event){
-                res.status(500).send('Tidak ditemukan event dengan id tersebut!');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan event dengan id tersebut'
+                });
                 return;
             }
             
 
             //Validators
             if (Object.keys(req.body).length === 0){
-                res.status(500).send('Belum ada data yang diinput');
+                res.status(201).json({
+                    msg: 'Belum ada data yang diinput'
+                });
                 return;
             }
 
             const validatorMsg: string = this.validateInputs(req);
             if(validatorMsg != ''){
-                res.status(500).send(validatorMsg);
+                res.status(201).json({
+                    msg: validatorMsg
+                });
                 return;
             }
 
@@ -353,7 +380,9 @@ class EventController{
             const updatedMitra = await Events.findByIdAndUpdate({ _id: decryptedId }, newEventObj, { new: true });
 
             if(!updatedMitra){
-                res.status(500).send('Tidak ditemukan mitra dengan id tersebut!');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan mitra dengan id tersebut'
+                });
                 return;
             }
 
@@ -386,7 +415,9 @@ class EventController{
     
                 const updatedGambarEvent = await GambarEvent.create(newGambarEventObj);
                 if(!updatedGambarEvent){
-                    res.status(500).send('Gagal upload gambar event!');
+                    res.status(201).json({
+                        msg: 'Gagal upload gambar event'
+                    });
                     return;
                 }
 
@@ -400,7 +431,9 @@ class EventController{
                     eventRelationObj.gambar_event.push(newGambarEventObj as any);
                     eventRelationObj.save();
                 }else{
-                    res.status(500).send('Relasi event tidak ditemukan!');
+                    res.status(201).json({
+                        msg: 'Relasi event tidak ditemukan'
+                    });
                     return;
                 }
             });
@@ -422,13 +455,17 @@ class EventController{
                             mitraRelationObj.pivot_mitra_event = [];
                             mitraRelationObj.save();
                         }else{
-                            res.status(500).send('Relasi mitra tidak ditemukan!');
+                            res.status(201).json({
+                                msg: 'Relasi mitra tidak ditemukan'
+                            });
                             return;
                         }
                     }
                 });
             }else{
-                res.status(500).send('Event tidak ditemukan!');
+                res.status(201).json({
+                    msg: 'Event tidak ditemukan'
+                });
                 return;
             }
             
@@ -453,7 +490,9 @@ class EventController{
     
                 const updatedPivotMitraEvent = await PivotMitraEvent.create(newPivotMitraEventObj);
                 if(!updatedPivotMitraEvent){
-                    res.status(500).send('Gagal upload gambar event!');
+                    res.status(201).json({
+                        msg: 'Gagal upload gambar event'
+                    });
                     return;
                 }
 
@@ -466,7 +505,9 @@ class EventController{
                     eventRelationObj.pivot_mitra_event.push(pivotMitraEventObjectId);
                     eventRelationObj.save();
                 }else{
-                    res.status(500).send('Relasi event tidak ditemukan!');
+                    res.status(201).json({
+                        msg: 'Relasi event tidak ditemukan'
+                    });
                     return;
                 }
                 
@@ -474,7 +515,9 @@ class EventController{
                     mitraRelationObj.pivot_mitra_event.push(pivotMitraEventObjectId);
                     mitraRelationObj.save();
                 }else{
-                    res.status(500).send('Relasi mitra tidak ditemukan!');
+                    res.status(201).json({
+                        msg: 'Relasi mitra tidak ditemukan'
+                    });
                     return;
                 }
             });
@@ -484,7 +527,9 @@ class EventController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + JSON.stringify(error));
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -496,7 +541,9 @@ class EventController{
             const event = await Events.findByIdAndDelete({ _id: decryptedId });
 
             if (!event){
-                res.status(500).send('Tidak ditemukan event dengan id tersebut!');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan event dengan id tersebut'
+                });
                 return;
             }
 
@@ -505,7 +552,9 @@ class EventController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }

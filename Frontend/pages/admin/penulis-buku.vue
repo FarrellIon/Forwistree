@@ -1,6 +1,6 @@
 <template>
     <div id="admin-panel" style="display: flex;">
-        <AdminSidebar :active="'kategori-buku'" style="min-width: 158px"></AdminSidebar>
+        <AdminSidebar :active="'penulis-buku'" style="min-width: 158px"></AdminSidebar>
         <UCard style="flex-grow: 1;" class="w-full" :ui="{
             base: '',
             ring: '',
@@ -11,7 +11,7 @@
         }">
             <template #header>
                 <h2 class="font-semibold text-xl text-gray-900 dark:text-white leading-tight">
-                    Data Kategori Buku
+                    Data Penulis Buku
                 </h2>
             </template>
 
@@ -20,7 +20,7 @@
                 <UInput v-model="search" icon="i-heroicons-magnifying-glass-20-solid" placeholder="Search..." />
 
                 <UButton icon="i-heroicons-plus" color="primary" size="xs" @click="openAddModal">
-                    Tambah Kategori
+                    Tambah Penulis
                 </UButton>
             </div>
 
@@ -42,7 +42,7 @@
             </div>
 
             <!-- Table -->
-            <UTable :rows="filteredKategori.slice((page - 1) * pageCount, ((page - 1) * pageCount) + pageCount)" :columns="columnsTable" :loading="pending" :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: 'Tidak ada data.' }"
+            <UTable :rows="filteredPenulis.slice((page - 1) * pageCount, ((page - 1) * pageCount) + pageCount)" :columns="columnsTable" :loading="pending" :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: 'Tidak ada data.' }"
                 sort-asc-icon="i-heroicons-arrow-up" sort-desc-icon="i-heroicons-arrow-down" sort-mode="manual"
                 class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }"
                 @select="select">
@@ -93,8 +93,16 @@
                 </template>
 
                 <UForm :state="state" class="space-y-4">
-                    <UFormGroup label="Nama Kategori" required>
-                        <UInput v-model="state.nama_kategori" placeholder="Masukkan nama kategori..." icon="i-heroicons-book-open" />
+                    <UFormGroup label="Nama Penulis" required>
+                        <UInput v-model="state.nama_pena" placeholder="Masukkan nama pena penulis..." icon="i-heroicons-book-open" />
+                    </UFormGroup>
+
+                    <UFormGroup label="Email" required>
+                        <UInput v-model="state.email" placeholder="Masukkan email penulis..." icon="i-heroicons-book-open" />
+                    </UFormGroup>
+
+                    <UFormGroup label="Nomor Whatsapp" required>
+                        <UInput v-model="state.no_wa" placeholder="Masukkan nomor whatsapp penulis..." icon="i-heroicons-book-open" />
                     </UFormGroup>
                 </UForm>
 
@@ -152,8 +160,14 @@ const columns = [{
     key: 'number',
     label: '#',
 }, {
-    key: 'nama',
-    label: 'Nama',
+    key: 'nama_pena',
+    label: 'Nama Pena',
+}, {
+    key: 'email',
+    label: 'Email',
+}, {
+    key: 'no_wa',
+    label: 'Nomor Whatsapp',
 }, {
     key: 'actions',
     label: 'Actions',
@@ -187,19 +201,21 @@ const pageFrom = computed(() => (page.value - 1) * pageCount.value + 1)
 const pageTo = computed(() => Math.min(page.value * pageCount.value, pageTotal.value))
 
 // Data
-let listKategori = ref([]);
+let listPenulis = ref([]);
 const config = useRuntimeConfig();
 const userValue = useCookie('userValue');
 
 // Form
 const state = reactive({
-    nama_kategori: undefined
+    nama_pena: undefined,
+    email: undefined,
+    no_wa: undefined
 });
 
 //Modal Popup
 let loading = ref(false);
 let isEditing = ref(false);
-let mainModalTitle = ref('Tambah Kategori');
+let mainModalTitle = ref('Tambah Penulis');
 let mainModalButton = ref('Tambah');
 let editLoadingText = ref('Loading...');
 let dataTipeSubmit = ref('insert');
@@ -219,38 +235,38 @@ let modalDeleteImage = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/qu
 let pendingEdit;
 let pendingDelete;
 
-const fetchListKategori = async () => {
-    let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori`, {
+const fetchListPenulis = async () => {
+    let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/penulis`, {
         headers: {
             userValue: userValue,
         }
     });
 
     if(fetchResult.data._rawValue){
-        if(fetchResult.data._rawValue.msg == 'Belum ada data kategori'){
-            listKategori.value = [];
+        if(fetchResult.data._rawValue.msg == 'Belum ada data penulis'){
+            listPenulis.value = [];
             pending.value = false;
         }else{
-            listKategori.value = fetchResult.data._rawValue.kategori.map((kategori, index) => ({
-                ...kategori,
+            listPenulis.value = fetchResult.data._rawValue.penulis.map((penulis, index) => ({
+                ...penulis,
                 number: index + 1
             }));
             pending.value = false;
-            pageTotal.value = listKategori.value.length
+            pageTotal.value = listPenulis.value.length
         }
     }else{
-        setTimeout(fetchListKategori, 2000)
-        listKategori.value = [];
+        setTimeout(fetchListPenulis, 2000)
+        listPenulis.value = [];
         pending.value = true;
     }
 }
 
-const filteredKategori = computed(() => {
+const filteredPenulis = computed(() => {
     if (!search.value) {
-        return listKategori.value;
+        return listPenulis.value;
     }
-    return listKategori.value.filter(kategori =>
-        kategori.nama.toLowerCase().includes(search.value.toLowerCase())
+    return listPenulis.value.filter(penulis =>
+        penulis.nama_pena.toLowerCase().includes(search.value.toLowerCase())
     );
 });
 
@@ -288,15 +304,15 @@ const editData = (event) => {
     isOpenAdd.value = true;
     isEditing.value = true;
     loading.value = true;
-    mainModalTitle.value = 'Edit Kategori';
+    mainModalTitle.value = 'Edit Penulis';
     mainModalButton.value = 'Edit';
     dataTipeSubmit.value = 'edit';
 
-    fetchKategoriDetail(pendingEdit);
+    fetchPenulisDetail(pendingEdit);
 }
 
-const fetchKategoriDetail = async (id_kategori) => {
-    let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori/${id_kategori}/edit`, {
+const fetchPenulisDetail = async (id_penulis) => {
+    let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/penulis/${id_penulis}`, {
         headers: {
             userValue: userValue,
         }
@@ -304,15 +320,17 @@ const fetchKategoriDetail = async (id_kategori) => {
 
     if(fetchResult.data._rawValue){
         if(fetchResult.data._rawValue.msg == 'Berhasil'){
-            let kategori = fetchResult.data._rawValue.kategori;
-            state.nama_kategori = kategori.nama;
+            let penulis = fetchResult.data._rawValue.penulis;
+            state.nama_pena = penulis.nama_pena;
+            state.email = penulis.email;
+            state.no_wa = penulis.no_wa;
 
             loading.value = false;
         }else{
             editLoadingText.value = 'Terjadi kesalahan, silahkan hubungi admin!';
         }
     }else{
-        setTimeout(fetchKategoriDetail, 2000)
+        setTimeout(fetchPenulisDetail, 2000)
     }
 }
 
@@ -331,7 +349,7 @@ const deleteDataAPI = async (event) => {
     modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`;
     modalDeleteContent.value = "Data sedang dihapus...";
     
-    const formResult = await $fetch(`${config.public.API_HOST}/api/database/master-data/kategori/${pendingDelete}`, {
+    const formResult = await $fetch(`${config.public.API_HOST}/api/database/master-data/penulis/${pendingDelete}`, {
         method: 'DELETE',
         headers: {
             userValue: userValue.value,
@@ -344,7 +362,7 @@ const deleteDataAPI = async (event) => {
         modalDeleteContent.value = "Data berhasil dihapus";
         canCloseModalDelete.value = true;
         
-        fetchListKategori();
+        fetchListPenulis();
     }else{
         modalDeleteHeader.value = "Gagal";
         modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
@@ -361,10 +379,12 @@ const insert = async (event) => {
     canCloseModal.value = false;
 
     const formData = new FormData();
-    formData.append('nama', state.nama_kategori);
+    formData.append('nama_pena', state.nama_pena);
+    formData.append('email', state.email);
+    formData.append('no_wa', state.no_wa);
     
     if(event.target.getAttribute('data-tipe') == 'insert'){
-        const formResult = await $fetch(`${config.public.API_HOST}/api/database/master-data/kategori`, {
+        const formResult = await $fetch(`${config.public.API_HOST}/api/database/master-data/penulis`, {
             method: 'POST',
             body: formData,
             headers: {
@@ -378,7 +398,7 @@ const insert = async (event) => {
             modalContent.value = "Data berhasil diinput";
             canCloseModal.value = true;
             
-            fetchListKategori();
+            fetchListPenulis();
         }else{
             modalHeader.value = "Gagal";
             modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
@@ -386,7 +406,7 @@ const insert = async (event) => {
             canCloseModal.value = true;
         }
     }else{
-        const formResult = await $fetch(`${config.public.API_HOST}/api/database/master-data/kategori/${pendingEdit}`, {
+        const formResult = await $fetch(`${config.public.API_HOST}/api/database/master-data/penulis/${pendingEdit}`, {
             method: 'PATCH',
             body: formData,
             headers: {
@@ -400,7 +420,7 @@ const insert = async (event) => {
             modalContent.value = "Data berhasil diedit";
             canCloseModal.value = true;
 
-            fetchListKategori();
+            fetchListPenulis();
         }else{
             modalHeader.value = "Gagal";
             modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
@@ -411,16 +431,18 @@ const insert = async (event) => {
 }
 
 const resetForm = async () => {
-    state.nama_kategori = undefined;
+    state.nama_pena = undefined;
+    state.email = undefined;
+    state.no_wa = undefined;
 
     isEditing.value = false;
-    mainModalTitle.value = 'Tambah Kategori';
+    mainModalTitle.value = 'Tambah Penulis';
     mainModalButton.value = 'Tambah';
     dataTipeSubmit.value = 'insert';
 }
 
 onMounted(() => {
-    fetchListKategori();
+    fetchListPenulis();
 });
 </script>
 

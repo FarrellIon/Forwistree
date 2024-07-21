@@ -25,7 +25,9 @@ class MitraEventController{
             .sort('-createdAt');
 
             if (mitra?.length === 0) {
-                res.status(500).send('Belum ada data mitra');
+                res.status(201).json({
+                    msg: "Belum ada data mitra"
+                });
                 return;
             }
 
@@ -34,7 +36,9 @@ class MitraEventController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + error
+            });
             return;
         }
     }
@@ -46,7 +50,9 @@ class MitraEventController{
             const mitra = await MitraEvent.findById({ _id: decryptedId });
 
             if (!mitra){
-                res.status(500).send('Tidak ditemukan mitra dengan id tersebut');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan mitra dengan id tersebut'
+                });
                 return;
             }
 
@@ -55,7 +61,9 @@ class MitraEventController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -85,7 +93,9 @@ class MitraEventController{
             }
 
             if(errorMsg != ''){
-                res.status(500).send(errorMsg);
+                res.status(201).json({
+                    msg: errorMsg
+                });
                 return;
             }
             
@@ -103,7 +113,9 @@ class MitraEventController{
             //Upload Sinopsis
             const validatorMsg: string = this.validateInputs(req);
             if(validatorMsg != ''){
-                res.status(500).send(validatorMsg);
+                res.status(201).json({
+                    msg: validatorMsg
+                });
                 return;
             }
 
@@ -129,7 +141,8 @@ class MitraEventController{
                 //Insert Mitra Event
                 const objectId = new Types.ObjectId();
                 const encryptedId = encryptString(objectId.toString());
-                const adminObjectId = (req.user! as any)._id;
+                const adminEncryptedObjectId = decryptString(req.headers.uservalue as any);
+                const adminObjectId = new Types.ObjectId(adminEncryptedObjectId);
     
                 const newMitraObj = {
                     _id: objectId,
@@ -149,7 +162,9 @@ class MitraEventController{
                     adminRelationObj.mitra_events.push(newMitraObj);
                     adminRelationObj.save();
                 }else{
-                    res.status(500).send('Relasi admin tidak ditemukan!');
+                    res.status(201).json({
+                        msg: "Relasi admin tidak ditemukan"
+                    });
                     return;
                 }
 
@@ -159,7 +174,9 @@ class MitraEventController{
                 });
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + JSON.stringify(error));
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -180,20 +197,26 @@ class MitraEventController{
             const mitraId = mitra?._id;
 
             if (!mitra){
-                res.status(500).send('Tidak ditemukan mitra dengan id tersebut!');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan mitra dengan id tersebut'
+                });
                 return;
             }
             
 
             //Validators
             if (Object.keys(req.body).length === 0){
-                res.status(500).send('Belum ada data yang diinput');
+                res.status(201).json({
+                    msg: 'Belum ada data yang diinput'
+                });
                 return;
             }
 
             const validatorMsg: string = this.validateInputs(req);
             if(validatorMsg != ''){
-                res.status(500).send(validatorMsg);
+                res.status(201).json({
+                    msg: validatorMsg
+                });
                 return;
             }
 
@@ -208,64 +231,86 @@ class MitraEventController{
             }
 
 
-            //Delete Gambar Mitra
-            const gambar_mitra_url_db = mitra.image;
-            const parts = gambar_mitra_url_db.split('/');
-            const index = parts.indexOf('forwistree');
-            const extractedPart = parts.slice(index).join('/');
-            const firstSlashIndex = extractedPart.indexOf('/');
-            const secondSlashIndex = extractedPart.indexOf('/', firstSlashIndex + 1);
-            const thirdSlashIndex = extractedPart.indexOf('/', secondSlashIndex + 1);
-            const extractedPartFinal = extractedPart.substring(0, thirdSlashIndex);
+            if(gambar_mitra){
+                //Delete Gambar Mitra
+                const gambar_mitra_url_db = mitra.image;
+                const parts = gambar_mitra_url_db.split('/');
+                const index = parts.indexOf('forwistree');
+                const extractedPart = parts.slice(index).join('/');
+                const firstSlashIndex = extractedPart.indexOf('/');
+                const secondSlashIndex = extractedPart.indexOf('/', firstSlashIndex + 1);
+                const thirdSlashIndex = extractedPart.indexOf('/', secondSlashIndex + 1);
+                const extractedPartFinal = extractedPart.substring(0, thirdSlashIndex);
 
-            await new Promise((resolve, reject) => {
-                cloudinary.v2.api.delete_resources_by_prefix(extractedPartFinal, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
-                    if (error) {
-                        return reject(error);
-                    } else {
-                        return resolve(uploadResult as UploadResult);
-                    }
-                });
-            });
-            await new Promise((resolve, reject) => {
-                cloudinary.v2.api.delete_folder(extractedPartFinal, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
-                    if (error) {
-                        return reject(error);
-                    } else {
-                        return resolve(uploadResult as UploadResult);
-                    }
-                });
-            });
-
-
-            //Upload Gambar Mitra
-            const unique_id = crypto.randomBytes(8).toString("hex");
-            const nama_folder = 'forwistree/mitra-event/'+nama.replace(/ /g,"_")+'_'+unique_id;
-            const gambar_mitra_array = Array.isArray(gambar_mitra) ? gambar_mitra : [gambar_mitra];
-            gambar_mitra_array.forEach(async (gambar: GambarMitra, index: number) => {
-                const uploadGambarResult: UploadResult = await new Promise((resolve, reject) => {
-                    cloudinary.v2.uploader.upload_stream({folder: nama_folder}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
+                await new Promise((resolve, reject) => {
+                    cloudinary.v2.api.delete_resources_by_prefix(extractedPartFinal, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
                         if (error) {
                             return reject(error);
                         } else {
                             return resolve(uploadResult as UploadResult);
                         }
-                    }).end(gambar.buffer);
+                    });
                 });
-                const gambar_mitra_url = uploadGambarResult.secure_url;
-                
+                await new Promise((resolve, reject) => {
+                    cloudinary.v2.api.delete_folder(extractedPartFinal, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
+                        if (error) {
+                            return reject(error);
+                        } else {
+                            return resolve(uploadResult as UploadResult);
+                        }
+                    });
+                });
 
-                //Update Mitra
+
+                //Upload Gambar Mitra
+                const unique_id = crypto.randomBytes(8).toString("hex");
+                const nama_folder = 'forwistree/mitra-event/'+nama.replace(/ /g,"_")+'_'+unique_id;
+                const gambar_mitra_array = Array.isArray(gambar_mitra) ? gambar_mitra : [gambar_mitra];
+                gambar_mitra_array.forEach(async (gambar: GambarMitra, index: number) => {
+                    const uploadGambarResult: UploadResult = await new Promise((resolve, reject) => {
+                        cloudinary.v2.uploader.upload_stream({folder: nama_folder}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
+                            if (error) {
+                                return reject(error);
+                            } else {
+                                return resolve(uploadResult as UploadResult);
+                            }
+                        }).end(gambar.buffer);
+                    });
+                    const gambar_mitra_url = uploadGambarResult.secure_url;
+
+                    const newMitraObj = {
+                        nama: nama,
+                        image: gambar_mitra_url,
+                        ...rest
+                    }
+            
+                    const updatedMitra = await MitraEvent.findByIdAndUpdate({ _id: decryptedId }, newMitraObj, { new: true });
+        
+                    if(!updatedMitra){
+                        res.status(201).json({
+                            msg: 'Tidak ditemukan mitra dengan id tersebut'
+                        });
+                        return;
+                    }
+
+                    res.status(201).json({
+                        buku: updatedMitra,
+                        msg: "Berhasil"
+                    });
+                    return;
+                });
+            }else{
                 const newMitraObj = {
                     nama: nama,
-                    image: gambar_mitra_url,
                     ...rest
                 }
-                
+        
                 const updatedMitra = await MitraEvent.findByIdAndUpdate({ _id: decryptedId }, newMitraObj, { new: true });
-
+    
                 if(!updatedMitra){
-                    res.status(500).send('Tidak ditemukan mitra dengan id tersebut!');
+                    res.status(201).json({
+                        msg: 'Tidak ditemukan mitra dengan id tersebut'
+                    });
                     return;
                 }
 
@@ -273,9 +318,14 @@ class MitraEventController{
                     buku: updatedMitra,
                     msg: "Berhasil"
                 });
-            });
+                return;
+            }
+                
+
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + JSON.stringify(error));
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -287,7 +337,9 @@ class MitraEventController{
             const mitra = await MitraEvent.findByIdAndDelete({ _id: decryptedId });
 
             if (!mitra){
-                res.status(500).send('Tidak ditemukan mitra dengan id tersebut!');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan mitra dengan id tersebut'
+                });
                 return;
             }
 
@@ -296,7 +348,9 @@ class MitraEventController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }

@@ -42,7 +42,7 @@
             </div>
 
             <!-- Table -->
-            <UTable :rows="filteredBooks.slice((page - 1) * pageCount, ((page - 1) * pageCount) + pageCount)" :columns="columnsTable" :loading="pending"
+            <UTable :rows="filteredBooks.slice((page - 1) * pageCount, ((page - 1) * pageCount) + pageCount)" :columns="columnsTable" :loading="pending" :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: 'Tidak ada data.' }"
                 sort-asc-icon="i-heroicons-arrow-up" sort-desc-icon="i-heroicons-arrow-down" sort-mode="manual"
                 class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }"
                 @select="select">
@@ -278,7 +278,6 @@ const isOpenAdd = ref(false)
 const isOpenDelete = ref(false)
 
 // Pagination
-const sort = ref({ column: 'id', direction: 'asc' as const })
 const page = ref(1)
 const pageCount = ref(10)
 const pageTotal = ref(0)
@@ -348,12 +347,17 @@ const fetchListBuku = async () => {
     });
 
     if(fetchResult.data._rawValue){
-        listBuku.value = fetchResult.data._rawValue.buku.map((book, index) => ({
-          ...book,
-          number: index + 1
-        }));
-        pending.value = false;
-        pageTotal.value = listBuku.value.length
+        if(fetchResult.data._rawValue.msg == 'Belum ada data buku'){
+            listBuku.value = [];
+            pending.value = false;
+        }else{
+            listBuku.value = fetchResult.data._rawValue.buku.map((book, index) => ({
+                ...book,
+                number: index + 1
+            }));
+            pending.value = false;
+            pageTotal.value = listBuku.value.length
+        }
     }else{
         setTimeout(fetchListBuku, 2000)
         listBuku.value = [];

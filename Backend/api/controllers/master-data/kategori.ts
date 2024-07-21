@@ -20,7 +20,9 @@ class KategoriController{
             .sort('-createdAt');
 
             if (kategori?.length === 0) {
-                res.status(500).send('Belum ada data kategori');
+                res.status(201).json({
+                    msg: "Belum ada data kategori"
+                });
                 return;
             }
 
@@ -29,7 +31,9 @@ class KategoriController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -70,7 +74,9 @@ class KategoriController{
             const maxDiskon = (buku as any).diskon;
 
             if (!kategori){
-                res.status(500).send('Tidak ditemukan kategori dengan id tersebut');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan kategori dengan id tersebut'
+                });
                 return;
             }
 
@@ -84,7 +90,9 @@ class KategoriController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -105,7 +113,9 @@ class KategoriController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).json("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -122,7 +132,9 @@ class KategoriController{
             });
 
             if (categories.length === 0) {
-                res.status(500).send('Tidak ditemukan kategori yang mengandung buku');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan kategori yang mengandung buku'
+                });
                 return;
             }
 
@@ -134,7 +146,9 @@ class KategoriController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -151,13 +165,17 @@ class KategoriController{
             }
 
             if(errorMsg != ''){
-                res.status(500).send(errorMsg);
+                res.status(201).json({
+                    msg: errorMsg
+                });
                 return;
             }
 
             const validatorMsg: string = this.validateInputs(req);
             if(validatorMsg != ''){
-                res.status(500).send(validatorMsg);
+                res.status(201).json({
+                    msg: validatorMsg
+                });
                 return;
             }
 
@@ -179,7 +197,9 @@ class KategoriController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -190,19 +210,25 @@ class KategoriController{
             const decryptedId = decryptString(id);
 
             if (Object.keys(req.body).length === 0){
-                res.status(500).send('Belum ada data yang diinput');
+                res.status(201).json({
+                    msg: 'Belum ada data yang diinput'
+                });
                 return;
             }
 
             const validatorMsg: string = this.validateInputs(req);
             if(validatorMsg != ''){
-                res.status(500).send(validatorMsg);
+                res.status(201).json({
+                    msg: validatorMsg
+                });
                 return;
             }
 
             const kategori = await MasterKategori.findByIdAndUpdate({ _id: decryptedId }, req.body, { new: true })
             if (!kategori){
-                res.status(500).send('Tidak ditemukan kategori dengan id tersebut!');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan kategori dengan id tersebut'
+                });
                 return;
             }
 
@@ -211,7 +237,9 @@ class KategoriController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -223,7 +251,9 @@ class KategoriController{
             const kategori = await MasterKategori.findByIdAndDelete({ _id: decryptedId });
 
             if (!kategori){
-                res.status(500).send('Tidak ditemukan kategori dengan id tersebut!');
+                res.status(201).json({
+                    msg: 'Tidak ditemukan kategori dengan id tersebut'
+                });
                 return;
             }
 
@@ -232,7 +262,9 @@ class KategoriController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + error);
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }

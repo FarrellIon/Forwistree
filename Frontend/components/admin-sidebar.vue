@@ -13,31 +13,31 @@
                     </NuxtLink>
                 </li>
                 <li>
-                    <NuxtLink class="sidebar-element" :to="`/admin/events`">
+                    <NuxtLink :class="{'sidebar-element': true, 'active': active == 'events'}" :to="`/admin/events`">
                         <span class="i-heroicons-calendar icon"></span>
                         <span class="truncate relative">Events</span>
                     </NuxtLink>
                 </li>
                 <li>
-                    <NuxtLink class="sidebar-element" :to="`/admin/kategori-buku`">
+                    <NuxtLink :class="{'sidebar-element': true, 'active': active == 'kategori-buku'}" :to="`/admin/kategori-buku`">
                         <span class="i-heroicons-tag icon"></span>
                         <span class="truncate relative">Kategori Buku</span>
                     </NuxtLink>
                 </li>
                 <li>
-                    <NuxtLink class="sidebar-element" :to="`/admin/mitra-event`">
+                    <NuxtLink :class="{'sidebar-element': true, 'active': active == 'mitra-event'}" :to="`/admin/mitra-event`">
                         <span class="i-heroicons-briefcase icon"></span>
                         <span class="truncate relative">Mitra Event</span>
                     </NuxtLink>
                 </li>
                 <li>
-                    <NuxtLink class="sidebar-element" :to="`/admin/penulis-buku`">
+                    <NuxtLink :class="{'sidebar-element': true, 'active': active == 'penulis-buku'}" :to="`/admin/penulis-buku`">
                         <span class="i-heroicons-pencil icon"></span>
                         <span class="truncate relative">Penulis Buku</span>
                     </NuxtLink>
                 </li>
                 <li>
-                    <NuxtLink class="sidebar-element" :to="`/admin/pengajuan`">
+                    <NuxtLink :class="{'sidebar-element': true, 'active': active == 'pengajuan'}" :to="`/admin/pengajuan`">
                         <span class="i-heroicons-document icon"></span>
                         <span class="truncate relative">Pengajuan</span>
                     </NuxtLink>

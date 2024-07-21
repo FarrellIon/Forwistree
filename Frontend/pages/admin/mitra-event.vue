@@ -42,26 +42,13 @@
             </div>
 
             <!-- Table -->
-            <UTable :rows="filteredKategori.slice((page - 1) * pageCount, ((page - 1) * pageCount) + pageCount)" :columns="columnsTable" :loading="pending"
+            <UTable :rows="filteredMitraEvent.slice((page - 1) * pageCount, ((page - 1) * pageCount) + pageCount)" :columns="columnsTable" :loading="pending" :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: 'Tidak ada data.' }"
                 sort-asc-icon="i-heroicons-arrow-up" sort-desc-icon="i-heroicons-arrow-down" sort-mode="manual"
                 class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }"
                 @select="select">
 
-                <template #jumlah_halaman-data="{ row }">
-                    {{ row.jumlah_halaman }} Halaman
-                </template>
-
-                <template #harga-data="{ row }">
-                    {{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(row.harga) }}
-                </template>
-
-                <template #diskon-data="{ row }">
-                    {{ row.diskon }}%
-                </template>
-
-                <template #status_bestseller-data="{ row }">
-                    <UBadge size="xs" :label="row.status_bestseller ? 'Bestseller' : '-'"
-                        :color="row.status_bestseller ? 'primary' : 'transparent'" />
+                <template #image-data="{ row }">
+                    <img :src="row.image" alt="" style="width: 128px; height: 128px;">
                 </template>
 
                 <template #actions-data="{ row }">
@@ -112,6 +99,10 @@
                 <UForm :state="state" class="space-y-4">
                     <UFormGroup label="Nama Mitra Event" required>
                         <UInput v-model="state.nama_mitra_event" placeholder="Masukkan nama mitra event..." icon="i-heroicons-book-open" />
+                    </UFormGroup>
+
+                    <UFormGroup label="Gambar Mitra" :required="!isEditing">
+                        <UInput type="file" size="md" @change="uploadGambar($event)" icon="i-heroicons-folder" />
                     </UFormGroup>
                 </UForm>
 
@@ -172,6 +163,9 @@ const columns = [{
     key: 'nama',
     label: 'Nama',
 }, {
+    key: 'image',
+    label: 'Gambar',
+}, {
     key: 'actions',
     label: 'Actions',
 }]
@@ -197,7 +191,6 @@ const isOpenAdd = ref(false)
 const isOpenDelete = ref(false)
 
 // Pagination
-const sort = ref({ column: 'id', direction: 'asc' as const })
 const page = ref(1)
 const pageCount = ref(10)
 const pageTotal = ref(0)
@@ -205,15 +198,14 @@ const pageFrom = computed(() => (page.value - 1) * pageCount.value + 1)
 const pageTo = computed(() => Math.min(page.value * pageCount.value, pageTotal.value))
 
 // Data
-let listKategori = ref([]);
+let listMitraEvent = ref([]);
 const config = useRuntimeConfig();
 const userValue = useCookie('userValue');
 
 // Form
-const mitraEventOptions = ref([]);
-const penulisOptions = ref([]);
 const state = reactive({
-    nama_mitra_event: undefined
+    nama_mitra_event: undefined,
+    gambar_mitra_event: undefined
 });
 
 //Modal Popup
@@ -239,7 +231,12 @@ let modalDeleteImage = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/qu
 let pendingEdit;
 let pendingDelete;
 
-const fetchListKategori = async () => {
+const uploadGambar = (files) => {
+    const file = files[0];
+    state.gambar_mitra_event = file;
+}
+
+const fetchListMitraEvent = async () => {
     let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/mitra_event`, {
         headers: {
             userValue: userValue,
@@ -247,25 +244,30 @@ const fetchListKategori = async () => {
     });
 
     if(fetchResult.data._rawValue){
-        listKategori.value = fetchResult.data._rawValue.mitra.map((book, index) => ({
-          ...book,
-          number: index + 1
-        }));
-        pending.value = false;
-        pageTotal.value = listKategori.value.length
+        if(fetchResult.data._rawValue.msg == 'Belum ada data mitra'){
+            listMitraEvent.value = [];
+            pending.value = false;
+        }else{
+            listMitraEvent.value = fetchResult.data._rawValue.mitra.map((mitra, index) => ({
+                ...mitra,
+                number: index + 1
+            }));
+            pending.value = false;
+            pageTotal.value = listMitraEvent.value.length
+        }
     }else{
-        setTimeout(fetchListKategori, 2000)
-        listKategori.value = [];
+        setTimeout(fetchListMitraEvent, 2000)
+        listMitraEvent.value = [];
         pending.value = true;
     }
 }
 
-const filteredKategori = computed(() => {
+const filteredMitraEvent = computed(() => {
     if (!search.value) {
-        return listKategori.value;
+        return listMitraEvent.value;
     }
-    return listKategori.value.filter(book =>
-        book.nama.toLowerCase().includes(search.value.toLowerCase())
+    return listMitraEvent.value.filter(mitra =>
+        mitra.nama.toLowerCase().includes(search.value.toLowerCase())
     );
 });
 
@@ -307,11 +309,11 @@ const editData = (event) => {
     mainModalButton.value = 'Edit';
     dataTipeSubmit.value = 'edit';
 
-    fetchKategoriDetail(pendingEdit);
+    fetchMitraEventDetail(pendingEdit);
 }
 
-const fetchKategoriDetail = async (id_mitra_event) => {
-    let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/mitra_event/${id_mitra_event}/edit`, {
+const fetchMitraEventDetail = async (id_mitra_event) => {
+    let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/mitra_event/${id_mitra_event}`, {
         headers: {
             userValue: userValue,
         }
@@ -327,7 +329,7 @@ const fetchKategoriDetail = async (id_mitra_event) => {
             editLoadingText.value = 'Terjadi kesalahan, silahkan hubungi admin!';
         }
     }else{
-        setTimeout(fetchKategoriDetail, 2000)
+        setTimeout(fetchMitraEventDetail, 2000)
     }
 }
 
@@ -359,7 +361,7 @@ const deleteDataAPI = async (event) => {
         modalDeleteContent.value = "Data berhasil dihapus";
         canCloseModalDelete.value = true;
         
-        fetchListKategori();
+        fetchListMitraEvent();
     }else{
         modalDeleteHeader.value = "Gagal";
         modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
@@ -377,6 +379,7 @@ const insert = async (event) => {
 
     const formData = new FormData();
     formData.append('nama', state.nama_mitra_event);
+    formData.append('gambar_mitra', state.gambar_mitra_event);
     
     if(event.target.getAttribute('data-tipe') == 'insert'){
         const formResult = await $fetch(`${config.public.API_HOST}/api/database/master-data/mitra_event`, {
@@ -393,7 +396,7 @@ const insert = async (event) => {
             modalContent.value = "Data berhasil diinput";
             canCloseModal.value = true;
             
-            fetchListKategori();
+            fetchListMitraEvent();
         }else{
             modalHeader.value = "Gagal";
             modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
@@ -415,7 +418,7 @@ const insert = async (event) => {
             modalContent.value = "Data berhasil diedit";
             canCloseModal.value = true;
 
-            fetchListKategori();
+            fetchListMitraEvent();
         }else{
             modalHeader.value = "Gagal";
             modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
@@ -427,6 +430,7 @@ const insert = async (event) => {
 
 const resetForm = async () => {
     state.nama_mitra_event = undefined;
+    state.gambar_mitra_event = undefined;
 
     isEditing.value = false;
     mainModalTitle.value = 'Tambah Mitra Event';
@@ -435,7 +439,7 @@ const resetForm = async () => {
 }
 
 onMounted(() => {
-    fetchListKategori();
+    fetchListMitraEvent();
 });
 </script>
 

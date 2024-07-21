@@ -32,7 +32,9 @@ class BukuController{
             .sort('-createdAt');
 
             if (buku?.length === 0) {
-                res.status(201).json('Belum ada data buku');
+                res.status(201).json({
+                    msg: "Belum ada data buku"
+                });
                 return;
             }
 
@@ -303,7 +305,7 @@ class BukuController{
                     bukuRelationObj.gambar_buku.push(newGambarBukuObj as any);
                     bukuRelationObj.save();
                 }else{
-                    res.status(201).send('Relasi buku tidak ditemukan!');
+                    res.status(201).send('Relasi buku tidak ditemukan');
                     return;
                 }
             });
@@ -333,7 +335,7 @@ class BukuController{
                     bukuRelationObj.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
                     bukuRelationObj.save();
                 }else{
-                    res.status(201).send('Relasi buku tidak ditemukan!');
+                    res.status(201).send('Relasi buku tidak ditemukan');
                     return;
                 }
                 
@@ -342,7 +344,7 @@ class BukuController{
                     penulisRelationObj.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
                     penulisRelationObj.save();
                 }else{
-                    res.status(201).send('Relasi penulis tidak ditemukan!');
+                    res.status(201).send('Relasi penulis tidak ditemukan');
                     return;
                 }
             });
@@ -355,7 +357,7 @@ class BukuController{
                 kategoriRelationObj.save();
             }else{
                 res.status(201).json({
-                    msg: 'Relasi kategori tidak ditemukan!'
+                    msg: 'Relasi kategori tidak ditemukan'
                 });
                 return;
             }
@@ -366,7 +368,7 @@ class BukuController{
                 adminRelationObj.save();
             }else{
                 res.status(201).json({
-                    msg: 'Relasi admin tidak ditemukan!'
+                    msg: 'Relasi admin tidak ditemukan'
                 });
                 return;
             }
@@ -403,7 +405,7 @@ class BukuController{
             const bukuId = buku?._id;
 
             if (!buku){
-                res.status(201).json('Tidak ditemukan buku dengan id tersebut!');
+                res.status(201).json('Tidak ditemukan buku dengan id tersebut');
                 return;
             }
             
@@ -503,7 +505,7 @@ class BukuController{
             const updatedBuku = await Buku.findByIdAndUpdate({ _id: decryptedId }, newBukuObj, { new: true });
 
             if(!updatedBuku){
-                res.status(201).json('Tidak ditemukan buku dengan id tersebut!');
+                res.status(201).json('Tidak ditemukan buku dengan id tersebut');
                 return;
             }
 
@@ -515,7 +517,7 @@ class BukuController{
                 oldKategoriRelationObj.buku = oldKategoriRelationObj?.buku.filter(item => item.toString() !== bukuId?.toString())
                 oldKategoriRelationObj.save();
             }else{
-                res.status(201).json('Relasi kategori tidak ditemukan!');
+                res.status(201).json('Relasi kategori tidak ditemukan');
                 return;
             }
 
@@ -525,7 +527,7 @@ class BukuController{
             //     oldAdminRelationObj.buku = oldAdminRelationObj?.buku.filter(item => item.toString() !== bukuId?.toString())
             //     oldAdminRelationObj.save();
             // }else{
-            //     res.status(500).send('Relasi admin tidak ditemukan!');
+            //     res.status(500).send('Relasi admin tidak ditemukan');
             //     return;
             // }
 
@@ -537,7 +539,9 @@ class BukuController{
                 newKategoriRelationObj.buku.push(updatedBuku._id);
                 newKategoriRelationObj.save();
             }else{
-                res.status(500).send('Relasi kategori tidak ditemukan!');
+                res.status(201).json({
+                    msg: 'Relasi kategori tidak ditemukan'
+                });
                 return;
             }
 
@@ -547,7 +551,7 @@ class BukuController{
             //     newAdminRelationObj.buku.push(updatedBuku._id);
             //     newAdminRelationObj.save();
             // }else{
-            //     res.status(500).send('Relasi admin tidak ditemukan!');
+            //     res.status(500).send('Relasi admin tidak ditemukan');
             //     return;
             // }
 
@@ -579,7 +583,9 @@ class BukuController{
         
                     const updatedGambarBuku = await GambarBuku.create(newGambarBukuObj);
                     if(!updatedGambarBuku){
-                        res.status(500).send('Gagal upload gambar buku!');
+                        res.status(201).json({
+                            msg: 'Gagal upload gambar buku'
+                        });
                         return;
                     }
 
@@ -593,7 +599,9 @@ class BukuController{
                         bukuRelationObj.gambar_buku.push(newGambarBukuObj as any);
                         bukuRelationObj.save();
                     }else{
-                        res.status(500).send('Relasi buku tidak ditemukan!');
+                        res.status(201).json({
+                            msg: 'Relasi buku tidak ditemukan'
+                        });
                         return;
                     }
                 });
@@ -620,7 +628,9 @@ class BukuController{
     
                 const updatedPivotPenulisBuku = await PivotPenulisBuku.create(newPivotPenulisBukuObj);
                 if(!updatedPivotPenulisBuku){
-                    res.status(500).send('Gagal upload gambar buku!');
+                    res.status(201).json({
+                        msg: 'Gagal upload gambar buku'
+                    });
                     return;
                 }
 
@@ -633,7 +643,9 @@ class BukuController{
                     bukuRelationObj.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
                     bukuRelationObj.save();
                 }else{
-                    res.status(500).send('Relasi buku tidak ditemukan!');
+                    res.status(201).json({
+                        msg: 'Relasi buku tidak ditemukan'
+                    });
                     return;
                 }
                 
@@ -644,7 +656,9 @@ class BukuController{
                     penulisRelationObj.pivot_penulis_buku.push(pivotPenulisBukuObjectId);
                     penulisRelationObj.save();
                 }else{
-                    res.status(500).send('Relasi penulis tidak ditemukan!');
+                    res.status(201).json({
+                        msg: 'Relasi penulis tidak ditemukan'
+                    });
                     return;
                 }
             });
@@ -654,7 +668,9 @@ class BukuController{
                 msg: "Berhasil"
             });
         } catch (error) {
-            res.status(500).send("Terjadi kesalahan, error : " + JSON.stringify(error));
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
             return;
         }
     }
@@ -666,7 +682,7 @@ class BukuController{
             const buku = await Buku.findByIdAndDelete({ _id: decryptedId });
 
             if (!buku){
-                res.status(201).json('Tidak ditemukan buku dengan id tersebut!');
+                res.status(201).json('Tidak ditemukan buku dengan id tersebut');
                 return;
             }
 
