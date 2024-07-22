@@ -27,7 +27,9 @@ class EventController{
             .sort('-createdAt');
 
             if (event?.length === 0) {
-                res.status(500).json('Belum ada data event');
+                res.status(201).json({
+                    msg: "Belum ada data event"
+                });
                 return;
             }
 
@@ -35,6 +37,7 @@ class EventController{
                 event,
                 msg: "Berhasil"
             });
+            return;
         } catch (error) {
             res.status(201).json({
                 msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
@@ -177,7 +180,6 @@ class EventController{
             const unique_id = crypto.randomBytes(8).toString("hex");
             const nama_folder = 'forwistree/event/'+judul.replace(/ /g,"_")+'_'+unique_id;
             const gambar_event_array = Array.isArray(gambar_event) ? gambar_event : [gambar_event];
-            console.log(gambar_event_array);
             gambar_event_array.forEach(async (gambar: GambarEvent) => {
                 const uploadGambarResult: UploadResult = await new Promise((resolve, reject) => {
                     cloudinary.v2.uploader.upload_stream({folder: nama_folder}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
@@ -336,7 +338,7 @@ class EventController{
 
 
             //Delete Gambar Event
-            if(event.gambar_event.length !== 0){
+            if(event.gambar_event.length !== 0 && gambar_event){
                 const gambar_event_url_db = event.gambar_event[0];
                 const gambar_event = await GambarEvent.findById({ _id: gambar_event_url_db });
 
@@ -387,140 +389,143 @@ class EventController{
             }
 
 
-            //Upload Gambar Event
-            const unique_id = crypto.randomBytes(8).toString("hex");
-            const nama_folder = 'forwistree/event/'+judul.replace(/ /g,"_")+'_'+unique_id;
-            const gambar_event_array = Array.isArray(gambar_event) ? gambar_event : [gambar_event];
-            gambar_event_array.forEach(async (gambar: GambarEvent, index: number) => {
-                const uploadGambarResult: UploadResult = await new Promise((resolve, reject) => {
-                    cloudinary.v2.uploader.upload_stream({folder: nama_folder+'/gambar_event'}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
-                        if (error) {
-                            return reject(error);
-                        } else {
-                            return resolve(uploadResult as UploadResult);
-                        }
-                    }).end(gambar.buffer);
-                });
-
-                const gambarObjectId = new Types.ObjectId();
-                const encryptedGambarId = encryptString(gambarObjectId.toString());
-                const gambar_event_url = uploadGambarResult.secure_url;
-                
-                const newGambarEventObj = {
-                    _id: gambarObjectId,
-                    id: encryptedGambarId,
-                    event: event._id,
-                    image: gambar_event_url
-                }
-    
-                const updatedGambarEvent = await GambarEvent.create(newGambarEventObj);
-                if(!updatedGambarEvent){
-                    res.status(201).json({
-                        msg: 'Gagal upload gambar event'
+            if(gambar_event){
+                //Upload Gambar Event
+                const unique_id = crypto.randomBytes(8).toString("hex");
+                const nama_folder = 'forwistree/event/'+judul.replace(/ /g,"_")+'_'+unique_id;
+                const gambar_event_array = Array.isArray(gambar_event) ? gambar_event : [gambar_event];
+                gambar_event_array.forEach(async (gambar: GambarEvent, index: number) => {
+                    const uploadGambarResult: UploadResult = await new Promise((resolve, reject) => {
+                        cloudinary.v2.uploader.upload_stream({folder: nama_folder+'/gambar_event'}, (error: UploadApiErrorResponse | undefined, uploadResult: UploadApiResponse | undefined) => {
+                            if (error) {
+                                return reject(error);
+                            } else {
+                                return resolve(uploadResult as UploadResult);
+                            }
+                        }).end(gambar.buffer);
                     });
-                    return;
-                }
 
-                
-                //Add gambar event relation to event
-                const eventRelationObj = await Events.findById({ _id: decryptedId });
-                if(eventRelationObj){
-                    if(index === 0){
-                        eventRelationObj.gambar_event = [];
+                    const gambarObjectId = new Types.ObjectId();
+                    const encryptedGambarId = encryptString(gambarObjectId.toString());
+                    const gambar_event_url = uploadGambarResult.secure_url;
+                    
+                    const newGambarEventObj = {
+                        _id: gambarObjectId,
+                        id: encryptedGambarId,
+                        event: event._id,
+                        image: gambar_event_url
                     }
-                    eventRelationObj.gambar_event.push(newGambarEventObj as any);
-                    eventRelationObj.save();
+        
+                    const updatedGambarEvent = await GambarEvent.create(newGambarEventObj);
+                    if(!updatedGambarEvent){
+                        res.status(201).json({
+                            msg: 'Gagal upload gambar event'
+                        });
+                        return;
+                    }
+
+                    
+                    //Add gambar event relation to event
+                    const eventRelationObj = await Events.findById({ _id: decryptedId });
+                    if(eventRelationObj){
+                        if(index === 0){
+                            eventRelationObj.gambar_event = [];
+                        }
+                        eventRelationObj.gambar_event.push(newGambarEventObj as any);
+                        eventRelationObj.save();
+                    }else{
+                        res.status(201).json({
+                            msg: 'Relasi event tidak ditemukan'
+                        });
+                        return;
+                    }
+                });
+            }
+
+            if(mitra_event){
+                //Delete Mitra Relations
+                const event_obj = await Events.findById({ _id: decryptedId });
+                if(event_obj){
+                    const old_mitra = event_obj.pivot_mitra_event;
+                    const old_mitra_array = Array.isArray(old_mitra) ? old_mitra : [old_mitra];
+
+                    old_mitra_array.forEach(async (mitra: Types.ObjectId, index: number) => {
+                        const pivotMitraRelationObj = await PivotMitraEvent.findById({ _id: mitra });
+                        
+                        if(pivotMitraRelationObj){
+                            const mitraRelationObj = await MitraEvent.findById({ _id: pivotMitraRelationObj.mitra });
+                            
+                            if(mitraRelationObj){
+                                mitraRelationObj.pivot_mitra_event = [];
+                                mitraRelationObj.save();
+                            }else{
+                                res.status(201).json({
+                                    msg: 'Relasi mitra tidak ditemukan'
+                                });
+                                return;
+                            }
+                        }
+                    });
                 }else{
                     res.status(201).json({
-                        msg: 'Relasi event tidak ditemukan'
+                        msg: 'Event tidak ditemukan'
                     });
                     return;
                 }
-            });
-
-
-            //Delete Mitra Relations
-            const event_obj = await Events.findById({ _id: decryptedId });
-            if(event_obj){
-                const old_mitra = event_obj.pivot_mitra_event;
-                const old_mitra_array = Array.isArray(old_mitra) ? old_mitra : [old_mitra];
-
-                old_mitra_array.forEach(async (mitra: Types.ObjectId, index: number) => {
-                    const pivotMitraRelationObj = await PivotMitraEvent.findById({ _id: mitra });
-                    
-                    if(pivotMitraRelationObj){
-                        const mitraRelationObj = await MitraEvent.findById({ _id: pivotMitraRelationObj.mitra });
-                        
-                        if(mitraRelationObj){
-                            mitraRelationObj.pivot_mitra_event = [];
-                            mitraRelationObj.save();
-                        }else{
-                            res.status(201).json({
-                                msg: 'Relasi mitra tidak ditemukan'
-                            });
-                            return;
-                        }
-                    }
-                });
-            }else{
-                res.status(201).json({
-                    msg: 'Event tidak ditemukan'
-                });
-                return;
-            }
             
 
-            //Insert Mitra
-            const mitra_event_array = Array.isArray(mitra_event) ? mitra_event : [mitra_event];
-            mitra_event_array.forEach(async (mitra: string, index: number) => {
-                const pivotMitraEventObjectId = new Types.ObjectId();
-                const encryptedMitraEventId = encryptString(pivotMitraEventObjectId.toString());
-                const decryptedMitraId = decryptString(mitra);
-                const mitraId = new Types.ObjectId(decryptedMitraId);
-                const mitraRelationObj = await MitraEvent.findById({ _id: mitraId });
+                //Insert Mitra
+                const mitra_event_array = Array.isArray(mitra_event) ? mitra_event : [mitra_event];
+                mitra_event_array.forEach(async (mitra: string, index: number) => {
+                    const pivotMitraEventObjectId = new Types.ObjectId();
+                    const encryptedMitraEventId = encryptString(pivotMitraEventObjectId.toString());
+                    const decryptedMitraId = decryptString(mitra);
+                    const mitraId = new Types.ObjectId(decryptedMitraId);
+                    const mitraRelationObj = await MitraEvent.findById({ _id: mitraId });
 
-                const eventRelationObj = await Events.findById({ _id: event._id });
-                
-                const newPivotMitraEventObj = {
-                    _id: pivotMitraEventObjectId,
-                    id: encryptedMitraEventId,
-                    event: event._id,
-                    mitra: mitraId
-                }
-    
-                const updatedPivotMitraEvent = await PivotMitraEvent.create(newPivotMitraEventObj);
-                if(!updatedPivotMitraEvent){
-                    res.status(201).json({
-                        msg: 'Gagal upload gambar event'
-                    });
-                    return;
-                }
-
-
-                //Add pivot event relations
-                if(eventRelationObj){
-                    if(index === 0){
-                        eventRelationObj.pivot_mitra_event = [];
+                    const eventRelationObj = await Events.findById({ _id: event._id });
+                    
+                    const newPivotMitraEventObj = {
+                        _id: pivotMitraEventObjectId,
+                        id: encryptedMitraEventId,
+                        event: event._id,
+                        mitra: mitraId
                     }
-                    eventRelationObj.pivot_mitra_event.push(pivotMitraEventObjectId);
-                    eventRelationObj.save();
-                }else{
-                    res.status(201).json({
-                        msg: 'Relasi event tidak ditemukan'
-                    });
-                    return;
-                }
-                
-                if(mitraRelationObj){
-                    mitraRelationObj.pivot_mitra_event.push(pivotMitraEventObjectId);
-                    mitraRelationObj.save();
-                }else{
-                    res.status(201).json({
-                        msg: 'Relasi mitra tidak ditemukan'
-                    });
-                    return;
-                }
-            });
+        
+                    const updatedPivotMitraEvent = await PivotMitraEvent.create(newPivotMitraEventObj);
+                    if(!updatedPivotMitraEvent){
+                        res.status(201).json({
+                            msg: 'Gagal upload gambar event'
+                        });
+                        return;
+                    }
+
+
+                    //Add pivot event relations
+                    if(eventRelationObj){
+                        if(index === 0){
+                            eventRelationObj.pivot_mitra_event = [];
+                        }
+                        eventRelationObj.pivot_mitra_event.push(pivotMitraEventObjectId);
+                        eventRelationObj.save();
+                    }else{
+                        res.status(201).json({
+                            msg: 'Relasi event tidak ditemukan'
+                        });
+                        return;
+                    }
+                    
+                    if(mitraRelationObj){
+                        mitraRelationObj.pivot_mitra_event.push(pivotMitraEventObjectId);
+                        mitraRelationObj.save();
+                    }else{
+                        res.status(201).json({
+                            msg: 'Relasi mitra tidak ditemukan'
+                        });
+                        return;
+                    }
+                });
+            }
 
             res.status(200).json({
                 event: event,

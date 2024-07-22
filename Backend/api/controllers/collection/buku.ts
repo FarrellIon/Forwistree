@@ -516,9 +516,6 @@ class BukuController{
             if(oldKategoriRelationObj){
                 oldKategoriRelationObj.buku = oldKategoriRelationObj?.buku.filter(item => item.toString() !== bukuId?.toString())
                 oldKategoriRelationObj.save();
-            }else{
-                res.status(201).json('Relasi kategori tidak ditemukan');
-                return;
             }
 
             // const oldAdminRelationObj = await Admins.findById({ _id: buku.added_by._id });

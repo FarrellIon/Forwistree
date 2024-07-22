@@ -60,9 +60,8 @@
                 </template>
 
                 <template #status_aktif-data="{ row }">
-                    <div class="flex">
-                        <img v-for="mitra in row.pivot_mitra_event" src="" alt="">
-                    </div>
+                    <UBadge size="xs" :label="(new Date(row.tanggal_mulai_pendaftaran) < new Date() && new Date(row.tanggal_penutupan) > new Date()) ? 'Sedang Berlangsung' : 'Event Tidak Aktif'"
+                        :color="(new Date(row.tanggal_mulai_pendaftaran) < new Date() && new Date(row.tanggal_penutupan) > new Date()) ? 'primary' : 'red'" />
                 </template>
 
                 <template #actions-data="{ row }">
@@ -189,7 +188,7 @@
                         </UFormGroup>
                     </div>
                     
-                    <UFormGroup label="Mitra Event" required>
+                    <UFormGroup label="Mitra Event" :required="!isEditing">
                         <USelectMenu v-model="state.mitra_event" multiple placeholder="Pilih mitra event..." :options="mitraOptions"/>
                     </UFormGroup>
 
@@ -459,21 +458,21 @@ const fetchEventDetail = async (id_event) => {
             let event = fetchResult.data._rawValue.event;
             state.judul_event = event.judul;
             state.deskripsi_event = event.deskripsi;
-            state.tanggal_pendaftaran = { start: formatDate(event.tanggal_mulai_pendaftaran), end: formatDate(event.tanggal_selesai_pendaftaran) };
-            state.tanggal_pembukaan = formatDate(event.tanggal_pembukaan);
-            state.tanggal_event = { start: formatDate(event.tanggal_mulai_event), end: formatDate(event.tanggal_selesai_event) };
-            state.tanggal_penutupan = formatDate(event.tanggal_penutupan);
+            state.tanggal_pendaftaran = { start: new Date(event.tanggal_mulai_pendaftaran), end: new Date(event.tanggal_selesai_pendaftaran) };
+            state.tanggal_pembukaan = new Date(event.tanggal_pembukaan);
+            state.tanggal_event = { start: new Date(event.tanggal_mulai_event), end: new Date(event.tanggal_selesai_event) };
+            state.tanggal_penutupan = new Date(event.tanggal_penutupan);
             state.cara_bergabung = event.cara_bergabung;
             state.syarat = event.syarat;
             state.hadiah = event.hadiah;
             state.contact_person = event.contact_person;
-            let mitra_array = [];
-            for(let i = 0; i < event.pivot_mitra_event.length; i++){
-                if(event.pivot_mitra_event[i]){
-                    mitra_array.push({'label': event.pivot_mitra_event[i].mitra.nama, 'id': event.pivot_mitra_event[i].mitra.id})
-                }
-            }
-            state.mitra_event = [];
+            // let mitra_array = [];
+            // for(let i = 0; i < event.pivot_mitra_event.length; i++){
+            //     if(event.pivot_mitra_event[i]){
+            //         mitra_array.push({'label': event.pivot_mitra_event[i].mitra.nama, 'id': event.pivot_mitra_event[i].mitra.id})
+            //     }
+            // }
+            // state.mitra_event = mitra_array;
             state.gambar_event = [];
 
             loading.value = false;
@@ -548,6 +547,8 @@ const insert = async (event) => {
     for(let i = 0; i < state.gambar_event.length; i++){
         formData.append('gambar_event', state.gambar_event[i]);
     }
+
+    console.log(state.mitra_event);
     
     if(event.target.getAttribute('data-tipe') == 'insert'){
         const formResult = await $fetch(`${config.public.API_HOST}/api/database/admin/event`, {
@@ -617,20 +618,9 @@ const resetForm = async () => {
 }
 
 const formatDate = (date) => {
-    let newDate;
-    if(typeof date === 'string'){
-        newDate = new Date(date);
-        const year = newDate.getUTCFullYear();
-        const month = String(newDate.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(newDate.getUTCDate()).padStart(2, '0');
-        
-        return `${year}-${month}-${day}`;
-    }else{
-        newDate = date;
-    }
-    const year = newDate.getFullYear();
-    const month = String(newDate.getMonth() + 1).padStart(2, '0');
-    const day = String(newDate.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
 
     const formattedDate = `${year}-${month}-${day}`;
 

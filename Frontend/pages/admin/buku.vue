@@ -471,7 +471,9 @@ const fetchBukuDetail = async (id_buku) => {
             let buku = fetchResult.data._rawValue.buku;
             state.nama_buku = buku.nama;
             state.deskripsi_buku = buku.deskripsi;
-            state.kategori = {'label': buku.kategori.nama, 'id': buku.kategori.id};
+            if(buku.kategori){
+                state.kategori = {'label': buku.kategori.nama, 'id': buku.kategori.id};
+            }
             state.penulis = {'label': buku.pivot_penulis_buku[0].penulis.nama_pena, 'id': buku.pivot_penulis_buku[0].penulis.id};
             state.jumlah_halaman = buku.jumlah_halaman;
             state.harga = buku.harga;
