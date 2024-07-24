@@ -38,6 +38,7 @@ class PengajuanController{
     get = async(req: Request, res: Response) => {
         try {
             const pengajuan = await PengajuanPenerbitan.find({})
+            .populate('pengaju')
             .sort('-createdAt');
 
             if (pengajuan?.length === 0) {
