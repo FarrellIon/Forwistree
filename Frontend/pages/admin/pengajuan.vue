@@ -40,12 +40,17 @@
             <!-- Table -->
             <UTable :rows="filteredPengajuan.slice((page - 1) * pageCount, ((page - 1) * pageCount) + pageCount)" :columns="columnsTable" :loading="pending" :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: 'Tidak ada data.' }"
                 sort-asc-icon="i-heroicons-arrow-up" sort-desc-icon="i-heroicons-arrow-down" sort-mode="manual"
-                class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }"
-                @select="select">
+                class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }">
 
                 <template #pengaju.no_wa-data="{ row }">
                     <a v-if="row.pengaju" class="no-wa-link" :href="`https://wa.me/${row.pengaju.no_wa}`">{{ row.pengaju.no_wa }}</a>
                     <p v-else>-</p>
+                </template>
+
+                <template #status-data="{ row }">
+                    <UBadge v-if="row.status == 'pending' && !row.accepted_by" size="xs" :label="'Pending'" :color="'primary'" />
+                    <UBadge v-else-if="row.accepted_by" size="xs" :label="'Accepted'" :color="'green'" />
+                    <UBadge v-else="row.accepted_by" size="xs" :label="'Rejected'" :color="'red'" />
                 </template>
 
                 <template #file_sinopsis-data="{ row }">
@@ -58,9 +63,14 @@
                 </template>
 
                 <template #actions-data="{ row }">
-                    <UButton class="approve mr-2" :data-id="row.id" icon="i-heroicons-check" size="2xs" color="green" variant="outline" :ui="{ rounded: 'rounded-full' }" square @click="approveData($event)" />
-
-                    <UButton class="reject" :data-id="row.id" icon="i-heroicons-x-mark" size="2xs" color="red" variant="outline" :ui="{ rounded: 'rounded-full' }" square @click="rejectData($event)" />
+                    <div v-if="row.status == 'pending' && !row.accepted_by">
+                        <UButton class="approve mr-2" :data-id="row.id" icon="i-heroicons-check" size="2xs" color="green" variant="outline" :ui="{ rounded: 'rounded-full' }" square @click="approveData($event)" />
+    
+                        <UButton class="reject" :data-id="row.id" icon="i-heroicons-x-mark" size="2xs" color="red" variant="outline" :ui="{ rounded: 'rounded-full' }" square @click="rejectData($event)" />
+                    </div>
+                    <div v-else>
+                        <p>-</p>
+                    </div>
                 </template>
             </UTable>
 
@@ -99,6 +109,16 @@
 
                 <img :src="modalImage" alt="">
                 <p style="text-align: center; margin-bottom: 1rem;" v-html="modalContent"></p>
+                <div v-if="modalConfirm" class="flex justify-center" style="gap: 1rem;">
+                    <div v-if="modalType == 'approve'">
+                        <UButton data-type="input" label="Tutup" variant="soft" color="gray" @click="closeStatusModal($event)" />
+                        <UButton data-type="input" label="Approve Data" color="green" @click="approveAPI($event)" />
+                    </div>
+                    <div v-else>
+                        <UButton data-type="input" label="Tutup" variant="soft" color="gray" @click="closeStatusModal($event)" />
+                        <UButton data-type="input" label="Reject Data" color="red" @click="rejectAPI($event)" />
+                    </div>
+                </div>
                 <div v-if="canCloseModal" class="flex justify-center">
                     <UButton data-type="input" label="Tutup" @click="closeStatusModal($event)" />
                 </div>
@@ -126,6 +146,9 @@ const columns = [{
     key: 'pengaju.no_wa',
     label: 'Nomor WhatsApp Pengaju',
 }, {
+    key: 'status',
+    label: 'Status Pengajuan',
+}, {
     key: 'file_sinopsis',
     label: 'File Sinopsis',
 }, {
@@ -135,18 +158,6 @@ const columns = [{
 
 const selectedColumns = ref(columns)
 const columnsTable = computed(() => columns.filter((column) => selectedColumns.value.includes(column)))
-
-// Selected Rows
-const selectedRows = ref([])
-
-function select(row) {
-    const index = selectedRows.value.findIndex((item) => item.id === row.id)
-    if (index === -1) {
-        selectedRows.value.push(row)
-    } else {
-        selectedRows.value.splice(index, 1)
-    }
-}
 
 const search = ref('')
 const pending = ref(true)
@@ -162,6 +173,8 @@ const pageTo = computed(() => Math.min(page.value * pageCount.value, pageTotal.v
 let listPengajuan = ref([]);
 const config = useRuntimeConfig();
 const userValue = useCookie('userValue');
+let pendingApprove = ref();
+let pendingReject = ref();
 
 //Modal Popup
 let isOpenStatus = ref(false);
@@ -169,20 +182,102 @@ let canCloseModal = ref(false);
 let modalHeader = ref("Loading...");
 let modalContent = ref("Data sedang diinput...");
 let modalImage = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`);
+let modalType = ref("approve");
+let modalConfirm = ref(true);
+
+const approveData = (event: any) => {
+    if(event.target.getAttribute('data-id')){
+        pendingApprove = event.target.getAttribute('data-id');
+    }else if(event.target.parentElement.getAttribute('data-id')){
+        pendingApprove = event.target.parentElement.getAttribute('data-id');
+    }
+    isOpenStatus.value = true;
+    modalHeader.value = 'Konfirmasi';
+    modalContent.value = 'Apakah anda yakin ingin approve pengajuan ini?';
+    modalType.value = 'approve';
+}
+
+const rejectData = (event: any) => {
+    if(event.target.getAttribute('data-id')){
+        pendingReject = event.target.getAttribute('data-id');
+    }else if(event.target.parentElement.getAttribute('data-id')){
+        pendingReject = event.target.parentElement.getAttribute('data-id');
+    }
+    isOpenStatus.value = true;
+    modalHeader.value = 'Konfirmasi';
+    modalContent.value = 'Apakah anda yakin ingin reject pengajuan ini?';
+    modalType.value = 'reject';
+}
+
+const approveAPI = async (event: any) => {
+    modalConfirm.value = false;
+    modalHeader.value = "Loading...";
+    modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`;
+    modalContent.value = "Data sedang diproses...";
+    
+    const formResult = await $fetch(`${config.public.API_HOST}/api/database/pengajuan/pengajuan/approve/${pendingApprove}`, {
+        method: 'PATCH',
+        headers: {
+            userValue: userValue.value!,
+        }
+    }) as any;
+    
+    if(formResult.msg == 'Berhasil'){
+        modalHeader.value = "Berhasil";
+        modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/success.png`;
+        modalContent.value = "Data berhasil diapprove";
+        canCloseModal.value = true;
+        
+        fetchListPengajuan();
+    }else{
+        modalHeader.value = "Gagal";
+        modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
+        modalContent.value = 'Data gagal diapprove, terjadi kesalahan : <br>'+formResult.msg.replace(/\n/g, '<br>');
+        canCloseModal.value = true;
+    }
+}
+
+const rejectAPI = async (event: any) => {
+    modalConfirm.value = false;
+    modalHeader.value = "Loading...";
+    modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`;
+    modalContent.value = "Data sedang diproses...";
+    
+    const formResult = await $fetch(`${config.public.API_HOST}/api/database/pengajuan/pengajuan/reject/${pendingReject}`, {
+        method: 'PATCH',
+        headers: {
+            userValue: userValue.value!,
+        }
+    }) as any;
+    
+    if(formResult.msg == 'Berhasil'){
+        modalHeader.value = "Berhasil";
+        modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/success.png`;
+        modalContent.value = "Data berhasil direject";
+        canCloseModal.value = true;
+        
+        fetchListPengajuan();
+    }else{
+        modalHeader.value = "Gagal";
+        modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
+        modalContent.value = 'Data gagal direject, terjadi kesalahan : <br>'+formResult.msg.replace(/\n/g, '<br>');
+        canCloseModal.value = true;
+    }
+}
 
 const fetchListPengajuan = async () => {
     let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/pengajuan/pengajuan`, {
         headers: {
-            userValue: userValue,
+            userValue: userValue as any,
         }
     });
 
-    if(fetchResult.data._rawValue){
-        if(fetchResult.data._rawValue.msg == 'Belum ada data pengajuan'){
+    if((fetchResult.data as any)._rawValue){
+        if((fetchResult.data as any)._rawValue.msg == 'Belum ada data pengajuan'){
             listPengajuan.value = [];
             pending.value = false;
         }else{
-            listPengajuan.value = fetchResult.data._rawValue.pengajuan.map((pengajuan, index) => ({
+            listPengajuan.value = (fetchResult.data as any)._rawValue.pengajuan.map((pengajuan: any, index: number) => ({
                 ...pengajuan,
                 number: index + 1
             }));
@@ -200,13 +295,12 @@ const filteredPengajuan = computed(() => {
     if (!search.value) {
         return listPengajuan.value;
     }
-    return listPengajuan.value.filter(event =>
-        event.judul.toLowerCase().includes(search.value.toLowerCase())
+    return listPengajuan.value.filter(pengajuan =>
+        (pengajuan as any).pengaju.nama_pena.toLowerCase().includes(search.value.toLowerCase())
     );
 });
 
-
-const closeStatusModal = (event) => {
+const closeStatusModal = (event: any) => {
     isOpenStatus.value = false;
 }
 

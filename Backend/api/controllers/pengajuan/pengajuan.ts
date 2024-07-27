@@ -9,6 +9,7 @@ import { UploadApiErrorResponse, UploadApiResponse } from 'cloudinary';
 import { PengajuanPenerbitan } from '../../database/schemas/pengajuan/pengajuan_penerbitan';
 import { MasterPenulis } from '../../database/schemas/master_data/master_penulis';
 import { Pengaju } from '../../database/schemas/pengajuan/pengaju';
+import { Admins } from '../../database/schemas/admin/admins';
 
 class PengajuanController{
     getPengaju = async(req: Request, res: Response) => {
@@ -167,7 +168,8 @@ class PengajuanController{
                         _id: objectId,
                         id: encryptedId,
                         pengaju: pengajuDecrypted,
-                        file_sinopsis: file_sinopsis_url
+                        file_sinopsis: file_sinopsis_url,
+                        status: 'pending'
                     }
                 }else{
                     res.status(201).json({
@@ -200,6 +202,7 @@ class PengajuanController{
                     id: pengajuanEncryptedId,
                     pengaju: penulisObjectId,
                     file_sinopsis: file_sinopsis_url,
+                    status: 'pending'
                 }
 
                 pengajuDecrypted = penulisObjectId;
@@ -220,11 +223,6 @@ class PengajuanController{
             if(penulisRelationObj){
                 penulisRelationObj.pengajuan_penerbitan.push(newPengajuanObj);
                 penulisRelationObj.save();
-            }else{
-                res.status(201).json({
-                    msg: 'Relasi penulis tidak ditemukan'
-                });
-                return;
             }
 
             
@@ -377,11 +375,6 @@ class PengajuanController{
                 if(oldPengajuRelationObj){
                     oldPengajuRelationObj.pengajuan_penerbitan = oldPengajuRelationObj?.pengajuan_penerbitan.filter(item => item.toString() !== pengajuanId?.toString())
                     oldPengajuRelationObj.save();
-                }else{
-                    res.status(201).json({
-                        msg: 'Relasi pengaju tidak ditemukan'
-                    });
-                    return;
                 }
 
                 
@@ -391,13 +384,103 @@ class PengajuanController{
                 if(newPengajuRelationObj){
                     newPengajuRelationObj.pengajuan_penerbitan.push(updatedPengajuan._id);
                     newPengajuRelationObj.save();
-                }else{
-                    res.status(201).json({
-                        msg: 'Relasi pengaju tidak ditemukan'
-                    });
-                    return;
                 }
             }
+
+            res.status(200).json({
+                pengajuan: pengajuan,
+                msg: "Berhasil"
+            });
+        } catch (error) {
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
+            return;
+        }
+    }
+
+    approve = async(req: Request, res: Response) => {
+        try {
+            //Declarations
+            const { id } = req.params;
+            const decryptedId = decryptString(id);
+
+            const pengajuan = await PengajuanPenerbitan.findById({ _id: decryptedId });
+
+            if (!pengajuan){
+                res.status(201).json({
+                    msg: 'Tidak ditemukan pengajuan dengan id tersebut'
+                });
+                return;
+            }
+            
+            //Update Pengajuan
+            const adminEncryptedObjectId = decryptString(req.headers.uservalue as any);
+            const adminObjectId = new Types.ObjectId(adminEncryptedObjectId);
+            const newPengajuanObj = {
+                accepted_by: adminObjectId,
+                status: 'diterima'
+            }
+            
+            const updatedPengajuan = await PengajuanPenerbitan.findByIdAndUpdate({ _id: decryptedId }, newPengajuanObj, { new: true });
+
+            if(!updatedPengajuan){
+                res.status(201).json({
+                    msg: 'Tidak ditemukan pengajuan dengan id tersebut'
+                });
+                return;
+            }
+
+            
+            //Add relations
+            const newAdminRelationObj = await Admins.findById({ _id: adminObjectId });
+            
+            if(newAdminRelationObj){
+                newAdminRelationObj.accepted_pengajuan.push(updatedPengajuan._id);
+                newAdminRelationObj.save();
+            }
+
+            res.status(200).json({
+                pengajuan: pengajuan,
+                msg: "Berhasil"
+            });
+        } catch (error) {
+            res.status(201).json({
+                msg: "Terjadi kesalahan, error : " + JSON.stringify(error)
+            });
+            return;
+        }
+    }
+
+    reject = async(req: Request, res: Response) => {
+        try {
+            //Declarations
+            const { id } = req.params;
+            const decryptedId = decryptString(id);
+
+            const pengajuan = await PengajuanPenerbitan.findById({ _id: decryptedId });
+
+            if (!pengajuan){
+                res.status(201).json({
+                    msg: 'Tidak ditemukan pengajuan dengan id tersebut'
+                });
+                return;
+            }
+            
+            //Update Pengajuan
+            const newPengajuanObj = {
+                status: 'ditolak'
+            }
+            
+            const updatedPengajuan = await PengajuanPenerbitan.findByIdAndUpdate({ _id: decryptedId }, newPengajuanObj, { new: true });
+
+            if(!updatedPengajuan){
+                res.status(201).json({
+                    msg: 'Tidak ditemukan pengajuan dengan id tersebut'
+                });
+                return;
+            }
+
 
             res.status(200).json({
                 pengajuan: pengajuan,

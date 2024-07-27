@@ -9,7 +9,7 @@ interface Admins {
     mitra_events: Types.ObjectId[],
     master_kategori: Types.ObjectId[],
     master_penulis: Types.ObjectId[],
-    pengajuan_penerbitan: Types.ObjectId[],
+    accepted_pengajuan: Types.ObjectId[],
     createdAt: Date,
     updatedAt: Date
 }
@@ -58,7 +58,7 @@ const AdminsSchema = new Schema<Admins>(
                 ref: 'master_penulis'
             }
         ],
-        pengajuan_penerbitan: [
+        accepted_pengajuan: [
             {
                 type: Schema.Types.ObjectId,
                 ref: 'pengajuan_penerbitan'

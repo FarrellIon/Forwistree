@@ -44,8 +44,7 @@
             <!-- Table -->
             <UTable :rows="filteredKategori.slice((page - 1) * pageCount, ((page - 1) * pageCount) + pageCount)" :columns="columnsTable" :loading="pending" :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: 'Tidak ada data.' }"
                 sort-asc-icon="i-heroicons-arrow-up" sort-desc-icon="i-heroicons-arrow-down" sort-mode="manual"
-                class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }"
-                @select="select">
+                class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }">
 
                 <template #actions-data="{ row }">
                     <UButton class="edit mr-2" :data-id="row.id" icon="i-heroicons-pencil" size="2xs" color="orange" variant="outline" :ui="{ rounded: 'rounded-full' }" square @click="editData($event)" />
@@ -162,18 +161,6 @@ const columns = [{
 const selectedColumns = ref(columns)
 const columnsTable = computed(() => columns.filter((column) => selectedColumns.value.includes(column)))
 
-// Selected Rows
-const selectedRows = ref([])
-
-function select(row) {
-    const index = selectedRows.value.findIndex((item) => item.id === row.id)
-    if (index === -1) {
-        selectedRows.value.push(row)
-    } else {
-        selectedRows.value.splice(index, 1)
-    }
-}
-
 const search = ref('')
 const pending = ref(true)
 const isOpenAdd = ref(false)
@@ -216,22 +203,22 @@ let modalDeleteContent = ref('');
 let modalDeleteConfirm = ref(true);
 let modalDeleteImage = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/question.png`);
 
-let pendingEdit;
-let pendingDelete;
+let pendingEdit: any;
+let pendingDelete: any;
 
 const fetchListKategori = async () => {
     let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori`, {
         headers: {
-            userValue: userValue,
+            userValue: userValue as any,
         }
     });
 
-    if(fetchResult.data._rawValue){
-        if(fetchResult.data._rawValue.msg == 'Belum ada data kategori'){
+    if((fetchResult.data as any)._rawValue){
+        if((fetchResult.data as any)._rawValue.msg == 'Belum ada data kategori'){
             listKategori.value = [];
             pending.value = false;
         }else{
-            listKategori.value = fetchResult.data._rawValue.kategori.map((kategori, index) => ({
+            listKategori.value = (fetchResult.data as any)._rawValue.kategori.map((kategori: any, index: number) => ({
                 ...kategori,
                 number: index + 1
             }));
@@ -250,7 +237,7 @@ const filteredKategori = computed(() => {
         return listKategori.value;
     }
     return listKategori.value.filter(kategori =>
-        kategori.nama.toLowerCase().includes(search.value.toLowerCase())
+        (kategori as any).nama.toLowerCase().includes(search.value.toLowerCase())
     );
 });
 
@@ -264,12 +251,12 @@ const closeAddModal = () => {
     isOpenAdd.value = false;
 }
 
-const closeStatusModal = (event) => {
+const closeStatusModal = (event: any) => {
     isOpenStatus.value = false;
     isOpenAdd.value = true;
 }
 
-const closeStatusModalDelete = (event) => {
+const closeStatusModalDelete = (event: any) => {
     isOpenDelete.value = false;
 
     canCloseModalDelete.value = false;
@@ -279,7 +266,7 @@ const closeStatusModalDelete = (event) => {
     modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/question.png`;
 }
 
-const editData = (event) => {
+const editData = (event: any) => {
     if(event.target.getAttribute('data-id')){
         pendingEdit = event.target.getAttribute('data-id');
     }else if(event.target.parentElement.getAttribute('data-id')){
@@ -295,16 +282,16 @@ const editData = (event) => {
     fetchKategoriDetail(pendingEdit);
 }
 
-const fetchKategoriDetail = async (id_kategori) => {
+const fetchKategoriDetail = async (id_kategori: any) => {
     let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori/${id_kategori}/edit`, {
         headers: {
-            userValue: userValue,
+            userValue: userValue as any,
         }
     });
 
-    if(fetchResult.data._rawValue){
-        if(fetchResult.data._rawValue.msg == 'Berhasil'){
-            let kategori = fetchResult.data._rawValue.kategori;
+    if((fetchResult.data as any)._rawValue){
+        if((fetchResult.data as any)._rawValue.msg == 'Berhasil'){
+            let kategori = (fetchResult.data as any)._rawValue.kategori;
             state.nama_kategori = kategori.nama;
 
             loading.value = false;
@@ -316,7 +303,7 @@ const fetchKategoriDetail = async (id_kategori) => {
     }
 }
 
-const deleteData = (event) => {
+const deleteData = (event: any) => {
     if(event.target.getAttribute('data-id')){
         pendingDelete = event.target.getAttribute('data-id');
     }else if(event.target.parentElement.getAttribute('data-id')){
@@ -325,7 +312,7 @@ const deleteData = (event) => {
     isOpenDelete.value = true;
 }
 
-const deleteDataAPI = async (event) => {
+const deleteDataAPI = async (event: any) => {
     modalDeleteConfirm.value = false;
     modalDeleteHeader.value = "Loading...";
     modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`;
@@ -334,9 +321,9 @@ const deleteDataAPI = async (event) => {
     const formResult = await $fetch(`${config.public.API_HOST}/api/database/master-data/kategori/${pendingDelete}`, {
         method: 'DELETE',
         headers: {
-            userValue: userValue.value,
+            userValue: userValue.value!,
         }
-    });
+    }) as any;
     
     if(formResult.msg == 'Berhasil'){
         modalDeleteHeader.value = "Berhasil";
@@ -353,7 +340,7 @@ const deleteDataAPI = async (event) => {
     }
 }
 
-const insert = async (event) => {
+const insert = async (event: any) => {
     isOpenStatus.value = true;
     modalHeader.value = "Loading...";
     modalContent.value = "Data sedang diinput...";
@@ -361,16 +348,16 @@ const insert = async (event) => {
     canCloseModal.value = false;
 
     const formData = new FormData();
-    formData.append('nama', state.nama_kategori);
+    formData.append('nama', (state as any).nama_kategori);
     
     if(event.target.getAttribute('data-tipe') == 'insert'){
         const formResult = await $fetch(`${config.public.API_HOST}/api/database/master-data/kategori`, {
             method: 'POST',
             body: formData,
             headers: {
-                userValue: userValue.value,
+                userValue: userValue.value!,
             }
-        });
+        }) as any;
         
         if(formResult.msg == 'Berhasil'){
             modalHeader.value = "Berhasil";
@@ -390,9 +377,9 @@ const insert = async (event) => {
             method: 'PATCH',
             body: formData,
             headers: {
-                userValue: userValue.value,
+                userValue: userValue.value!,
             }
-        });
+        }) as any;
         
         if(formResult.msg == 'Berhasil'){
             modalHeader.value = "Berhasil";

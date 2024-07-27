@@ -44,8 +44,7 @@
             <!-- Table -->
             <UTable :rows="filteredBooks.slice((page - 1) * pageCount, ((page - 1) * pageCount) + pageCount)" :columns="columnsTable" :loading="pending" :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: 'Tidak ada data.' }"
                 sort-asc-icon="i-heroicons-arrow-up" sort-desc-icon="i-heroicons-arrow-down" sort-mode="manual"
-                class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }"
-                @select="select">
+                class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }">
 
                 <template #jumlah_halaman-data="{ row }">
                     {{ row.jumlah_halaman }} Halaman
@@ -260,18 +259,6 @@ const columns = [{
 const selectedColumns = ref(columns)
 const columnsTable = computed(() => columns.filter((column) => selectedColumns.value.includes(column)))
 
-// Selected Rows
-const selectedRows = ref([])
-
-function select(row) {
-    const index = selectedRows.value.findIndex((item) => item.id === row.id)
-    if (index === -1) {
-        selectedRows.value.push(row)
-    } else {
-        selectedRows.value.splice(index, 1)
-    }
-}
-
 const search = ref('')
 const pending = ref(true)
 const isOpenAdd = ref(false)
@@ -327,31 +314,31 @@ let modalDeleteContent = ref('');
 let modalDeleteConfirm = ref(true);
 let modalDeleteImage = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/question.png`);
 
-let pendingEdit;
-let pendingDelete;
+let pendingEdit: any;
+let pendingDelete: any;
 
-const uploadSinopsis = (files) => {
+const uploadSinopsis = (files: any) => {
     const file = files[0];
     state.file_sinopsis = file;
 }
 
-const uploadGambar = (files) => {
+const uploadGambar = (files: any) => {
     state.gambar_buku = files;
 }
 
 const fetchListBuku = async () => {
     let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku`, {
         headers: {
-            userValue: userValue,
+            userValue: userValue as any,
         }
-    });
+    }) as any;
 
     if(fetchResult.data._rawValue){
         if(fetchResult.data._rawValue.msg == 'Belum ada data buku'){
             listBuku.value = [];
             pending.value = false;
         }else{
-            listBuku.value = fetchResult.data._rawValue.buku.map((book, index) => ({
+            listBuku.value = fetchResult.data._rawValue.buku.map((book: any, index: number) => ({
                 ...book,
                 number: index + 1
             }));
@@ -368,13 +355,13 @@ const fetchListBuku = async () => {
 const fetchKategori = async () => {
     let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori`, {
         headers: {
-            userValue: userValue.value,
+            userValue: userValue.value as any,
         }
-    });
+    }) as any;
 
     if(fetchResult.data._rawValue){
         if(fetchResult.data._rawValue.msg != 'Belum ada data kategori'){
-            const apiOptions = fetchResult.data._rawValue.kategori.map(item => {
+            const apiOptions = fetchResult.data._rawValue.kategori.map((item: any) => {
                 return { label: item.nama, id: item.id };
             });
             kategoriOptions.value = kategoriOptions.value.concat(apiOptions);
@@ -390,13 +377,13 @@ const fetchKategori = async () => {
 const fetchPenulis = async () => {
     let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/penulis`, {
         headers: {
-            userValue: userValue.value,
+            userValue: userValue.value as any,
         }
-    });
+    }) as any;
 
     if(fetchResult.data._rawValue){
         if(fetchResult.data._rawValue.msg != 'Belum ada data penulis'){
-            const apiOptions = fetchResult.data._rawValue.penulis.map(item => {
+            const apiOptions = fetchResult.data._rawValue.penulis.map((item: any) => {
                 return { label: item.nama_pena, id: item.id };
             });
             penulisOptions.value = penulisOptions.value.concat(apiOptions);
@@ -414,7 +401,7 @@ const filteredBooks = computed(() => {
         return listBuku.value;
     }
     return listBuku.value.filter(book =>
-        book.nama.toLowerCase().includes(search.value.toLowerCase())
+        (book as any).nama.toLowerCase().includes(search.value.toLowerCase())
     );
 });
 
@@ -428,12 +415,12 @@ const closeAddModal = () => {
     isOpenAdd.value = false;
 }
 
-const closeStatusModal = (event) => {
+const closeStatusModal = (event: any) => {
     isOpenStatus.value = false;
     isOpenAdd.value = true;
 }
 
-const closeStatusModalDelete = (event) => {
+const closeStatusModalDelete = (event: any) => {
     isOpenDelete.value = false;
 
     canCloseModalDelete.value = false;
@@ -443,7 +430,7 @@ const closeStatusModalDelete = (event) => {
     modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/question.png`;
 }
 
-const editData = (event) => {
+const editData = (event: any) => {
     if(event.target.getAttribute('data-id')){
         pendingEdit = event.target.getAttribute('data-id');
     }else if(event.target.parentElement.getAttribute('data-id')){
@@ -459,12 +446,12 @@ const editData = (event) => {
     fetchBukuDetail(pendingEdit);
 }
 
-const fetchBukuDetail = async (id_buku) => {
+const fetchBukuDetail = async (id_buku: any) => {
     let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/${id_buku}`, {
         headers: {
-            userValue: userValue,
+            userValue: userValue as any,
         }
-    });
+    }) as any;
 
     if(fetchResult.data._rawValue){
         if(fetchResult.data._rawValue.msg == 'Berhasil'){
@@ -472,9 +459,9 @@ const fetchBukuDetail = async (id_buku) => {
             state.nama_buku = buku.nama;
             state.deskripsi_buku = buku.deskripsi;
             if(buku.kategori){
-                state.kategori = {'label': buku.kategori.nama, 'id': buku.kategori.id};
+                (state as any).kategori = {'label': buku.kategori.nama, 'id': buku.kategori.id};
             }
-            state.penulis = {'label': buku.pivot_penulis_buku[0].penulis.nama_pena, 'id': buku.pivot_penulis_buku[0].penulis.id};
+            (state as any).penulis = {'label': buku.pivot_penulis_buku[0].penulis.nama_pena, 'id': buku.pivot_penulis_buku[0].penulis.id};
             state.jumlah_halaman = buku.jumlah_halaman;
             state.harga = buku.harga;
             state.diskon = buku.diskon;
@@ -491,7 +478,7 @@ const fetchBukuDetail = async (id_buku) => {
     }
 }
 
-const deleteData = (event) => {
+const deleteData = (event: any) => {
     if(event.target.getAttribute('data-id')){
         pendingDelete = event.target.getAttribute('data-id');
     }else if(event.target.parentElement.getAttribute('data-id')){
@@ -500,7 +487,7 @@ const deleteData = (event) => {
     isOpenDelete.value = true;
 }
 
-const deleteDataAPI = async (event) => {
+const deleteDataAPI = async (event: any) => {
     modalDeleteConfirm.value = false;
     modalDeleteHeader.value = "Loading...";
     modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`;
@@ -509,9 +496,9 @@ const deleteDataAPI = async (event) => {
     const formResult = await $fetch(`${config.public.API_HOST}/api/database/collection/buku/${pendingDelete}`, {
         method: 'DELETE',
         headers: {
-            userValue: userValue.value,
+            userValue: userValue.value as any,
         }
-    });
+    }) as any;
     
     if(formResult.msg == 'Berhasil'){
         modalDeleteHeader.value = "Berhasil";
@@ -528,7 +515,7 @@ const deleteDataAPI = async (event) => {
     }
 }
 
-const insert = async (event) => {
+const insert = async (event: any) => {
     isOpenStatus.value = true;
     modalHeader.value = "Loading...";
     modalContent.value = "Data sedang diinput...";
@@ -536,21 +523,21 @@ const insert = async (event) => {
     canCloseModal.value = false;
 
     const formData = new FormData();
-    formData.append('nama', state.nama_buku);
-    formData.append('deskripsi', state.deskripsi_buku);
+    formData.append('nama', (state as any).nama_buku);
+    formData.append('deskripsi', (state as any).deskripsi_buku);
     if(state.kategori){
-        formData.append('kategori', state.kategori.id);
+        formData.append('kategori', (state as any).kategori.id);
     }
     if(state.penulis){
-        formData.append('penulis_buku', state.penulis.id);
+        formData.append('penulis_buku', (state as any).penulis.id);
     }
-    formData.append('jumlah_halaman', state.jumlah_halaman);
-    formData.append('harga', state.harga);
-    formData.append('diskon', state.diskon);
-    formData.append('link_shopee', state.link_shopee);
-    formData.append('status_bestseller', state.status_bestseller);
-    formData.append('status_editors_pick', state.status_editors_pick);
-    formData.append('file_sinopsis', state.file_sinopsis);
+    formData.append('jumlah_halaman', (state as any).jumlah_halaman);
+    formData.append('harga', (state as any).harga);
+    formData.append('diskon', (state as any).diskon);
+    formData.append('link_shopee', (state as any).link_shopee);
+    formData.append('status_bestseller', (state as any).status_bestseller);
+    formData.append('status_editors_pick', (state as any).status_editors_pick);
+    formData.append('file_sinopsis', (state as any).file_sinopsis);
     for(let i = 0; i < state.gambar_buku.length; i++){
         formData.append('gambar_buku', state.gambar_buku[i]);
     }
@@ -560,9 +547,9 @@ const insert = async (event) => {
             method: 'POST',
             body: formData,
             headers: {
-                userValue: userValue.value,
+                userValue: userValue.value as any,
             }
-        });
+        }) as any;
         
         if(formResult.msg == 'Berhasil'){
             modalHeader.value = "Berhasil";
@@ -582,9 +569,9 @@ const insert = async (event) => {
             method: 'PATCH',
             body: formData,
             headers: {
-                userValue: userValue.value,
+                userValue: userValue.value as any,
             }
-        });
+        }) as any;
         
         if(formResult.msg == 'Berhasil'){
             modalHeader.value = "Berhasil";

@@ -44,8 +44,7 @@
             <!-- Table -->
             <UTable :rows="filteredPenulis.slice((page - 1) * pageCount, ((page - 1) * pageCount) + pageCount)" :columns="columnsTable" :loading="pending" :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: 'Tidak ada data.' }"
                 sort-asc-icon="i-heroicons-arrow-up" sort-desc-icon="i-heroicons-arrow-down" sort-mode="manual"
-                class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }"
-                @select="select">
+                class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }">
 
                 <template #actions-data="{ row }">
                     <UButton class="edit mr-2" :data-id="row.id" icon="i-heroicons-pencil" size="2xs" color="orange" variant="outline" :ui="{ rounded: 'rounded-full' }" square @click="editData($event)" />
@@ -176,18 +175,6 @@ const columns = [{
 const selectedColumns = ref(columns)
 const columnsTable = computed(() => columns.filter((column) => selectedColumns.value.includes(column)))
 
-// Selected Rows
-const selectedRows = ref([])
-
-function select(row) {
-    const index = selectedRows.value.findIndex((item) => item.id === row.id)
-    if (index === -1) {
-        selectedRows.value.push(row)
-    } else {
-        selectedRows.value.splice(index, 1)
-    }
-}
-
 const search = ref('')
 const pending = ref(true)
 const isOpenAdd = ref(false)
@@ -232,22 +219,22 @@ let modalDeleteContent = ref('');
 let modalDeleteConfirm = ref(true);
 let modalDeleteImage = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/question.png`);
 
-let pendingEdit;
-let pendingDelete;
+let pendingEdit: any;
+let pendingDelete: any;
 
 const fetchListPenulis = async () => {
     let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/penulis`, {
         headers: {
-            userValue: userValue,
+            userValue: userValue as any,
         }
-    });
+    }) as any;
 
     if(fetchResult.data._rawValue){
         if(fetchResult.data._rawValue.msg == 'Belum ada data penulis'){
             listPenulis.value = [];
             pending.value = false;
         }else{
-            listPenulis.value = fetchResult.data._rawValue.penulis.map((penulis, index) => ({
+            listPenulis.value = fetchResult.data._rawValue.penulis.map((penulis: any, index: number) => ({
                 ...penulis,
                 number: index + 1
             }));
@@ -266,7 +253,7 @@ const filteredPenulis = computed(() => {
         return listPenulis.value;
     }
     return listPenulis.value.filter(penulis =>
-        penulis.nama_pena.toLowerCase().includes(search.value.toLowerCase())
+        (penulis as any).nama_pena.toLowerCase().includes(search.value.toLowerCase())
     );
 });
 
@@ -280,12 +267,12 @@ const closeAddModal = () => {
     isOpenAdd.value = false;
 }
 
-const closeStatusModal = (event) => {
+const closeStatusModal = (event: any) => {
     isOpenStatus.value = false;
     isOpenAdd.value = true;
 }
 
-const closeStatusModalDelete = (event) => {
+const closeStatusModalDelete = (event: any) => {
     isOpenDelete.value = false;
 
     canCloseModalDelete.value = false;
@@ -295,7 +282,7 @@ const closeStatusModalDelete = (event) => {
     modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/question.png`;
 }
 
-const editData = (event) => {
+const editData = (event: any) => {
     if(event.target.getAttribute('data-id')){
         pendingEdit = event.target.getAttribute('data-id');
     }else if(event.target.parentElement.getAttribute('data-id')){
@@ -311,12 +298,12 @@ const editData = (event) => {
     fetchPenulisDetail(pendingEdit);
 }
 
-const fetchPenulisDetail = async (id_penulis) => {
+const fetchPenulisDetail = async (id_penulis: any) => {
     let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/penulis/${id_penulis}`, {
         headers: {
-            userValue: userValue,
+            userValue: userValue as any,
         }
-    });
+    }) as any;
 
     if(fetchResult.data._rawValue){
         if(fetchResult.data._rawValue.msg == 'Berhasil'){
@@ -334,7 +321,7 @@ const fetchPenulisDetail = async (id_penulis) => {
     }
 }
 
-const deleteData = (event) => {
+const deleteData = (event: any) => {
     if(event.target.getAttribute('data-id')){
         pendingDelete = event.target.getAttribute('data-id');
     }else if(event.target.parentElement.getAttribute('data-id')){
@@ -343,7 +330,7 @@ const deleteData = (event) => {
     isOpenDelete.value = true;
 }
 
-const deleteDataAPI = async (event) => {
+const deleteDataAPI = async (event: any) => {
     modalDeleteConfirm.value = false;
     modalDeleteHeader.value = "Loading...";
     modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`;
@@ -352,9 +339,9 @@ const deleteDataAPI = async (event) => {
     const formResult = await $fetch(`${config.public.API_HOST}/api/database/master-data/penulis/${pendingDelete}`, {
         method: 'DELETE',
         headers: {
-            userValue: userValue.value,
+            userValue: userValue.value as any,
         }
-    });
+    }) as any;
     
     if(formResult.msg == 'Berhasil'){
         modalDeleteHeader.value = "Berhasil";
@@ -371,7 +358,7 @@ const deleteDataAPI = async (event) => {
     }
 }
 
-const insert = async (event) => {
+const insert = async (event: any) => {
     isOpenStatus.value = true;
     modalHeader.value = "Loading...";
     modalContent.value = "Data sedang diinput...";
@@ -379,18 +366,18 @@ const insert = async (event) => {
     canCloseModal.value = false;
 
     const formData = new FormData();
-    formData.append('nama_pena', state.nama_pena);
-    formData.append('email', state.email);
-    formData.append('no_wa', state.no_wa);
+    formData.append('nama_pena', (state as any).nama_pena);
+    formData.append('email', (state as any).email);
+    formData.append('no_wa', (state as any).no_wa);
     
     if(event.target.getAttribute('data-tipe') == 'insert'){
         const formResult = await $fetch(`${config.public.API_HOST}/api/database/master-data/penulis`, {
             method: 'POST',
             body: formData,
             headers: {
-                userValue: userValue.value,
+                userValue: userValue.value as any,
             }
-        });
+        }) as any;
         
         if(formResult.msg == 'Berhasil'){
             modalHeader.value = "Berhasil";
@@ -410,9 +397,9 @@ const insert = async (event) => {
             method: 'PATCH',
             body: formData,
             headers: {
-                userValue: userValue.value,
+                userValue: userValue.value as any,
             }
-        });
+        }) as any;
         
         if(formResult.msg == 'Berhasil'){
             modalHeader.value = "Berhasil";

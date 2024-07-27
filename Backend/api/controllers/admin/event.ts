@@ -210,11 +210,6 @@ class EventController{
                 if(eventRelationObj){
                     eventRelationObj.gambar_event.push(newGambarEventObj as any);
                     eventRelationObj.save();
-                }else{
-                    res.status(201).json({
-                        msg: 'Relasi event tidak ditemukan'
-                    });
-                    return;
                 }
             });
 
@@ -242,22 +237,12 @@ class EventController{
                 if(eventRelationObj){
                     eventRelationObj.pivot_mitra_event.push(pivotMitraEventObjectId);
                     eventRelationObj.save();
-                }else{
-                    res.status(201).json({
-                        msg: 'Relasi event tidak ditemukan'
-                    });
-                    return;
                 }
                 
                 const mitraRelationObj = await MitraEvent.findById({ _id: mitraId });
                 if(mitraRelationObj){
                     mitraRelationObj.pivot_mitra_event.push(pivotMitraEventObjectId);
                     mitraRelationObj.save();
-                }else{
-                    res.status(201).json({
-                        msg: 'Relasi mitra tidak ditemukan'
-                    });
-                    return;
                 }
             });
 
@@ -267,11 +252,6 @@ class EventController{
             if(adminRelationObj){
                 adminRelationObj.events.push(newEventObj);
                 adminRelationObj.save();
-            }else{
-                res.status(201).json({
-                    msg: 'Relasi admin tidak ditemukan'
-                });
-                return;
             }
 
             
@@ -433,11 +413,6 @@ class EventController{
                         }
                         eventRelationObj.gambar_event.push(newGambarEventObj as any);
                         eventRelationObj.save();
-                    }else{
-                        res.status(201).json({
-                            msg: 'Relasi event tidak ditemukan'
-                        });
-                        return;
                     }
                 });
             }
@@ -458,11 +433,6 @@ class EventController{
                             if(mitraRelationObj){
                                 mitraRelationObj.pivot_mitra_event = [];
                                 mitraRelationObj.save();
-                            }else{
-                                res.status(201).json({
-                                    msg: 'Relasi mitra tidak ditemukan'
-                                });
-                                return;
                             }
                         }
                     });
@@ -508,21 +478,11 @@ class EventController{
                         }
                         eventRelationObj.pivot_mitra_event.push(pivotMitraEventObjectId);
                         eventRelationObj.save();
-                    }else{
-                        res.status(201).json({
-                            msg: 'Relasi event tidak ditemukan'
-                        });
-                        return;
                     }
                     
                     if(mitraRelationObj){
                         mitraRelationObj.pivot_mitra_event.push(pivotMitraEventObjectId);
                         mitraRelationObj.save();
-                    }else{
-                        res.status(201).json({
-                            msg: 'Relasi mitra tidak ditemukan'
-                        });
-                        return;
                     }
                 });
             }

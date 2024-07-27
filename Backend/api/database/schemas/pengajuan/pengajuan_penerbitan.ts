@@ -5,6 +5,7 @@ interface PengajuanPenerbitan {
     pengaju: Types.ObjectId,
     file_sinopsis: String,
     accepted_by: Types.ObjectId,
+    status: String,
     createdAt: Date,
     updatedAt: Date
 }
@@ -27,7 +28,10 @@ const PengajuanPenerbitanSchema = new Schema<PengajuanPenerbitan>(
         accepted_by: {
             type: Schema.Types.ObjectId,
             ref: 'admins',
-        }
+        },
+        status: {
+            type: String,
+        },
     },
     { timestamps: true }
 );

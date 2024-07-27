@@ -14,6 +14,8 @@ router.post('/', upload.fields([
 router.patch('/:id', upload.fields([
     { name: 'file_sinopsis' }
 ]), pengajuanController.update);
+router.route('/approve/:id').patch(pengajuanController.approve);
+router.route('/reject/:id').patch(pengajuanController.reject);
 router.route('/:id').get(pengajuanController.getOne).delete(pengajuanController.delete);
 
 // router.post('/accept/:id', upload.none(), pengajuanController.accept);

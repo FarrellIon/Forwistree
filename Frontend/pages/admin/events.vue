@@ -44,8 +44,7 @@
             <!-- Table -->
             <UTable :rows="filteredEvents.slice((page - 1) * pageCount, ((page - 1) * pageCount) + pageCount)" :columns="columnsTable" :loading="pending" :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: 'Tidak ada data.' }"
                 sort-asc-icon="i-heroicons-arrow-up" sort-desc-icon="i-heroicons-arrow-down" sort-mode="manual"
-                class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }"
-                @select="select">
+                class="w-full" :ui="{ td: { base: 'max-w-[0] truncate' }, default: { checkbox: { color: 'gray' } } }">
 
                 <template #gambar_event-data="{ row }">
                     <img v-if="row.gambar_event[0]" :src="row.gambar_event[0].image" alt="" style="width: 128px; height: 128px;">
@@ -275,18 +274,6 @@ const columns = [{
 const selectedColumns = ref(columns)
 const columnsTable = computed(() => columns.filter((column) => selectedColumns.value.includes(column)))
 
-// Selected Rows
-const selectedRows = ref([])
-
-function select(row) {
-    const index = selectedRows.value.findIndex((item) => item.id === row.id)
-    if (index === -1) {
-        selectedRows.value.push(row)
-    } else {
-        selectedRows.value.splice(index, 1)
-    }
-}
-
 const search = ref('')
 const pending = ref(true)
 const isOpenAdd = ref(false)
@@ -341,26 +328,26 @@ let modalDeleteContent = ref('');
 let modalDeleteConfirm = ref(true);
 let modalDeleteImage = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/question.png`);
 
-let pendingEdit;
-let pendingDelete;
+let pendingEdit: any;
+let pendingDelete: any;
 
-const uploadGambar = (files) => {
+const uploadGambar = (files: any) => {
     state.gambar_event = files;
 }
 
 const fetchListEvent = async () => {
     let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/admin/event`, {
         headers: {
-            userValue: userValue,
+            userValue: userValue as any,
         }
-    });
+    }) as any;
 
     if(fetchResult.data._rawValue){
         if(fetchResult.data._rawValue.msg == 'Belum ada data event'){
             listEvent.value = [];
             pending.value = false;
         }else{
-            listEvent.value = fetchResult.data._rawValue.event.map((event, index) => ({
+            listEvent.value = fetchResult.data._rawValue.event.map((event: any, index: any) => ({
                 ...event,
                 number: index + 1
             }));
@@ -377,13 +364,13 @@ const fetchListEvent = async () => {
 const fetchMitra = async () => {
     let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/mitra_event`, {
         headers: {
-            userValue: userValue.value,
+            userValue: userValue.value as any,
         }
-    });
+    }) as any;
 
     if(fetchResult.data._rawValue){
         if(fetchResult.data._rawValue.msg != 'Belum ada data mitra'){
-            const apiOptions = fetchResult.data._rawValue.mitra.map(item => {
+            const apiOptions = fetchResult.data._rawValue.mitra.map((item: any) => {
                 return { label: item.nama, id: item.id };
             });
             mitraOptions.value = mitraOptions.value.concat(apiOptions);
@@ -401,7 +388,7 @@ const filteredEvents = computed(() => {
         return listEvent.value;
     }
     return listEvent.value.filter(event =>
-        event.judul.toLowerCase().includes(search.value.toLowerCase())
+        (event as any).judul.toLowerCase().includes(search.value.toLowerCase())
     );
 });
 
@@ -415,12 +402,12 @@ const closeAddModal = () => {
     isOpenAdd.value = false;
 }
 
-const closeStatusModal = (event) => {
+const closeStatusModal = (event: any) => {
     isOpenStatus.value = false;
     isOpenAdd.value = true;
 }
 
-const closeStatusModalDelete = (event) => {
+const closeStatusModalDelete = (event: any) => {
     isOpenDelete.value = false;
 
     canCloseModalDelete.value = false;
@@ -430,7 +417,7 @@ const closeStatusModalDelete = (event) => {
     modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/question.png`;
 }
 
-const editData = (event) => {
+const editData = (event: any) => {
     if(event.target.getAttribute('data-id')){
         pendingEdit = event.target.getAttribute('data-id');
     }else if(event.target.parentElement.getAttribute('data-id')){
@@ -446,12 +433,12 @@ const editData = (event) => {
     fetchEventDetail(pendingEdit);
 }
 
-const fetchEventDetail = async (id_event) => {
+const fetchEventDetail = async (id_event: any) => {
     let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/admin/event/${id_event}`, {
         headers: {
-            userValue: userValue,
+            userValue: userValue as any,
         }
-    });
+    }) as any;
 
     if(fetchResult.data._rawValue){
         if(fetchResult.data._rawValue.msg == 'Berhasil'){
@@ -484,7 +471,7 @@ const fetchEventDetail = async (id_event) => {
     }
 }
 
-const deleteData = (event) => {
+const deleteData = (event: any) => {
     if(event.target.getAttribute('data-id')){
         pendingDelete = event.target.getAttribute('data-id');
     }else if(event.target.parentElement.getAttribute('data-id')){
@@ -493,7 +480,7 @@ const deleteData = (event) => {
     isOpenDelete.value = true;
 }
 
-const deleteDataAPI = async (event) => {
+const deleteDataAPI = async (event: any) => {
     modalDeleteConfirm.value = false;
     modalDeleteHeader.value = "Loading...";
     modalDeleteImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`;
@@ -502,9 +489,9 @@ const deleteDataAPI = async (event) => {
     const formResult = await $fetch(`${config.public.API_HOST}/api/database/admin/event/${pendingDelete}`, {
         method: 'DELETE',
         headers: {
-            userValue: userValue.value,
+            userValue: userValue.value as any,
         }
-    });
+    }) as any;
     
     if(formResult.msg == 'Berhasil'){
         modalDeleteHeader.value = "Berhasil";
@@ -521,7 +508,7 @@ const deleteDataAPI = async (event) => {
     }
 }
 
-const insert = async (event) => {
+const insert = async (event: any) => {
     isOpenStatus.value = true;
     modalHeader.value = "Loading...";
     modalContent.value = "Data sedang diinput...";
@@ -529,20 +516,20 @@ const insert = async (event) => {
     canCloseModal.value = false;
 
     const formData = new FormData();
-    formData.append('judul', state.judul_event);
-    formData.append('deskripsi', state.deskripsi_event);
+    formData.append('judul', (state as any).judul_event);
+    formData.append('deskripsi', (state as any).deskripsi_event);
     formData.append('tanggal_mulai_pendaftaran', formatDate(state.tanggal_pendaftaran.start));
     formData.append('tanggal_selesai_pendaftaran', formatDate(state.tanggal_pendaftaran.end));
     formData.append('tanggal_pembukaan', formatDate(state.tanggal_pembukaan));
     formData.append('tanggal_mulai_event', formatDate(state.tanggal_event.start));
     formData.append('tanggal_selesai_event', formatDate(state.tanggal_event.end));
     formData.append('tanggal_penutupan', formatDate(state.tanggal_penutupan));
-    formData.append('cara_bergabung', state.cara_bergabung);
-    formData.append('syarat', state.syarat);
-    formData.append('hadiah', state.hadiah);
-    formData.append('contact_person', state.contact_person);
+    formData.append('cara_bergabung', (state as any).cara_bergabung);
+    formData.append('syarat', (state as any).syarat);
+    formData.append('hadiah', (state as any).hadiah);
+    formData.append('contact_person', (state as any).contact_person);
     for(let i = 0; i < state.mitra_event.length; i++){
-        formData.append('mitra_event', state.mitra_event[i].id);
+        formData.append('mitra_event', (state as any).mitra_event[i].id);
     }
     for(let i = 0; i < state.gambar_event.length; i++){
         formData.append('gambar_event', state.gambar_event[i]);
@@ -555,9 +542,9 @@ const insert = async (event) => {
             method: 'POST',
             body: formData,
             headers: {
-                userValue: userValue.value,
+                userValue: userValue.value as any,
             }
-        });
+        }) as any;
         
         if(formResult.msg == 'Berhasil'){
             modalHeader.value = "Berhasil";
@@ -577,9 +564,9 @@ const insert = async (event) => {
             method: 'PATCH',
             body: formData,
             headers: {
-                userValue: userValue.value,
+                userValue: userValue.value as any,
             }
-        });
+        }) as any;
         
         if(formResult.msg == 'Berhasil'){
             modalHeader.value = "Berhasil";
@@ -617,7 +604,7 @@ const resetForm = async () => {
     dataTipeSubmit.value = 'insert';
 }
 
-const formatDate = (date) => {
+const formatDate = (date: any) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');

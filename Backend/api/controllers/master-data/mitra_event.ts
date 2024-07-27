@@ -161,11 +161,6 @@ class MitraEventController{
                 if(adminRelationObj){
                     adminRelationObj.mitra_events.push(newMitraObj);
                     adminRelationObj.save();
-                }else{
-                    res.status(201).json({
-                        msg: "Relasi admin tidak ditemukan"
-                    });
-                    return;
                 }
 
                 res.status(201).json({
