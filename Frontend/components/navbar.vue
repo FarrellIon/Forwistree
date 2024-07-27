@@ -19,11 +19,15 @@
             </NuxtLink>
         </div>
         <div class="min-width navbar-right-side flex items-center justify-end" style="min-width: 226px;">
-            <div v-if="isLoggedIn" style="display: flex; flex-direction: column; justify-content: center; align-items: end;">
-                <p>Selamat datang, {{ username }}!</p>
+            <div v-if="isLoggedIn && !loading" style="display: flex; flex-direction: column; justify-content: center; align-items: end;">
+                <p v-if="username">Selamat datang, {{ username }}!</p>
+                <p v-else>Loading...</p>
                 <NuxtLink id="link-dashboard" :to="'/admin/buku'">
                     Dashboard
                 </NuxtLink>
+            </div>
+            <div v-else-if="loading">
+                <p>Loading...</p>
             </div>
             <div v-else>
                 <!-- <img class="size-6 opacity-70" src="assets/images/search.png" alt=""> -->
@@ -101,12 +105,16 @@ export default {
 <script setup>
 const isOpen = ref(false);
 const isLoggedIn = ref(false);
-const username = ref();
+const loading = ref(false);
+const username = ref(null);
 const config = useRuntimeConfig();
 const userValue = useCookie('userValue');
 
 const fetchAkunDetails = async () => {
     if(userValue.value && userValue.value != undefined){
+        isLoggedIn.value = true;
+        loading.value = true;
+        
         let fetchResult = await useFetch(`${config.public.API_HOST}/api/auth/details`, {
             headers: {
                 userValue: userValue.value,
