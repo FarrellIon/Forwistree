@@ -19,12 +19,15 @@
             </NuxtLink>
         </div>
         <div class="min-width navbar-right-side flex items-center justify-end" style="min-width: 226px;">
-            <div v-if="isLoggedIn && !loading" style="display: flex; flex-direction: column; justify-content: center; align-items: end;">
-                <p v-if="username">Selamat datang, {{ username }}!</p>
-                <p v-else>Loading...</p>
-                <NuxtLink id="link-dashboard" :to="'/admin/buku'">
-                    Dashboard
-                </NuxtLink>
+            <div v-if="isLoggedIn && !loading">
+                <div style="flex-direction: column; justify-content: center; align-items: end;" class="hidden sm:hidden md:flex lg:flex">
+                    <p v-if="username">Selamat datang, {{ username }}!</p>
+                    <p v-else>Loading...</p>
+                    <NuxtLink id="link-dashboard" :to="'/admin/buku'">
+                        Dashboard
+                    </NuxtLink>
+                </div>
+                <button id="sidebarBtn" class="sm:block md:hidden lg:hidden" title="Side Menu" @click="isOpen = true"><img src="assets/images/menu-primary.png" class="size-6" alt="login"></button>
             </div>
             <div v-else-if="loading">
                 <p>Loading...</p>
@@ -67,9 +70,17 @@
             </div>
             </template>
             <template #footer>
-                <NuxtLink :to="`/login`">
-                    <button id="login-admin-navbar">Login Admin</button>
-                </NuxtLink>
+                <div v-if="!isLoggedIn">
+                    <NuxtLink :to="`/login`">
+                        <button id="login-admin-navbar">Login Admin</button>
+                    </NuxtLink>
+                </div>
+                <div v-else style="display: flex; justify-content: space-between">
+                    <p>Selamat datang, {{ username }}!</p>
+                    <NuxtLink id="link-dashboard" :to="'/admin/buku'">
+                        Dashboard
+                    </NuxtLink>
+                </div>
             </template>
 
             <div class="sidebar-links">
@@ -108,7 +119,9 @@ const isLoggedIn = ref(false);
 const loading = ref(false);
 const username = ref(null);
 const config = useRuntimeConfig();
-const userValue = useCookie('userValue');
+const userValue = useCookie('userValue', {
+    maxAge: 60*60*24
+});
 
 const fetchAkunDetails = async () => {
     if(userValue.value && userValue.value != undefined){

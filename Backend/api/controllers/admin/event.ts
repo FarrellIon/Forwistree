@@ -85,7 +85,14 @@ class EventController{
                 tanggal_mulai_pendaftaran: { $lt: now },
                 tanggal_penutupan: { $gt: now }
             })
-            .populate('gambar_event');
+            .populate('gambar_event')
+            .populate({
+                path: 'pivot_mitra_event',
+                select: 'mitra',
+                populate: {
+                    path: 'mitra'
+                }
+            });
 
             if (!event){
                 res.status(201).json({

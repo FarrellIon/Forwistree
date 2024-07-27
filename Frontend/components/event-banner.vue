@@ -3,8 +3,11 @@
         <div class="event-banner-container grid" style="grid-template-columns: 2fr 3fr 2fr;">
             <p class="label">Event Sekarang</p>
             <div class="images flex items-center">
-                <div class="image" v-for="gambar in eventOngoing.gambar_event.slice(0,3)">
+                <div v-if="eventOngoing.gambar_event.length > 2" class="image" v-for="gambar in eventOngoing.gambar_event.slice(0,3)">
                     <img :src="gambar.image" alt="">
+                </div>
+                <div v-else v-for="index in 3" class="image">
+                    <img :src="eventOngoing.gambar_event[0].image" alt="">
                 </div>
             </div>
             <div class="content"> 

@@ -274,7 +274,9 @@ const pageTo = computed(() => Math.min(page.value * pageCount.value, pageTotal.v
 // Data
 let listBuku = ref([]);
 const config = useRuntimeConfig();
-const userValue = useCookie('userValue');
+const userValue = useCookie('userValue', {
+    maxAge: 60*60*24
+});
 
 // Form
 const kategoriOptions = ref([]);

@@ -92,7 +92,9 @@ export default {
 const config = useRuntimeConfig();
 const isOpenLogout = ref(false);
 const gambarModal = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/success.png`);
-const userValue = useCookie('userValue');
+const userValue = useCookie('userValue', {
+    maxAge: 60*60*24
+});
 const logout = async () => {
     userValue.value = null;
     isOpenLogout.value = true;

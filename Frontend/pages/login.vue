@@ -42,7 +42,9 @@
     })
 
     const config = useRuntimeConfig();
-    const userValue = useCookie('userValue');
+    const userValue = useCookie('userValue', {
+        maxAge: 60*60*24
+    });
     let isOpen = ref(false);
     let canCloseModal = ref(false);
     let modalHeader = ref("Loading...");
