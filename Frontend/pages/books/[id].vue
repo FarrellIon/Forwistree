@@ -113,7 +113,6 @@
     const bukuTidakDitemukan = ref(false);
     const { id } = useRoute().params;
     const config = useRuntimeConfig();
-    const userValue = useCookie('userValue');
     let openTab = {
         sinopsis: ref(true),
         detail_buku: ref(false),
@@ -123,11 +122,7 @@
     let bukuDetail = ref();
 
     const fetchBukuDetail = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/`+id, {
-            headers: {
-                userValue: userValue,
-            }
-        });
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/`+id);
 
         if(fetchResult.data._rawValue){
             if(fetchResult.data._rawValue.msg == 'Berhasil'){

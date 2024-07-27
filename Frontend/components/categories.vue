@@ -56,16 +56,11 @@
 
 <script setup>
     const config = useRuntimeConfig();
-    const userValue = useCookie('userValue');
     
     let categories = ref();
 
     const fetchCategories = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori`, {
-            headers: {
-                userValue: userValue,
-            }
-        });
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori`);
 
         if(fetchResult.data._rawValue){
             categories.value = fetchResult.data._rawValue.kategori;

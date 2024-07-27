@@ -219,7 +219,6 @@
     })
     const { id } = useRoute().params;
     const config = useRuntimeConfig();
-    const userValue = useCookie('userValue');
     const page = ref(1);
     const numberPerPage = ref(5);
     const dropdownItems = [
@@ -254,11 +253,7 @@
     let maxPageParam = ref(99999);
 
     const fetchKategoriDetail = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori/${id}?minDiskonParam=${minDiskonParam.value}&maxDiskonParam=${maxDiskonParam.value}&minPageParam=${minPageParam.value}&maxPageParam=${maxPageParam.value}`, {
-            headers: {
-                userValue: userValue,
-            }
-        });
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori/${id}?minDiskonParam=${minDiskonParam.value}&maxDiskonParam=${maxDiskonParam.value}&minPageParam=${minPageParam.value}&maxPageParam=${maxPageParam.value}`);
 
         if(fetchResult.data._rawValue){
             fetchedKategoriDetail.value = fetchResult.data._rawValue;
@@ -272,11 +267,7 @@
     }
     
     const fetchListKategori = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori`, {
-            headers: {
-                userValue: userValue,
-            }
-        });
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori`);
 
         if(fetchResult.data._rawValue){
             listKategori.value = fetchResult.data._rawValue.kategori;

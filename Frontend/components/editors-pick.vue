@@ -35,15 +35,10 @@
 
 <script setup>
     const config = useRuntimeConfig();
-    const userValue = useCookie('userValue');
     let bukuEditorsPick = ref();
 
     const fetchBukuEditorsPick = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/editors-pick`, {
-            headers: {
-                userValue: userValue,
-            }
-        });
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/editors-pick`);
 
         if(fetchResult.data._rawValue){
             bukuEditorsPick.value = fetchResult.data._rawValue.buku;

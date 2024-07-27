@@ -22,16 +22,11 @@
 
 <script setup>
     const config = useRuntimeConfig();
-    const userValue = useCookie('userValue');
     
     let bukuTerbaru = ref();
 
     const fetchBukuTerbaru = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku`, {
-            headers: {
-                userValue: userValue,
-            }
-        });
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku`);
 
         if(fetchResult.data._rawValue){
             bukuTerbaru.value = fetchResult.data._rawValue.buku;

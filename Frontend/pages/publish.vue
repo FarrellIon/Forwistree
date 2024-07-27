@@ -55,7 +55,6 @@
     const options = ref([]);
 
     const config = useRuntimeConfig();
-    const userValue = useCookie('userValue');
     let pengaju = ref();
     let isOpen = ref(false);
     let canCloseModal = ref(false);
@@ -64,11 +63,7 @@
     let modalImage = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/information.png`);
 
     const fetchPengaju = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/pengajuan/pengajuan/get/pengaju`, {
-            headers: {
-                userValue: userValue.value,
-            }
-        });
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/pengajuan/pengajuan/get/pengaju`);
 
         if(fetchResult.data._rawValue){
             if(fetchResult.data._rawValue.msg == 'Belum ada data pengaju'){
@@ -119,10 +114,7 @@
         isOpen.value = true;
         const formResult = await $fetch(`${config.public.API_HOST}/api/database/pengajuan/pengajuan`, {
             method: 'POST',
-            body: formData,
-            headers: {
-                userValue: userValue.value,
-            }
+            body: formData
         });
         
         if(formResult.msg == 'Berhasil'){

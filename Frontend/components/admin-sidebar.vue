@@ -43,7 +43,7 @@
                     </NuxtLink>
                 </li>
                 <div class="flex items-center align-center text-center p-2 w-full flex-row">
-                <div class="flex border-gray-200 dark:border-gray-800 w-full border-t border-solid"></div>
+                    <div class="flex border-gray-200 dark:border-gray-800 w-full border-t border-solid"></div>
                 </div>
             </ul>
             <ul>
@@ -54,13 +54,26 @@
                 </a>
                 </li>
                 <li>
-                <a class="sidebar-element" href="/">
+                <a class="sidebar-element cursor-pointer" @click="logout">
                     <span class="i-heroicons-arrow-left-end-on-rectangle icon"></span>
                     <span class="truncate relative">Log Out</span>
                 </a>
                 </li>
             </ul>
         </nav>
+        <UModal id="modal-sidebar" v-model="isOpenLogout" prevent-close>
+            <UCard id="modal-sidebar-card" :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
+                <template #header>
+                    <h3 style="font-weight: bold; font-size: 22px; text-align: center;">Berhasil Logout</h3>
+                </template>
+
+                <img :src="gambarModal" alt="">
+                <p style="text-align: center; margin-bottom: 1rem;">Anda akan dikembalikan ke beranda.</p>
+                <div class="flex justify-center">
+                    <UButton data-type="input" label="Tutup" variant="soft" color="gray" @click="redirectToHome()" />
+                </div>
+            </UCard>
+        </UModal>
     </div>
 </template>
 
@@ -76,6 +89,17 @@ export default {
 </script>
 
 <script setup>
+const config = useRuntimeConfig();
+const isOpenLogout = ref(false);
+const gambarModal = ref(`${config.public.FRONTEND_URL}/_nuxt/assets/images/success.png`);
+const userValue = useCookie('userValue');
+const logout = async () => {
+    userValue.value = null;
+    isOpenLogout.value = true;
+}
+const redirectToHome = async () => {
+    await navigateTo('/');
+}
 </script>
 
 <style lang="scss" scoped>
@@ -163,6 +187,15 @@ nav{
 
     &.group-hover:hover {
         color: #374151; /* group-hover:text-gray-700 */
+    }
+}
+
+#modal-sidebar{
+    img{
+        width: 96px;
+        height: 96px;
+        margin: 0 auto;
+        margin-bottom: 1rem;
     }
 }
 </style>

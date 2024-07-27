@@ -49,29 +49,30 @@
             </div>
         </div>
     </div>
-    <div v-else class="px-32">
+    <div v-else-if="loading" class="px-32">
         Loading...
     </div>
 </template>
 
 <script setup>
+    const loading = ref(true);
     const config = useRuntimeConfig();
-    const userValue = useCookie('userValue');
     
     let bukuKategoriRandom = ref();
 
     const fetchBukuKategoriRandom = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori/random`, {
-            headers: {
-                userValue: userValue,
-            }
-        });
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori/get/random`);
 
         if(fetchResult.data._rawValue){
-            bukuKategoriRandom.value = {
-                kategori: fetchResult.data._rawValue.kategori,
-                buku: fetchResult.data._rawValue.kategori.buku
+            if(fetchResult.data._rawValue.msg == "Berhasil"){
+                bukuKategoriRandom.value = {
+                    kategori: fetchResult.data._rawValue.kategori,
+                    buku: fetchResult.data._rawValue.kategori.buku
+                }
+            }else{
+                bukuKategoriRandom.value = null;
             }
+            loading.value = false;
         }else{
             setTimeout(fetchBukuKategoriRandom, 2000)
             bukuKategoriRandom.value = null;

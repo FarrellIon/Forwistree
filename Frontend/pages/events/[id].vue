@@ -159,7 +159,6 @@
 
     const { id } = useRoute().params;
     const config = useRuntimeConfig();
-    const userValue = useCookie('userValue');
     let openTab = {
         timeline: ref(true),
         cara_bergabung: ref(false),
@@ -175,11 +174,7 @@
     }
 
     const fetchEventDetail = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/admin/event/`+id, {
-            headers: {
-                userValue: userValue,
-            }
-        });
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/admin/event/`+id);
 
         if(fetchResult.data._rawValue){
             eventDetail.value = fetchResult.data._rawValue.event;

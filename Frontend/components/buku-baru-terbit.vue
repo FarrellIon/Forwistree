@@ -68,38 +68,11 @@
     // });
 
     const config = useRuntimeConfig();
-    const userValue = useCookie('userValue');
-    
-    const login = async () => {
-        try {
-            let fetchResult = await $fetch(`${config.public.API_HOST}/api/auth/login`, {
-                method: 'POST',
-                body: {
-                    username: 'Farrell2',
-                    password: '1234'
-                }
-            });
-            return fetchResult;
-        } catch (error) {
-            return null;
-        }
-    }
-
-    const loginResult = await login();
-    if(loginResult){
-        if(loginResult.message == "Berhasil Login"){
-            userValue.value = loginResult.id;
-        }
-    }
 
     let bukuBaruTerbit = ref();
 
     const fetchBukuBaruTerbit = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/recently-published`, {
-            headers: {
-                userValue: userValue,
-            }
-        });
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/recently-published`);
 
         if(fetchResult.data._rawValue){
             bukuBaruTerbit.value = fetchResult.data._rawValue.buku;

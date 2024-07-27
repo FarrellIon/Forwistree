@@ -2,10 +2,13 @@ import express from "express";
 import passport from 'passport';
 import authRegisterController from "../controllers/register";
 import multer from "multer";
+import { ensureAuthenticated } from "../utils/checkauth";
+import authDetailController from "../controllers/authdetails";
 
 const upload = multer();
 const router = express.Router();
 
+router.route('/details').get(ensureAuthenticated, authDetailController);
 router.post('/login', upload.none(), passport.authenticate('local'), (req, res) => {
     if(req.user){
         res.send({

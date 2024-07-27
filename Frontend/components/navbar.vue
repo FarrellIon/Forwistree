@@ -19,16 +19,24 @@
             </NuxtLink>
         </div>
         <div class="min-width navbar-right-side flex items-center justify-end" style="min-width: 226px;">
-            <!-- <img class="size-6 opacity-70" src="assets/images/search.png" alt=""> -->
-            <NuxtLink :to="`/login`">
-                <button id="loginBtn" class="hidden lg:block">Login Admin</button>
-            </NuxtLink>
-            <!-- <button id="registerBtn" class="hidden lg:block">Register</button> -->
-            <NuxtLink :to="`/login`">
-                <button id="loginBtnSmall" class="md:block hidden lg:hidden" title="Login"><img src="assets/images/login-primary.png" class="size-6" alt="login"></button>
-            </NuxtLink>
-            <!-- <button id="registerBtnSmall" class="hidden md:block lg:hidden" title="Register"><img src="assets/images/edit.png" class="size-6" alt="login"></button> -->
-            <button id="sidebarBtn" class="sm:block md:hidden lg:hidden" title="Side Menu" @click="isOpen = true"><img src="assets/images/menu-primary.png" class="size-6" alt="login"></button>
+            <div v-if="isLoggedIn" style="display: flex; flex-direction: column; justify-content: center; align-items: end;">
+                <p>Selamat datang, {{ username }}!</p>
+                <NuxtLink id="link-dashboard" :to="'/admin/buku'">
+                    Dashboard
+                </NuxtLink>
+            </div>
+            <div v-else>
+                <!-- <img class="size-6 opacity-70" src="assets/images/search.png" alt=""> -->
+                <NuxtLink :to="`/login`">
+                    <button id="loginBtn" class="hidden lg:block">Login Admin</button>
+                </NuxtLink>
+                <!-- <button id="registerBtn" class="hidden lg:block">Register</button> -->
+                <NuxtLink :to="`/login`">
+                    <button id="loginBtnSmall" class="md:block hidden lg:hidden" title="Login"><img src="assets/images/login-primary.png" class="size-6" alt="login"></button>
+                </NuxtLink>
+                <!-- <button id="registerBtnSmall" class="hidden md:block lg:hidden" title="Register"><img src="assets/images/edit.png" class="size-6" alt="login"></button> -->
+                <button id="sidebarBtn" class="sm:block md:hidden lg:hidden" title="Side Menu" @click="isOpen = true"><img src="assets/images/menu-primary.png" class="size-6" alt="login"></button>
+            </div>
         </div>
     </div>
     <div>
@@ -92,6 +100,37 @@ export default {
 
 <script setup>
 const isOpen = ref(false);
+const isLoggedIn = ref(false);
+const username = ref();
+const config = useRuntimeConfig();
+const userValue = useCookie('userValue');
+
+const fetchAkunDetails = async () => {
+    if(userValue.value && userValue.value != undefined){
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/auth/details`, {
+            headers: {
+                userValue: userValue.value,
+            }
+        });
+
+        if(fetchResult.data._rawValue){
+            if(fetchResult.data._rawValue.msg == "Berhasil"){
+                isLoggedIn.value = true;
+                username.value = fetchResult.data._rawValue.username;
+            }else{
+                username.value = null;
+            }
+            loading.value = false;
+        }else{
+            setTimeout(fetchAkunDetails, 2000)
+            username.value = null;
+        }
+    }
+}
+
+onBeforeMount(() => {
+    fetchAkunDetails();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -210,6 +249,15 @@ const isOpen = ref(false);
             &:hover{
                 color: $primary;
             }
+        }
+    }
+
+    #link-dashboard{
+        color: $primary;
+        transition: 0.3s all ease-out;
+
+        &:hover{
+            color: $secondary;
         }
     }
 

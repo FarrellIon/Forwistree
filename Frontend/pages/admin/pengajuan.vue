@@ -304,6 +304,16 @@ const closeStatusModal = (event: any) => {
     isOpenStatus.value = false;
 }
 
+const checkLoggedIn = async () => {
+    if(!userValue.value){
+        await navigateTo('/not-found');
+    }
+}
+
+onBeforeMount(() => {
+    checkLoggedIn();
+});
+
 onMounted(() => {
     fetchListPengajuan();
 });

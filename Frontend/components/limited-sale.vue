@@ -113,16 +113,11 @@
 
 <script setup>
     const config = useRuntimeConfig();
-    const userValue = useCookie('userValue');
 
     let bukuLimitedSale = ref();
 
     const fetchBukuLimitedSale = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/limited-sale`, {
-            headers: {
-                userValue: userValue,
-            }
-        });
+        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku/limited-sale`);
 
         if(fetchResult.data._rawValue){
             bukuLimitedSale.value = fetchResult.data._rawValue.buku;

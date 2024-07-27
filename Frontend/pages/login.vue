@@ -10,10 +10,10 @@
             <h2 class="font-bold text-3xl mb-8">Login Admin</h2>
             <UForm id="form-data" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormGroup class="mb-4" v-slot="{ error }" label="Username" :error="!state.username && 'Anda harus menginput username'" help="">
-                    <UInput v-model="state.username" type="username" placeholder="Masukkan username anda" :trailing-icon="error ? 'i-heroicons-exclamation-triangle-20-solid' : undefined"/>
+                    <UInput v-model="state.username" type="text" placeholder="Masukkan username anda" :trailing-icon="error ? 'i-heroicons-exclamation-triangle-20-solid' : undefined"/>
                 </UFormGroup>
                 <UFormGroup class="mb-4" v-slot="{ error }" label="Password" :error="!state.password && 'Anda harus menginput password'" help="">
-                    <UInput v-model="state.password" type="text" placeholder="Masukkan nama pena anda" :trailing-icon="error ? 'i-heroicons-exclamation-triangle-20-solid' : undefined"/>
+                    <UInput v-model="state.password" type="password" placeholder="Masukkan nama pena anda" :trailing-icon="error ? 'i-heroicons-exclamation-triangle-20-solid' : undefined"/>
                 </UFormGroup>
                 <UButton type="submit">
                     Login
@@ -40,7 +40,6 @@
     definePageMeta({
         colorMode: 'light',
     })
-    const options = ref([]);
 
     const config = useRuntimeConfig();
     const userValue = useCookie('userValue');
@@ -72,8 +71,14 @@
                 method: 'POST',
                 body: formData
             });
+            
+            if(formResult){
+                if(formResult.message == "Berhasil Login"){
+                    userValue.value = formResult.id;
+                    await navigateTo('/admin/buku');
+                }
+            }
 
-            await navigateTo('/admin/dashboard');
         }catch (error){
             modalHeader.value = "Gagal";
             modalImage.value = `${config.public.FRONTEND_URL}/_nuxt/assets/images/failed.png`;
@@ -117,9 +122,5 @@
             margin: 0 auto;
             margin-bottom: 1rem;
         }
-    }
-
-    @media(max-width: 840px){
-        
     }
 </style>

@@ -614,6 +614,16 @@ const formatDate = (date: any) => {
     return formattedDate;
 }
 
+const checkLoggedIn = async () => {
+    if(!userValue.value){
+        await navigateTo('/not-found');
+    }
+}
+
+onBeforeMount(() => {
+    checkLoggedIn();
+});
+
 onMounted(() => {
     fetchListEvent();
     fetchMitra();

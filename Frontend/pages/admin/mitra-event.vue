@@ -425,6 +425,16 @@ const resetForm = async () => {
     dataTipeSubmit.value = 'insert';
 }
 
+const checkLoggedIn = async () => {
+    if(!userValue.value){
+        await navigateTo('/not-found');
+    }
+}
+
+onBeforeMount(() => {
+    checkLoggedIn();
+});
+
 onMounted(() => {
     fetchListMitraEvent();
 });
