@@ -139,6 +139,7 @@
                             </p>
                         </p>
                         <div class="pagination-container">
+                            <p>Menampilkan buku {{ 1 + (numberPerPage * (page - 1)) }} - {{ (filteredBuku.length < (numberPerPage * page)) ? filteredBuku.length : numberPerPage * page }}</p>
                             <div class="pagination">
                                 <UPagination v-model="page" :page-count="numberPerPage" :total="filteredBuku.length" />
                             </div>
