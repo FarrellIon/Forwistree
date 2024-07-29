@@ -140,19 +140,15 @@
                         </p>
                         <div class="pagination-container">
                             <div class="pagination">
-                                <template>
-                                    <UPagination v-model="page" :page-count="numberPerPage" :total="filteredBuku.length" />
-                                </template>
+                                <UPagination v-model="page" :page-count="numberPerPage" :total="filteredBuku.length" />
                             </div>
-                            <div class="dropdown">
-                                <template>
-                                    <client-only>
-                                        <UDropdown :items="dropdownItems" :popper="{ placement: 'bottom-start' }">
-                                            <UButton color="white" label="Options" trailing-icon="i-heroicons-chevron-down-20-solid" />
-                                        </UDropdown>
-                                    </client-only>
-                                </template>
-                            </div>
+                            <!-- <div class="dropdown">
+                                <client-only>
+                                    <UDropdown :items="dropdownItems" :popper="{ placement: 'bottom-start' }">
+                                        <UButton color="white" label="Options" trailing-icon="i-heroicons-chevron-down-20-solid" />
+                                    </UDropdown>
+                                </client-only>
+                            </div> -->
                         </div>
                     </div>
                     <div v-if="filteredBuku == 'loading'" class="text-center text-3xl font-bold">Loading...</div>
@@ -190,7 +186,7 @@
     const { id } = useRoute().params;
     const config = useRuntimeConfig();
     const page = ref(1);
-    const numberPerPage = ref(999);
+    const numberPerPage = ref(8);
     const dropdownItems = [
         [
             {
