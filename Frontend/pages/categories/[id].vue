@@ -1,8 +1,8 @@
 <template>
-    <div v-if="kategoriDetail || id == 'semua'">
+    <div v-if="kategoriDetail">
         <Navbar :active="'categories'"></Navbar>
         <div class="px-8 lg:px-32 mb-16">
-            <div class="category category-big" v-if="maxDiskon > 0 && id != 'semua'">
+            <div class="category category-big" v-if="maxDiskon > 0">
                 <div class="left-side">
                     <div class="container">
                         <p class="title header-font">Kategori {{ kategoriDetail.nama }}</p>
@@ -29,7 +29,7 @@
                     </div>
                 </div>
             </div>
-            <div class="category category-small" v-if="maxDiskon > 0 && id != 'semua'">
+            <div class="category category-small" v-if="maxDiskon > 0">
                 <div class="left-side">
                     <div class="container">
                         <p class="title header-font">Kategori {{ kategoriDetail.nama }}</p>
@@ -97,6 +97,9 @@
                         </div>
                         <div class="filter-group">
                             <p class="filter-title">Kategori</p>
+                            <p :class="{'filter-element': true, 'active': id=='semua'}">
+                                <NuxtLink :to="`/categories/semua`">Semua</NuxtLink>
+                            </p>
                             <p v-for="kategori in listKategori" :class="{'filter-element': true, 'active': kategori.nama == kategoriDetail.nama}">
                                 <NuxtLink :to="`/categories/${kategori.id}`">{{ kategori.nama }}</NuxtLink>
                             </p>
@@ -119,12 +122,15 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="id != 'semua'" class="right-side">
+                <div class="right-side">
                     <div class="header">
                         <p class="header-title">
                             Menampilkan
-                            <span class="text-primary">{{ filteredBuku.length }}</span> Buku
-                            <span class="font-bold">"{{ kategoriDetail.nama }}"</span>
+                            <div v-if="id != 'semua'">
+                                <span class="text-primary">{{ filteredBuku.length }}</span> Buku
+                                <span class="font-bold">"{{ kategoriDetail.nama }}"</span>
+                            </div>
+                            <span v-else> semua buku <span class="text-primary">({{ filteredBuku.length }} Buku)</span></span>
                             <p class="filter-text">Filter : 
                                 <span v-if="maxDiskonParam != 0 && maxDiskonParam != 100" class="mr-2">Diskon <span class="text-primary">{{minDiskonParam}}% - {{maxDiskonParam}}%</span>,</span>
                                 <span v-else>Diskon diatas <span class="text-primary">{{ minDiskonParam }}%</span>, </span>
@@ -135,7 +141,7 @@
                         <div class="pagination-container">
                             <div class="pagination">
                                 <template>
-                                    <UPagination v-model="page" :page-count="numberPerPage" :total="kategoriDetail.buku.length" />
+                                    <UPagination v-model="page" :page-count="numberPerPage" :total="filteredBuku.length" />
                                 </template>
                             </div>
                             <div class="dropdown">
@@ -167,42 +173,6 @@
                     </div>
                     <div v-else class="text-center text-3xl font-bold">Tidak ada buku dengan filter yang dipilih / dalam kategori ini.</div>
                 </div>
-                <div v-else class="right-side">
-                    <div class="header">
-                        <p class="header-title">Pilih kategori di samping!</p>
-                        <div class="pagination-container">
-                            <div class="pagination">
-                                <template v-if="id != 'semua'">
-                                    <UPagination v-model="page" :page-count="numberPerPage" :total="kategoriDetail.buku.length" />
-                                </template>
-                            </div>
-                            <div class="dropdown">
-                                <template>
-                                    <client-only>
-                                        <UDropdown :items="dropdownItems" :popper="{ placement: 'bottom-start' }">
-                                            <UButton color="white" label="Options" trailing-icon="i-heroicons-chevron-down-20-solid" />
-                                        </UDropdown>
-                                    </client-only>
-                                </template>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="body">
-                        <div v-if="id != 'semua'" v-for="buku in kategoriDetail.buku.slice((page - 1) * numberPerPage, ((page - 1) * numberPerPage) + numberPerPage)">
-                            <NuxtLink :to="`/books/${buku.id}`">
-                                <div class="book">
-                                    <div class="image">
-                                        <img :src="buku.gambar_buku[0].image" alt="">
-                                    </div>
-                                    <p class="nama paragraph-font">{{ buku.nama }}</p>
-                                    <p class="final-price paragraph-font">{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(buku.harga * ((100 - buku.diskon)/100)) }}</p>
-                                    <p v-if="buku.diskon > 0" class="initial-price paragraph-font"><s>{{ Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(buku.harga) }}</s></p>
-                                    <div v-if="buku.diskon > 0" class="discount paragraph-font">-{{ buku.diskon }}%</div>
-                                </div>
-                            </NuxtLink>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
         <KirimkanKarya></KirimkanKarya>
@@ -220,7 +190,7 @@
     const { id } = useRoute().params;
     const config = useRuntimeConfig();
     const page = ref(1);
-    const numberPerPage = ref(5);
+    const numberPerPage = ref(999);
     const dropdownItems = [
         [
             {
@@ -253,16 +223,28 @@
     let maxPageParam = ref(99999);
 
     const fetchKategoriDetail = async () => {
-        let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori/${id}?minDiskonParam=${minDiskonParam.value}&maxDiskonParam=${maxDiskonParam.value}&minPageParam=${minPageParam.value}&maxPageParam=${maxPageParam.value}`);
-
-        if(fetchResult.data._rawValue){
-            fetchedKategoriDetail.value = fetchResult.data._rawValue;
-            kategoriDetail.value = fetchedKategoriDetail.value.kategori;
-            filteredBuku.value = fetchedKategoriDetail.value.filteredBuku;
-            maxDiskon.value = fetchedKategoriDetail.value.maxDiskon;
+        if(id == 'semua'){
+            let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/collection/buku`);
+            
+            if(fetchResult.data._rawValue){
+                filteredBuku.value = fetchResult.data._rawValue.buku;
+                kategoriDetail.value = [];
+            }else{
+                setTimeout(fetchKategoriDetail, 2000)
+                filteredBuku.value = null;
+            }
         }else{
-            setTimeout(fetchKategoriDetail, 2000)
-            fetchedKategoriDetail.value = null;
+            let fetchResult = await useFetch(`${config.public.API_HOST}/api/database/master-data/kategori/${id}?minDiskonParam=${minDiskonParam.value}&maxDiskonParam=${maxDiskonParam.value}&minPageParam=${minPageParam.value}&maxPageParam=${maxPageParam.value}`);
+
+            if(fetchResult.data._rawValue){
+                fetchedKategoriDetail.value = fetchResult.data._rawValue;
+                kategoriDetail.value = fetchedKategoriDetail.value.kategori;
+                filteredBuku.value = fetchedKategoriDetail.value.filteredBuku;
+                maxDiskon.value = fetchedKategoriDetail.value.maxDiskon;
+            }else{
+                setTimeout(fetchKategoriDetail, 2000)
+                fetchedKategoriDetail.value = null;
+            }
         }
     }
     
